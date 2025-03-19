@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+        play: {
+          blue: '#3490dc',
+          green: '#38c172',
+          orange: '#f6ad55',
+          purple: '#9561e2',
+          red: '#e3342f',
+        }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,12 +92,74 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+        'fade-up': {
+          '0%': {
+            opacity: '0',
+            transform: 'translateY(20px)'
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translateY(0)'
+          }
+        },
+        'fade-in': {
+          '0%': {
+            opacity: '0'
+          },
+          '100%': {
+            opacity: '1'
+          }
+        },
+        'scale-up': {
+          '0%': {
+            opacity: '0',
+            transform: 'scale(0.95)'
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'scale(1)'
+          }
+        },
+        'slide-in-right': {
+          '0%': {
+            transform: 'translateX(100%)',
+            opacity: '0'
+          },
+          '100%': {
+            transform: 'translateX(0)',
+            opacity: '1'
+          }
+        },
+        'slide-in-left': {
+          '0%': {
+            transform: 'translateX(-100%)',
+            opacity: '0'
+          },
+          '100%': {
+            transform: 'translateX(0)',
+            opacity: '1'
+          }
+        }
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+        'fade-up': 'fade-up 0.6s ease-out forwards',
+        'fade-in': 'fade-in 0.6s ease-out forwards',
+        'scale-up': 'scale-up 0.4s ease-out forwards',
+        'slide-in-right': 'slide-in-right 0.5s ease-out forwards',
+        'slide-in-left': 'slide-in-left 0.5s ease-out forwards'
+			},
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'hero-pattern': "url('data:image/svg+xml;utf8,<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><path fill=\"%23f1f5f9\" d=\"M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z\"/></svg>')",
+      },
+      boxShadow: {
+        'soft': '0 4px 20px rgba(0, 0, 0, 0.05)',
+        'glass': '0 4px 20px rgba(0, 0, 0, 0.03)',
+        'button': '0 4px 14px rgba(0, 0, 0, 0.1)',
+      },
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
