@@ -80,6 +80,39 @@ export type Database = {
           },
         ]
       }
+      early_signups: {
+        Row: {
+          child_age: string | null
+          child_name: string | null
+          created_at: string | null
+          email: string
+          id: string
+          interests: string[] | null
+          location: string | null
+          parent_name: string
+        }
+        Insert: {
+          child_age?: string | null
+          child_name?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          interests?: string[] | null
+          location?: string | null
+          parent_name: string
+        }
+        Update: {
+          child_age?: string | null
+          child_name?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          interests?: string[] | null
+          location?: string | null
+          parent_name?: string
+        }
+        Relationships: []
+      }
       interests: {
         Row: {
           id: string

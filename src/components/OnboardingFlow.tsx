@@ -1,20 +1,26 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { cn } from '@/lib/utils';
 import { CheckCircle, ChevronRight, Mail, Lock, User, MapPin, CalendarDays, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const OnboardingFlow = ({ id }: { id?: string }) => {
+  const navigate = useNavigate();
   const { ref, isIntersecting } = useIntersectionObserver({
     threshold: 0.1,
     triggerOnce: true
   });
   
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [parentName, setParentName] = useState('');
+  const [location, setLocation] = useState('');
   const [childName, setChildName] = useState('');
   const [childAge, setChildAge] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
@@ -33,6 +39,55 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
   
   const prevStep = () => {
     setStep(step - 1);
+  };
+
+  const handleCompleteSetup = async () => {
+    setIsSubmitting(true);
+    
+    try {
+      // Save the user data to Supabase
+      const { error } = await supabase
+        .from('early_signups')
+        .insert({
+          email,
+          parent_name: parentName,
+          location,
+          child_name: childName,
+          child_age: childAge,
+          interests,
+        });
+      
+      if (error) {
+        console.error('Error saving signup data:', error);
+        if (error.code === '23505') { // Unique constraint violation
+          toast({
+            title: 'Email already registered',
+            description: 'This email is already in our waiting list.',
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Signup Error',
+            description: 'There was an error saving your information. Please try again.',
+            variant: 'destructive',
+          });
+        }
+        setIsSubmitting(false);
+        return;
+      }
+      
+      // Redirect to thank you page with email in state
+      navigate('/thank-you', { state: { email } });
+      
+    } catch (err) {
+      console.error('Error in signup process:', err);
+      toast({
+        title: 'Something went wrong',
+        description: 'Please try again later.',
+        variant: 'destructive',
+      });
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -112,6 +167,7 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
                         placeholder="your@email.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        required
                       />
                     </div>
                   </div>
@@ -137,6 +193,7 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
                     <Button 
                       className="w-full button-glow bg-primary hover:bg-primary/90 text-white rounded-xl"
                       onClick={nextStep}
+                      disabled={!email}
                     >
                       Continue <ChevronRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -165,6 +222,7 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
                         placeholder="Your full name"
                         value={parentName}
                         onChange={(e) => setParentName(e.target.value)}
+                        required
                       />
                     </div>
                   </div>
@@ -177,6 +235,8 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
                         type="text" 
                         className="w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                         placeholder="Your neighborhood or city"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
                       />
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -195,6 +255,7 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
                     <Button 
                       className="flex-1 button-glow bg-primary hover:bg-primary/90 text-white rounded-xl"
                       onClick={nextStep}
+                      disabled={!parentName}
                     >
                       Continue <ChevronRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -300,9 +361,10 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
                     </Button>
                     <Button 
                       className="flex-1 button-glow bg-primary hover:bg-primary/90 text-white rounded-xl"
-                      onClick={() => window.location.href = '/dashboard'}
+                      onClick={handleCompleteSetup}
+                      disabled={isSubmitting || !email || !parentName}
                     >
-                      Complete Setup <CheckCircle className="ml-2 h-4 w-4" />
+                      {isSubmitting ? 'Submitting...' : 'Complete Setup'} <CheckCircle className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
                 </div>

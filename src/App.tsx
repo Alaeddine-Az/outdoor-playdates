@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import ParentProfile from "./pages/ParentProfile";
 import PlaydateDetail from "./pages/PlaydateDetail";
 import GroupDetail from "./pages/GroupDetail";
+import ThankYou from "./pages/ThankYou";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/parent/:id" element={<ParentProfile />} />
           <Route path="/playdate/:id" element={<PlaydateDetail />} />
           <Route path="/group/:id" element={<GroupDetail />} />
+          <Route path="/thank-you" element={<ThankYou />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
