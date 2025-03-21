@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import ProgressIndicator from './onboarding/ProgressIndicator';
 import AccountCreationStep from './onboarding/AccountCreationStep';
 import ParentProfileStep from './onboarding/ParentProfileStep';
-import ChildProfileStep from './onboarding/ChildProfileStep';
+import ChildProfileStep, { ChildInfo } from './onboarding/ChildProfileStep';
 import InterestsStep from './onboarding/InterestsStep';
 
 const OnboardingFlow = ({ id }: { id?: string }) => {
@@ -27,8 +27,7 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
   const [password, setPassword] = useState('');
   const [parentName, setParentName] = useState('');
   const [location, setLocation] = useState('');
-  const [childName, setChildName] = useState('');
-  const [childAge, setChildAge] = useState('');
+  const [children, setChildren] = useState<ChildInfo[]>([{ name: '', age: '' }]);
   const [interests, setInterests] = useState<string[]>([]);
   
   const nextStep = () => {
@@ -43,35 +42,37 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
     setIsSubmitting(true);
     
     try {
-      // Save the user data to Supabase
-      const { error } = await supabase
-        .from('early_signups')
-        .insert({
-          email,
-          parent_name: parentName,
-          location,
-          child_name: childName,
-          child_age: childAge,
-          interests,
-        });
-      
-      if (error) {
-        console.error('Error saving signup data:', error);
-        if (error.code === '23505') { // Unique constraint violation
-          toast({
-            title: 'Email already registered',
-            description: 'This email is already in our waiting list.',
-            variant: 'destructive',
+      // Process each child and save to Supabase
+      for (const child of children) {
+        const { error } = await supabase
+          .from('early_signups')
+          .insert({
+            email,
+            parent_name: parentName,
+            location,
+            child_name: child.name,
+            child_age: child.age,
+            interests,
           });
-        } else {
-          toast({
-            title: 'Signup Error',
-            description: 'There was an error saving your information. Please try again.',
-            variant: 'destructive',
-          });
+        
+        if (error) {
+          console.error('Error saving signup data:', error);
+          if (error.code === '23505') { // Unique constraint violation
+            toast({
+              title: 'Email already registered',
+              description: 'This email is already in our waiting list.',
+              variant: 'destructive',
+            });
+          } else {
+            toast({
+              title: 'Signup Error',
+              description: 'There was an error saving your information. Please try again.',
+              variant: 'destructive',
+            });
+          }
+          setIsSubmitting(false);
+          return;
         }
-        setIsSubmitting(false);
-        return;
       }
       
       // Redirect to thank you page with email in state
@@ -155,10 +156,8 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
                 step === 3 ? "opacity-100 translate-x-0" : "opacity-0 absolute top-0 left-0 right-0 translate-x-[100%]"
               )}>
                 <ChildProfileStep 
-                  childName={childName}
-                  setChildName={setChildName}
-                  childAge={childAge}
-                  setChildAge={setChildAge}
+                  children={children}
+                  setChildren={setChildren}
                   nextStep={nextStep}
                   prevStep={prevStep}
                 />
