@@ -74,11 +74,12 @@ const Hero = () => {
             )}
           >
             <div className="relative z-10 bg-white rounded-2xl shadow-soft p-6 backdrop-blur-sm border border-muted">
-              <div className="aspect-video w-full rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
-                <div className="text-center px-4">
-                  <span className="block text-muted-foreground mb-2">Preview illustration will appear here</span>
-                  <span className="block text-sm text-muted-foreground/70">Showing playdate scheduling interface</span>
-                </div>
+              <div className="aspect-video w-full rounded-xl overflow-hidden">
+                <img 
+                  src="https://images.unsplash.com/photo-1605810230434-7631ac76ec81?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" 
+                  alt="Children playing outdoors" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               
               <div className="mt-4 space-y-3">

@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from '@/lib/utils';
 
 const Header = () => {
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
@@ -18,6 +19,13 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const scrollToElement = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <header 
@@ -42,10 +50,10 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <NavLink href="#features" isScrolled={isScrolled}>Features</NavLink>
-            <NavLink href="#how-it-works" isScrolled={isScrolled}>How It Works</NavLink>
-            <NavLink href="#testimonials" isScrolled={isScrolled}>Testimonials</NavLink>
-            <NavLink href="#faq" isScrolled={isScrolled}>FAQ</NavLink>
+            <NavLink href="#features" isScrolled={isScrolled} onClick={() => scrollToElement('features')}>Features</NavLink>
+            <NavLink href="#how-it-works" isScrolled={isScrolled} onClick={() => scrollToElement('how-it-works')}>How It Works</NavLink>
+            <NavLink href="#testimonials" isScrolled={isScrolled} onClick={() => scrollToElement('testimonials')}>Testimonials</NavLink>
+            <NavLink href="#faq" isScrolled={isScrolled} onClick={() => scrollToElement('faq')}>FAQ</NavLink>
           </nav>
 
           <div className="hidden md:flex items-center space-x-4">
@@ -55,13 +63,13 @@ const Header = () => {
                 "transition-all",
                 isScrolled ? "border-primary text-primary hover:bg-primary/10" : "border-white text-white hover:bg-white/10"
               )}
-              onClick={() => document.getElementById('onboarding')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => scrollToElement('onboarding')}
             >
               Log In
             </Button>
             <Button
               className="button-glow bg-primary hover:bg-primary/90 text-white"
-              onClick={() => document.getElementById('onboarding')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => scrollToElement('onboarding')}
             >
               Get Started
             </Button>
@@ -88,10 +96,10 @@ const Header = () => {
         isMenuOpen ? "max-h-screen py-4" : "max-h-0"
       )}>
         <div className="container mx-auto px-6 space-y-4">
-          <MobileNavLink href="#features" onClick={() => setIsMenuOpen(false)}>Features</MobileNavLink>
-          <MobileNavLink href="#how-it-works" onClick={() => setIsMenuOpen(false)}>How It Works</MobileNavLink>
-          <MobileNavLink href="#testimonials" onClick={() => setIsMenuOpen(false)}>Testimonials</MobileNavLink>
-          <MobileNavLink href="#faq" onClick={() => setIsMenuOpen(false)}>FAQ</MobileNavLink>
+          <MobileNavLink href="#features" onClick={() => { setIsMenuOpen(false); scrollToElement('features'); }}>Features</MobileNavLink>
+          <MobileNavLink href="#how-it-works" onClick={() => { setIsMenuOpen(false); scrollToElement('how-it-works'); }}>How It Works</MobileNavLink>
+          <MobileNavLink href="#testimonials" onClick={() => { setIsMenuOpen(false); scrollToElement('testimonials'); }}>Testimonials</MobileNavLink>
+          <MobileNavLink href="#faq" onClick={() => { setIsMenuOpen(false); scrollToElement('faq'); }}>FAQ</MobileNavLink>
           
           <div className="flex flex-col space-y-3 pt-3">
             <Button 
@@ -99,7 +107,7 @@ const Header = () => {
               className="w-full"
               onClick={() => {
                 setIsMenuOpen(false);
-                document.getElementById('onboarding')?.scrollIntoView({ behavior: 'smooth' });
+                scrollToElement('onboarding');
               }}
             >
               Log In
@@ -108,7 +116,7 @@ const Header = () => {
               className="w-full button-glow"
               onClick={() => {
                 setIsMenuOpen(false);
-                document.getElementById('onboarding')?.scrollIntoView({ behavior: 'smooth' });
+                scrollToElement('onboarding');
               }}
             >
               Get Started
@@ -124,11 +132,13 @@ interface NavLinkProps {
   href: string;
   children: React.ReactNode;
   isScrolled: boolean;
+  onClick: () => void;
 }
 
-const NavLink = ({ href, children, isScrolled }: NavLinkProps) => (
+const NavLink = ({ href, children, isScrolled, onClick }: NavLinkProps) => (
   <a 
     href={href}
+    onClick={(e) => { e.preventDefault(); onClick(); }}
     className={cn(
       "relative font-medium transition-colors hover:text-primary",
       isScrolled ? "text-foreground" : "text-foreground",
@@ -149,7 +159,7 @@ const MobileNavLink = ({ href, children, onClick }: MobileNavLinkProps) => (
   <a 
     href={href}
     className="block py-2 text-foreground font-medium hover:text-primary transition-colors"
-    onClick={onClick}
+    onClick={(e) => { e.preventDefault(); onClick(); }}
   >
     {children}
   </a>

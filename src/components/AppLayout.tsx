@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, 
   Calendar, 
@@ -22,6 +22,7 @@ interface AppLayoutProps {
 
 const AppLayout = ({ children }: AppLayoutProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   const toggleSidebar = () => {
@@ -72,19 +73,19 @@ const AppLayout = ({ children }: AppLayoutProps) => {
               to="/playdates" 
               icon={<Calendar className="h-5 w-5" />} 
               label="Playdates" 
-              active={location.pathname.includes('/playdates')} 
+              active={location.pathname.includes('/playdates') || location.pathname.includes('/playdate/')} 
             />
             <SidebarLink 
               to="/connections" 
               icon={<Users className="h-5 w-5" />} 
               label="Connections" 
-              active={location.pathname.includes('/connections')} 
+              active={location.pathname.includes('/connections') || location.pathname.includes('/parent/')} 
             />
             <SidebarLink 
-              to="/challenges" 
+              to="/achievements" 
               icon={<Trophy className="h-5 w-5" />} 
-              label="Challenges" 
-              active={location.pathname.includes('/challenges')} 
+              label="Achievements" 
+              active={location.pathname.includes('/achievements')} 
             />
             <SidebarLink 
               to="/notifications" 
@@ -140,7 +141,10 @@ const AppLayout = ({ children }: AppLayoutProps) => {
               <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-secondary"></span>
             </Button>
             
-            <div className="flex items-center space-x-2">
+            <div 
+              className="flex items-center space-x-2 cursor-pointer"
+              onClick={() => navigate('/parent/current')}
+            >
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
                 JP
               </div>

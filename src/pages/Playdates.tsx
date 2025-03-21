@@ -79,6 +79,45 @@ const Playdates = () => {
             
             <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
               <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-medium">My Scheduled Playdates</h2>
+                <Button variant="outline" size="sm">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                <PlaydateItem 
+                  title="Soccer in the Park"
+                  date="June 17, 2025"
+                  time="4:00 PM - 6:00 PM"
+                  location="Edworthy Park"
+                  attendees={6}
+                  status="confirmed"
+                  onClick={() => navigate('/playdate/6')}
+                />
+                
+                <PlaydateItem 
+                  title="Art Class Meetup"
+                  date="June 19, 2025"
+                  time="1:00 PM - 3:00 PM"
+                  location="Wildflower Arts Centre"
+                  attendees={8}
+                  status="confirmed"
+                  onClick={() => navigate('/playdate/7')}
+                />
+              </div>
+              
+              <div className="mt-6">
+                <Button variant="ghost" className="text-muted-foreground w-full">
+                  View All My Playdates
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </section>
+            
+            <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
+              <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-medium">Past Playdates</h2>
                 <Button variant="outline" size="sm">
                   <Filter className="h-4 w-4 mr-2" />
@@ -144,18 +183,21 @@ const Playdates = () => {
               
               <div className="space-y-3">
                 <PlaydateGroupCard 
+                  id="1"
                   name="Calgary STEM Parents"
                   members={12}
                   lastActive="2 days ago"
                 />
                 
                 <PlaydateGroupCard 
+                  id="2"
                   name="NW Calgary Outdoor Play"
                   members={23}
                   lastActive="5 hours ago"
                 />
                 
                 <PlaydateGroupCard 
+                  id="3"
                   name="Indoor Winter Activities"
                   members={18}
                   lastActive="1 day ago"
@@ -187,9 +229,9 @@ interface PlaydateItemProps {
 
 const PlaydateItem = ({ title, date, time, location, attendees, status, onClick }: PlaydateItemProps) => {
   const statusColors = {
-    pending: 'bg-muted-foreground text-muted-foreground',
-    confirmed: 'bg-primary text-primary',
-    completed: 'bg-secondary text-secondary'
+    pending: 'text-muted-foreground',
+    confirmed: 'text-primary',
+    completed: 'text-secondary'
   };
   
   const statusLabels = {
@@ -210,7 +252,7 @@ const PlaydateItem = ({ title, date, time, location, attendees, status, onClick 
         <div className="flex justify-between">
           <h3 className="font-medium">{title}</h3>
           <div className="flex items-center space-x-1">
-            <div className={`w-2 h-2 rounded-full ${statusColors[status]}`}></div>
+            <div className={`w-2 h-2 rounded-full bg-${statusColors[status]}`}></div>
             <span className={`text-xs capitalize ${statusColors[status]}`}>{statusLabels[status]}</span>
           </div>
         </div>
@@ -266,12 +308,15 @@ const SuggestedPlaydateCard = ({ title, date, location, numFamilies }: Suggested
 };
 
 interface PlaydateGroupCardProps {
+  id: string;
   name: string;
   members: number;
   lastActive: string;
 }
 
-const PlaydateGroupCard = ({ name, members, lastActive }: PlaydateGroupCardProps) => {
+const PlaydateGroupCard = ({ id, name, members, lastActive }: PlaydateGroupCardProps) => {
+  const navigate = useNavigate();
+  
   return (
     <div className="p-3 rounded-lg border border-muted hover:border-primary/20 transition-colors">
       <h4 className="font-medium text-sm">{name}</h4>
@@ -284,7 +329,12 @@ const PlaydateGroupCard = ({ name, members, lastActive }: PlaydateGroupCardProps
           Active {lastActive}
         </span>
       </div>
-      <Button variant="outline" size="sm" className="w-full mt-2 h-7 text-xs">
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className="w-full mt-2 h-7 text-xs"
+        onClick={() => navigate(`/group/${id}`)}
+      >
         View Group
       </Button>
     </div>
