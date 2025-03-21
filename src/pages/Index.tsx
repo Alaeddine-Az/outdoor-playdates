@@ -7,6 +7,7 @@ import PlaymateFinderPreview from '@/components/PlaymateFinderPreview';
 import PlaydateSchedulerPreview from '@/components/PlaydateSchedulerPreview';
 import GamifiedChallengePreview from '@/components/GamifiedChallengePreview';
 import CommunityPreview from '@/components/CommunityPreview';
+import TestimonialsCarousel from '@/components/TestimonialsCarousel';
 import OnboardingFlow from '@/components/OnboardingFlow';
 import { ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -36,6 +37,7 @@ const Index = () => {
       <PlaydateSchedulerPreview />
       <GamifiedChallengePreview />
       <CommunityPreview />
+      <TestimonialsCarousel />
       <OnboardingFlow id="onboarding" />
 
       {/* Footer */}
