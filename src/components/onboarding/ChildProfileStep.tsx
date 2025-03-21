@@ -61,6 +61,7 @@ const ChildProfileStep: React.FC<ChildProfileStepProps> = ({
 
   const addChild = () => {
     const currentChildren = form.getValues().children;
+    // Fix: Ensure we're creating a valid ChildInfo object with required properties
     form.setValue('children', [...currentChildren, { name: '', age: '' }]);
   };
 
