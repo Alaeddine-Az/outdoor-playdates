@@ -22,6 +22,13 @@ const FeatureSection = ({ id }: FeatureSectionProps) => {
     >
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 opacity-5">
+          <img 
+            src="https://images.unsplash.com/photo-1472162072942-cd5147eb3902?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80" 
+            alt="Children playing background" 
+            className="w-full h-full object-cover"
+          />
+        </div>
         <div className="absolute top-[10%] right-[10%] w-[30%] h-[30%] rounded-full bg-primary/5 filter blur-3xl"></div>
         <div className="absolute bottom-[20%] left-[5%] w-[20%] h-[20%] rounded-full bg-secondary/5 filter blur-3xl"></div>
       </div>
