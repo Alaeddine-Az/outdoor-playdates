@@ -27,7 +27,7 @@ const GroupDetail = () => {
     description: id === "1" 
       ? "A community for parents in Calgary who are interested in STEM (Science, Technology, Engineering, Math) activities for their children. We organize regular playdates focused on hands-on learning, experiments, and educational fun."
       : "For families in Northwest Calgary looking for outdoor play opportunities. We organize regular meetups at local parks, nature reserves, and playgrounds to encourage active outdoor play.",
-    members: id === "1" ? 12 : 23,
+    memberCount: id === "1" ? 12 : 23,
     created: "January 2025",
     location: "Calgary, AB",
     type: "Private",
