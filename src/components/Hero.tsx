@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,7 @@ const samplePlaydates = [
   {
     location: "Riverside Splash Pad",
     time: "Tomorrow, 10AM",
-    image: "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image: "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D",
     children: { name: "Olivia (7) and Noah (4)", distance: "5 blocks away", group: "Water Play" }
   },
   {
@@ -40,7 +39,7 @@ const samplePlaydates = [
   {
     location: "Art & Craft Studio",
     time: "Next Monday, 1PM",
-    image: "https://plus.unsplash.com/premium_photo-1661695729294-fa0dc94f2a09?q=80&w=2982&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image: "https://plus.unsplash.com/premium_photo-1661695729294-fa0dc94f2a09?q=80&w=2982&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D",
     children: { name: "Harper (5) and Mason (7)", distance: "4 blocks away", group: "Creative Minds" }
   },
   {

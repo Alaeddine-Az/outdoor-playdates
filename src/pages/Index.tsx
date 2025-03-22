@@ -3,6 +3,7 @@ import React from 'react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import FeatureSection from '@/components/FeatureSection';
+import HowItWorks from '@/components/HowItWorks';
 import PlaymateFinderPreview from '@/components/PlaymateFinderPreview';
 import PlaydateSchedulerPreview from '@/components/PlaydateSchedulerPreview';
 import GamifiedChallengePreview from '@/components/GamifiedChallengePreview';
@@ -32,6 +33,7 @@ const Index = () => {
     <div className="min-h-screen">
       <Header />
       <Hero />
+      <HowItWorks />
       <FeatureSection id="features" />
       <PlaymateFinderPreview />
       <PlaydateSchedulerPreview />
