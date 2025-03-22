@@ -10,32 +10,44 @@ const samplePlaydates = [
   {
     location: "Central Park Playground",
     time: "Today, 2PM",
-    image: "https://images.unsplash.com/photo-1540479859555-17af45c78602?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+    image: "https://plus.unsplash.com/premium_photo-1686920244658-f3db03fe22e3?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     children: { name: "Liam (6) and Emma (5)", distance: "3 blocks away", group: "Nature Explorers" }
   },
   {
     location: "Riverside Splash Pad",
     time: "Tomorrow, 10AM",
-    image: "https://images.unsplash.com/photo-1596394723269-b2cbca4e6e73?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     children: { name: "Olivia (7) and Noah (4)", distance: "5 blocks away", group: "Water Play" }
   },
   {
     location: "Community Garden",
     time: "Saturday, 1PM",
-    image: "https://images.unsplash.com/photo-1532922258633-46f9f8a65225?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+    image: "https://plus.unsplash.com/premium_photo-1686920245950-58617c8a602e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     children: { name: "Sophia (5) and Jackson (6)", distance: "2 blocks away", group: "Little Gardeners" }
   },
   {
     location: "Neighborhood Sports Field",
     time: "Sunday, 3PM",
-    image: "https://images.unsplash.com/photo-1608734265656-f035d3e7bcbf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+    image: "https://plus.unsplash.com/premium_photo-1661567408466-27899e8a4a2f?q=80&w=2942&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     children: { name: "Lucas (8) and Mia (7)", distance: "6 blocks away", group: "Sports Buddies" }
   },
   {
     location: "Indoor Play Center",
     time: "Rainy days, 4PM",
-    image: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1599376672737-bd66af54c8f5?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     children: { name: "Ethan (4) and Ava (6)", distance: "10 blocks away", group: "Creative Play" }
+  },
+  {
+    location: "Art & Craft Studio",
+    time: "Next Monday, 1PM",
+    image: "https://plus.unsplash.com/premium_photo-1661695729294-fa0dc94f2a09?q=80&w=2982&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    children: { name: "Harper (5) and Mason (7)", distance: "4 blocks away", group: "Creative Minds" }
+  },
+  {
+    location: "Local Library Kids Area",
+    time: "Wednesday, 3PM",
+    image: "https://plus.unsplash.com/premium_photo-1686920246064-f0b125432fbe?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    children: { name: "Charlotte (6) and Benjamin (8)", distance: "7 blocks away", group: "Book Explorers" }
   }
 ];
 
