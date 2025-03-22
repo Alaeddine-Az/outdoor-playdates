@@ -39,7 +39,6 @@ const ChildProfileStep: React.FC<ChildProfileStepProps> = ({
   };
 
   const addChild = () => {
-    // Initialize with empty strings (not optional) to conform to ChildInfo interface
     onChange([...children, { name: "", age: "" }]);
   };
 

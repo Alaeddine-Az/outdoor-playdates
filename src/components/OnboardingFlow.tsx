@@ -157,9 +157,9 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
               )}>
                 <ChildProfileStep 
                   children={children}
-                  setChildren={setChildren}
-                  nextStep={nextStep}
-                  prevStep={prevStep}
+                  onChange={setChildren}
+                  onNext={nextStep}
+                  onBack={prevStep}
                 />
               </div>
               
