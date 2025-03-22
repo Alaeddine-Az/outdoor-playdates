@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Define sample playdate data
@@ -129,7 +130,7 @@ const Hero = () => {
             <div className="relative z-10 bg-white rounded-2xl shadow-soft p-6 backdrop-blur-sm border border-muted">
               <div className="aspect-video w-full rounded-xl overflow-hidden">
                 <img 
-                  src={playdate.image} 
+                  src="https://static.wixstatic.com/media/321259_c8d549f8a59146f1952f739b4907969e~mv2.jpg/v1/fill/w_1000,h_508,al_c,q_85,enc_avif,quality_auto/321259_c8d549f8a59146f1952f739b4907969e~mv2.jpg" 
                   alt="Children playing outdoors" 
                   className="w-full h-full object-cover"
                 />
@@ -174,10 +175,9 @@ const Hero = () => {
             )}
             style={{ animationDelay: "0.4s" }}
           >
-            <TrustBadge label="Verified Parents" value="1,000+" />
-            <TrustBadge label="Playdates Organized" value="10,000+" />
-            <TrustBadge label="Unique Locations" value="500+" />
-            <TrustBadge label="Outdoor Challenges" value="250+" />
+            <TrustBadge icon={<Check className="h-5 w-5 text-primary" />} label="Parent-Approved Activities" />
+            <TrustBadge icon={<Check className="h-5 w-5 text-primary" />} label="Your Privacy is Safe" />
+            <TrustBadge icon={<Check className="h-5 w-5 text-primary" />} label="Free to Join, Always" />
           </div>
         </div>
       </div>
@@ -196,14 +196,16 @@ const Hero = () => {
 };
 
 interface TrustBadgeProps {
+  icon?: React.ReactNode;
   label: string;
-  value: string;
+  value?: string;
 }
 
-const TrustBadge = ({ label, value }: TrustBadgeProps) => (
-  <div className="text-center px-2">
-    <div className="text-3xl font-bold text-foreground">{value}</div>
-    <div className="text-sm text-muted-foreground">{label}</div>
+const TrustBadge = ({ icon, label, value }: TrustBadgeProps) => (
+  <div className="text-center px-2 flex items-center gap-2">
+    {icon}
+    <div className="text-sm font-medium text-foreground">{label}</div>
+    {value && <div className="text-sm text-muted-foreground">{value}</div>}
   </div>
 );
 
