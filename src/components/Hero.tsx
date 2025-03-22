@@ -1,11 +1,53 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Define sample playdate data
+const samplePlaydates = [
+  {
+    location: "Central Park Playground",
+    time: "Today, 2PM",
+    image: "https://images.unsplash.com/photo-1540479859555-17af45c78602?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+    children: { name: "Liam (6) and Emma (5)", distance: "3 blocks away", group: "Nature Explorers" }
+  },
+  {
+    location: "Riverside Splash Pad",
+    time: "Tomorrow, 10AM",
+    image: "https://images.unsplash.com/photo-1596394723269-b2cbca4e6e73?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+    children: { name: "Olivia (7) and Noah (4)", distance: "5 blocks away", group: "Water Play" }
+  },
+  {
+    location: "Community Garden",
+    time: "Saturday, 1PM",
+    image: "https://images.unsplash.com/photo-1532922258633-46f9f8a65225?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+    children: { name: "Sophia (5) and Jackson (6)", distance: "2 blocks away", group: "Little Gardeners" }
+  },
+  {
+    location: "Neighborhood Sports Field",
+    time: "Sunday, 3PM",
+    image: "https://images.unsplash.com/photo-1608734265656-f035d3e7bcbf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+    children: { name: "Lucas (8) and Mia (7)", distance: "6 blocks away", group: "Sports Buddies" }
+  },
+  {
+    location: "Indoor Play Center",
+    time: "Rainy days, 4PM",
+    image: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+    children: { name: "Ethan (4) and Ava (6)", distance: "10 blocks away", group: "Creative Play" }
+  }
+];
+
 const Hero = () => {
+  const [playdate, setPlaydate] = useState(samplePlaydates[0]);
+  
+  // Random playdate selection on component mount
+  useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * samplePlaydates.length);
+    setPlaydate(samplePlaydates[randomIndex]);
+  }, []);
+
   const { ref, isIntersecting } = useIntersectionObserver({
     threshold: 0.1,
     triggerOnce: true
@@ -76,8 +118,8 @@ const Hero = () => {
             <div className="relative z-10 bg-white rounded-2xl shadow-soft p-6 backdrop-blur-sm border border-muted">
               <div className="aspect-video w-full rounded-xl overflow-hidden">
                 <img 
-                  src="https://images.unsplash.com/photo-1540479859555-17af45c78602?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" 
-                  alt="Children playing outdoors in a park" 
+                  src={playdate.image} 
+                  alt="Children playing outdoors" 
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -86,21 +128,21 @@ const Hero = () => {
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="font-medium">Upcoming Playdate</h3>
-                    <p className="text-sm text-muted-foreground">Central Park Playground</p>
+                    <p className="text-sm text-muted-foreground">{playdate.location}</p>
                   </div>
                   <div className="bg-primary/10 text-primary font-medium px-3 py-1 rounded-full text-sm">
-                    Today, 2PM
+                    {playdate.time}
                   </div>
                 </div>
                 
                 <div className="bg-muted rounded-lg p-3">
                   <div className="flex space-x-3">
                     <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center text-secondary">
-                      L
+                      {playdate.children.name.charAt(0)}
                     </div>
                     <div>
-                      <span className="block text-sm font-medium">Liam (6) and Emma (5)</span>
-                      <span className="block text-xs text-muted-foreground">3 blocks away • Nature Explorers</span>
+                      <span className="block text-sm font-medium">{playdate.children.name}</span>
+                      <span className="block text-xs text-muted-foreground">{playdate.children.distance} • {playdate.children.group}</span>
                     </div>
                   </div>
                 </div>
