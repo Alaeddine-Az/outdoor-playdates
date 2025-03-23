@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Menu, X, User, LogOut, Calendar, Trophy, UserPlus, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,6 +19,23 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (isMenuOpen && !target.closest('[data-mobile-menu]')) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -31,10 +48,8 @@ const Header = () => {
 
   const scrollToSection = (id: string) => {
     if (isHomePage) {
-      // If on home page, scroll to the section
       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     } else {
-      // If on another page, navigate to home page with anchor
       navigate(`/#${id}`);
     }
     setIsMenuOpen(false);
@@ -42,15 +57,14 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-40 w-full backdrop-blur-sm border-b bg-white/90 border-muted">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-14 sm:h-16 items-center justify-between">
         <div className="flex items-center">
           <Link to="/" className="flex items-center">
-            <span className="font-bold text-xl md:text-2xl text-primary">GoPlayNow</span>
+            <span className="font-bold text-lg md:text-xl lg:text-2xl text-primary">GoPlayNow</span>
           </Link>
         </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-4 lg:gap-6">
           {user ? (
             <>
               <Link to="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
@@ -119,104 +133,116 @@ const Header = () => {
           )}
         </nav>
 
-        {/* Mobile Navigation Trigger */}
         <button
           className="block md:hidden"
           onClick={toggleMenu}
           aria-label="Toggle navigation menu"
         >
-          {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
-      {/* Mobile Navigation Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-b border-muted">
-          <div className="container py-4 space-y-4">
-            {user ? (
-              <>
-                <Link 
-                  to="/dashboard" 
-                  className="block px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Dashboard
-                </Link>
-                <Link 
-                  to="/playdates" 
-                  className="block px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Playdates
-                </Link>
-                <Link 
-                  to="/challenges" 
-                  className="block px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Challenges
-                </Link>
-                <Link 
-                  to="/connections" 
-                  className="block px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Connections
-                </Link>
-                <Link 
-                  to="/parent-profile" 
-                  className="block px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <User className="inline mr-2 h-4 w-4" /> Profile
-                </Link>
-                <Link 
-                  to="/achievements" 
-                  className="block px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <Trophy className="inline mr-2 h-4 w-4" /> Achievements
-                </Link>
-                <button
-                  className="w-full text-left px-4 py-2 text-sm font-medium rounded-md text-red-500 hover:bg-red-50"
-                  onClick={() => {
-                    handleSignOut();
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <LogOut className="inline mr-2 h-4 w-4" /> Sign Out
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => scrollToSection('features')}
-                  className="block w-full text-left px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                >
-                  Features
-                </button>
-                <button
-                  onClick={() => scrollToSection('how-it-works')}
-                  className="block w-full text-left px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                >
-                  How It Works
-                </button>
-                <button
-                  onClick={() => scrollToSection('testimonials')}
-                  className="block w-full text-left px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                >
-                  Testimonials
-                </button>
-                <Link 
-                  to="/auth"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <Button className="w-full bg-primary hover:bg-primary/90">
-                    Sign In
-                  </Button>
-                </Link>
-              </>
-            )}
+        <div className="md:hidden fixed inset-0 z-50 pt-14 bg-white/95 backdrop-blur-sm" data-mobile-menu>
+          <div className="container py-4 h-full overflow-y-auto">
+            <div className="flex flex-col h-full pb-safe">
+              {user ? (
+                <>
+                  <div className="flex items-center space-x-3 p-4 mb-2 border-b">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                      {user.email?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <div>
+                      <p className="font-medium">{user.email}</p>
+                      <p className="text-xs text-muted-foreground">Member</p>
+                    </div>
+                  </div>
+                  <Link 
+                    to="/dashboard" 
+                    className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted"
+                  >
+                    <span className="mr-3">Dashboard</span>
+                  </Link>
+                  <Link 
+                    to="/playdates" 
+                    className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted"
+                  >
+                    <Calendar className="w-5 h-5 mr-3" />
+                    <span>Playdates</span>
+                  </Link>
+                  <Link 
+                    to="/challenges" 
+                    className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted"
+                  >
+                    <Trophy className="w-5 h-5 mr-3" />
+                    <span>Challenges</span>
+                  </Link>
+                  <Link 
+                    to="/connections" 
+                    className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted"
+                  >
+                    <Users className="w-5 h-5 mr-3" />
+                    <span>Connections</span>
+                  </Link>
+                  <Link 
+                    to="/parent-profile" 
+                    className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted"
+                  >
+                    <User className="w-5 h-5 mr-3" />
+                    <span>Profile</span>
+                  </Link>
+                  <Link 
+                    to="/achievements" 
+                    className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted"
+                  >
+                    <Trophy className="w-5 h-5 mr-3" />
+                    <span>Achievements</span>
+                  </Link>
+                  
+                  <div className="mt-auto border-t pt-2">
+                    <button
+                      className="flex items-center w-full px-4 py-3 text-base font-medium rounded-md text-red-500 hover:bg-red-50"
+                      onClick={handleSignOut}
+                    >
+                      <LogOut className="w-5 h-5 mr-3" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => scrollToSection('features')}
+                    className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted"
+                  >
+                    <span>Features</span>
+                  </button>
+                  <button
+                    onClick={() => scrollToSection('how-it-works')}
+                    className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted"
+                  >
+                    <span>How It Works</span>
+                  </button>
+                  <button
+                    onClick={() => scrollToSection('testimonials')}
+                    className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted"
+                  >
+                    <span>Testimonials</span>
+                  </button>
+                  
+                  <div className="px-4 mt-4">
+                    <Link 
+                      to="/auth"
+                      className="block w-full"
+                    >
+                      <Button className="w-full bg-primary hover:bg-primary/90 py-6 text-base">
+                        Sign In
+                      </Button>
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

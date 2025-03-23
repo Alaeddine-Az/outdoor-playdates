@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Form,
   FormControl,
@@ -41,6 +42,7 @@ const PlaydateCreationForm = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isMobile = useIsMobile();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -110,11 +112,11 @@ const PlaydateCreationForm = () => {
   };
   
   return (
-    <div className="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-soft">
-      <h2 className="text-2xl font-bold mb-6">Create a New Playdate</h2>
+    <div className={`${isMobile ? 'w-full' : 'max-w-2xl mx-auto'} bg-white p-4 sm:p-6 rounded-xl shadow-soft`}>
+      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Create a New Playdate</h2>
       
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
           <FormField
             control={form.control}
             name="title"
@@ -124,7 +126,7 @@ const PlaydateCreationForm = () => {
                 <FormControl>
                   <Input placeholder="e.g. Park Adventure" {...field} />
                 </FormControl>
-                <FormDescription>
+                <FormDescription className="text-xs sm:text-sm">
                   Choose a title that describes the activity.
                 </FormDescription>
                 <FormMessage />
@@ -141,11 +143,11 @@ const PlaydateCreationForm = () => {
                 <FormControl>
                   <Textarea 
                     placeholder="Tell other parents what this playdate is about..." 
-                    className="min-h-32"
+                    className={`${isMobile ? 'min-h-24' : 'min-h-32'}`}
                     {...field} 
                   />
                 </FormControl>
-                <FormDescription>
+                <FormDescription className="text-xs sm:text-sm">
                   Include activity details, what to bring, and age recommendations.
                 </FormDescription>
                 <FormMessage />
@@ -153,7 +155,7 @@ const PlaydateCreationForm = () => {
             )}
           />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6">
             <FormField
               control={form.control}
               name="location"
@@ -162,7 +164,7 @@ const PlaydateCreationForm = () => {
                   <FormLabel>Location</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                       <Input 
                         placeholder="e.g. Nose Hill Park" 
                         className="pl-10"
@@ -187,7 +189,7 @@ const PlaydateCreationForm = () => {
                         <Button
                           variant={"outline"}
                           className={cn(
-                            "pl-3 text-left font-normal",
+                            "pl-3 text-left font-normal w-full",
                             !field.value && "text-muted-foreground"
                           )}
                         >
@@ -200,7 +202,7 @@ const PlaydateCreationForm = () => {
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0" align={isMobile ? "center" : "start"}>
                       <Calendar
                         mode="single"
                         selected={field.value}
@@ -216,7 +218,7 @@ const PlaydateCreationForm = () => {
             />
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <FormField
               control={form.control}
               name="startTime"
@@ -225,7 +227,7 @@ const PlaydateCreationForm = () => {
                   <FormLabel>Start Time</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                      <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                       <Input 
                         placeholder="14:00" 
                         className="pl-10"
@@ -233,7 +235,7 @@ const PlaydateCreationForm = () => {
                       />
                     </div>
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-xs sm:text-sm">
                     24-hour format (e.g. 14:00)
                   </FormDescription>
                   <FormMessage />
@@ -249,7 +251,7 @@ const PlaydateCreationForm = () => {
                   <FormLabel>End Time</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                      <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                       <Input 
                         placeholder="16:00" 
                         className="pl-10"
@@ -257,7 +259,7 @@ const PlaydateCreationForm = () => {
                       />
                     </div>
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-xs sm:text-sm">
                     24-hour format (e.g. 16:00)
                   </FormDescription>
                   <FormMessage />
@@ -274,7 +276,7 @@ const PlaydateCreationForm = () => {
                 <FormLabel>Maximum Participants</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                    <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                     <Input 
                       type="number" 
                       min={1} 
@@ -284,7 +286,7 @@ const PlaydateCreationForm = () => {
                     />
                   </div>
                 </FormControl>
-                <FormDescription>
+                <FormDescription className="text-xs sm:text-sm">
                   How many families can attend this playdate?
                 </FormDescription>
                 <FormMessage />
@@ -292,18 +294,18 @@ const PlaydateCreationForm = () => {
             )}
           />
           
-          <div className="pt-2 space-x-3 flex">
+          <div className="pt-2 flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0">
             <Button
               type="button"
               variant="outline"
               onClick={() => navigate('/playdates')}
-              className="flex-1"
+              className="w-full"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
-              className="flex-1 button-glow bg-primary hover:bg-primary/90 text-white"
+              className="w-full button-glow bg-primary hover:bg-primary/90 text-white"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Creating..." : "Create Playdate"}
