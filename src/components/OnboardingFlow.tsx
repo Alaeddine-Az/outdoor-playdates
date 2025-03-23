@@ -42,7 +42,21 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
     setIsSubmitting(true);
     
     try {
-      // Process each child and save to Supabase
+      // First, register the user with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            parent_name: parentName,
+            location,
+          }
+        }
+      });
+      
+      if (authError) throw authError;
+      
+      // If auth signup is successful but we're using the waitlist approach
       for (const child of children) {
         const { error } = await supabase
           .from('early_signups')
@@ -78,11 +92,11 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
       // Redirect to thank you page with email in state
       navigate('/thank-you', { state: { email } });
       
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error in signup process:', err);
       toast({
         title: 'Something went wrong',
-        description: 'Please try again later.',
+        description: err.message || 'Please try again later.',
         variant: 'destructive',
       });
       setIsSubmitting(false);
@@ -184,7 +198,7 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
           <div className="p-4 bg-muted/30 border-t border-muted flex items-center justify-center">
             <Users className="h-5 w-5 text-primary mr-2" />
             <span className="text-sm text-muted-foreground">
-              Join <span className="font-medium text-foreground">1,000+</span> verified parents using GoPlayNow
+              Join other parents using GoPlayNow for safe outdoor activities
             </span>
           </div>
         </div>

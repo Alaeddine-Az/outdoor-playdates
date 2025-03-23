@@ -1,44 +1,146 @@
 
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
-import Playdates from "./pages/Playdates";
-import Achievements from "./pages/Achievements";
-import Connections from "./pages/Connections";
-import NotFound from "./pages/NotFound";
-import ParentProfile from "./pages/ParentProfile";
-import PlaydateDetail from "./pages/PlaydateDetail";
-import GroupDetail from "./pages/GroupDetail";
-import ThankYou from "./pages/ThankYou";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 
+// Import pages
+import Index from './pages/Index';
+import Dashboard from './pages/Dashboard';
+import Playdates from './pages/Playdates';
+import Challenges from './pages/Challenges';
+import Achievements from './pages/Achievements';
+import Connections from './pages/Connections';
+import ParentProfile from './pages/ParentProfile';
+import PlaydateDetail from './pages/PlaydateDetail';
+import GroupDetail from './pages/GroupDetail';
+import NotFound from './pages/NotFound';
+import ThankYou from './pages/ThankYou';
+import Auth from './pages/Auth';
+import CreatePlaydate from './pages/CreatePlaydate';
+import AddChild from './pages/AddChild';
+
+// Create a client
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
+// Protected route component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    // Show loading spinner or placeholder
+    return <div className="h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/playdates" element={<Playdates />} />
-          <Route path="/achievements" element={<Achievements />} />
-          <Route path="/connections" element={<Connections />} />
-          <Route path="/parent/:id" element={<ParentProfile />} />
-          <Route path="/playdate/:id" element={<PlaydateDetail />} />
-          <Route path="/group/:id" element={<GroupDetail />} />
-          <Route path="/thank-you" element={<ThankYou />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/thank-you" element={<ThankYou />} />
+            
+            {/* Protected routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/playdates"
+              element={
+                <ProtectedRoute>
+                  <Playdates />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/create-playdate"
+              element={
+                <ProtectedRoute>
+                  <CreatePlaydate />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/playdate/:id"
+              element={
+                <ProtectedRoute>
+                  <PlaydateDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/challenges"
+              element={
+                <ProtectedRoute>
+                  <Challenges />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/achievements"
+              element={
+                <ProtectedRoute>
+                  <Achievements />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/connections"
+              element={
+                <ProtectedRoute>
+                  <Connections />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/parent-profile"
+              element={
+                <ProtectedRoute>
+                  <ParentProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/add-child"
+              element={
+                <ProtectedRoute>
+                  <AddChild />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/group/:id"
+              element={
+                <ProtectedRoute>
+                  <GroupDetail />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          
+          <Toaster />
+        </AuthProvider>
       </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </QueryClientProvider>
+  );
+}
 
 export default App;
