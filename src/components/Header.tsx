@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,6 +17,8 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -25,6 +27,17 @@ const Header = () => {
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+  };
+
+  const scrollToSection = (id: string) => {
+    if (isHomePage) {
+      // If on home page, scroll to the section
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // If on another page, navigate to home page with anchor
+      navigate(`/#${id}`);
+    }
+    setIsMenuOpen(false);
   };
 
   return (
@@ -79,15 +92,24 @@ const Header = () => {
             </>
           ) : (
             <>
-              <Link to="/#features" className="text-sm font-medium transition-colors hover:text-primary">
+              <button 
+                onClick={() => scrollToSection('features')}
+                className="text-sm font-medium transition-colors hover:text-primary"
+              >
                 Features
-              </Link>
-              <Link to="/#how-it-works" className="text-sm font-medium transition-colors hover:text-primary">
+              </button>
+              <button 
+                onClick={() => scrollToSection('how-it-works')}
+                className="text-sm font-medium transition-colors hover:text-primary"
+              >
                 How It Works
-              </Link>
-              <Link to="/#testimonials" className="text-sm font-medium transition-colors hover:text-primary">
+              </button>
+              <button 
+                onClick={() => scrollToSection('testimonials')}
+                className="text-sm font-medium transition-colors hover:text-primary"
+              >
                 Testimonials
-              </Link>
+              </button>
               <Link to="/auth">
                 <Button variant="default" className="bg-primary hover:bg-primary/90">
                   Sign In
@@ -167,27 +189,24 @@ const Header = () => {
               </>
             ) : (
               <>
-                <Link 
-                  to="/#features" 
-                  className="block px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                  onClick={() => setIsMenuOpen(false)}
+                <button
+                  onClick={() => scrollToSection('features')}
+                  className="block w-full text-left px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
                 >
                   Features
-                </Link>
-                <Link 
-                  to="/#how-it-works" 
-                  className="block px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                  onClick={() => setIsMenuOpen(false)}
+                </button>
+                <button
+                  onClick={() => scrollToSection('how-it-works')}
+                  className="block w-full text-left px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
                 >
                   How It Works
-                </Link>
-                <Link 
-                  to="/#testimonials" 
-                  className="block px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                  onClick={() => setIsMenuOpen(false)}
+                </button>
+                <button
+                  onClick={() => scrollToSection('testimonials')}
+                  className="block w-full text-left px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
                 >
                   Testimonials
-                </Link>
+                </button>
                 <Link 
                   to="/auth"
                   onClick={() => setIsMenuOpen(false)}
