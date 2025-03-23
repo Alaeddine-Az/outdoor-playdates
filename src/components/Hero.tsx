@@ -4,60 +4,104 @@ import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Define sample playdate data
 const samplePlaydates = [
   {
-    location: "Central Park Playground",
+    title: "Nature Discovery Walk",
+    location: "Nose Hill Park",
     time: "Today, 2PM",
     image: "https://plus.unsplash.com/premium_photo-1686920244658-f3db03fe22e3?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    children: { name: "Liam (6) and Emma (5)", distance: "3 blocks away", group: "Nature Explorers" }
+    parent: { 
+      name: "Sarah Johnson", 
+      avatar: "https://i.pravatar.cc/150?img=36"
+    },
+    children: "Liam (6) and Emma (5)"
   },
   {
-    location: "Riverside Splash Pad",
+    title: "Water Play Fun Day",
+    location: "Bowness Park",
     time: "Tomorrow, 10AM",
     image: "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D",
-    children: { name: "Olivia (7) and Noah (4)", distance: "5 blocks away", group: "Water Play" }
+    parent: { 
+      name: "Michael Thompson", 
+      avatar: "https://i.pravatar.cc/150?img=12"
+    },
+    children: "Olivia (7) and Noah (4)"
   },
   {
-    location: "Community Garden",
+    title: "Kids Gardening Workshop",
+    location: "Reader Rock Garden",
     time: "Saturday, 1PM",
     image: "https://plus.unsplash.com/premium_photo-1686920245950-58617c8a602e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    children: { name: "Sophia (5) and Jackson (6)", distance: "2 blocks away", group: "Little Gardeners" }
+    parent: { 
+      name: "Jessica Parker", 
+      avatar: "https://i.pravatar.cc/150?img=25"
+    },
+    children: "Sophia (5) and Jackson (6)"
   },
   {
-    location: "Neighborhood Sports Field",
+    title: "Kids Soccer Meetup",
+    location: "Shouldice Athletic Park",
     time: "Sunday, 3PM",
     image: "https://plus.unsplash.com/premium_photo-1661567408466-27899e8a4a2f?q=80&w=2942&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    children: { name: "Lucas (8) and Mia (7)", distance: "6 blocks away", group: "Sports Buddies" }
+    parent: { 
+      name: "David Wilson", 
+      avatar: "https://i.pravatar.cc/150?img=51"
+    },
+    children: "Lucas (8) and Mia (7)"
   },
   {
-    location: "Indoor Play Center",
-    time: "Rainy days, 4PM",
+    title: "Creative Art Class",
+    location: "Fish Creek Provincial Park",
+    time: "Monday, 4PM",
     image: "https://images.unsplash.com/photo-1599376672737-bd66af54c8f5?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    children: { name: "Ethan (4) and Ava (6)", distance: "10 blocks away", group: "Creative Play" }
+    parent: { 
+      name: "Emily Roberts", 
+      avatar: "https://i.pravatar.cc/150?img=44"
+    },
+    children: "Ethan (4) and Ava (6)"
   },
   {
-    location: "Art & Craft Studio",
-    time: "Next Monday, 1PM",
-    image: "https://plus.unsplash.com/premium_photo-1661695729294-fa0dc94f2a09?q=80&w=2982&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D",
-    children: { name: "Harper (5) and Mason (7)", distance: "4 blocks away", group: "Creative Minds" }
+    title: "Animal Spotting Adventure",
+    location: "Edworthy Park",
+    time: "Tuesday, 1PM",
+    image: "https://plus.unsplash.com/premium_photo-1661695729294-fa0dc94f2a09?q=80&w=2982&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    parent: { 
+      name: "Amanda Lee", 
+      avatar: "https://i.pravatar.cc/150?img=32"
+    },
+    children: "Harper (5) and Mason (7)"
   },
   {
-    location: "Local Library Kids Area",
+    title: "Story Time in the Park",
+    location: "Riley Park",
     time: "Wednesday, 3PM",
     image: "https://plus.unsplash.com/premium_photo-1686920246064-f0b125432fbe?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    children: { name: "Charlotte (6) and Benjamin (8)", distance: "7 blocks away", group: "Book Explorers" }
+    parent: { 
+      name: "Jennifer Brown", 
+      avatar: "https://i.pravatar.cc/150?img=16"
+    },
+    children: "Charlotte (6) and Benjamin (8)"
   }
 ];
 
 const Hero = () => {
+  const [playdateIndex, setPlaydateIndex] = useState(0);
   const [playdate, setPlaydate] = useState(samplePlaydates[0]);
   
-  // Random playdate selection on component mount
+  // Cycle through playdates every 5 seconds
   useEffect(() => {
-    const randomIndex = Math.floor(Math.random() * samplePlaydates.length);
-    setPlaydate(samplePlaydates[randomIndex]);
+    const interval = setInterval(() => {
+      setPlaydateIndex((prevIndex) => {
+        const newIndex = (prevIndex + 1) % samplePlaydates.length;
+        setPlaydate(samplePlaydates[newIndex]);
+        return newIndex;
+      });
+    }, 5000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const { ref, isIntersecting } = useIntersectionObserver({
@@ -130,16 +174,17 @@ const Hero = () => {
             <div className="relative z-10 bg-white rounded-2xl shadow-soft p-6 backdrop-blur-sm border border-muted">
               <div className="aspect-video w-full rounded-xl overflow-hidden">
                 <img 
-                  src="https://static.wixstatic.com/media/321259_c8d549f8a59146f1952f739b4907969e~mv2.jpg/v1/fill/w_1000,h_508,al_c,q_85,enc_avif,quality_auto/321259_c8d549f8a59146f1952f739b4907969e~mv2.jpg" 
-                  alt="Children playing outdoors" 
-                  className="w-full h-full object-cover"
+                  src={playdate.image} 
+                  alt="Playdate activity" 
+                  className="w-full h-full object-cover transition-opacity duration-500"
+                  key={playdateIndex}
                 />
               </div>
               
               <div className="mt-4 space-y-3">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="font-medium">Upcoming Playdate</h3>
+                    <h3 className="font-medium">{playdate.title}</h3>
                     <p className="text-sm text-muted-foreground">{playdate.location}</p>
                   </div>
                   <div className="bg-primary/10 text-primary font-medium px-3 py-1 rounded-full text-sm">
@@ -149,12 +194,15 @@ const Hero = () => {
                 
                 <div className="bg-muted rounded-lg p-3">
                   <div className="flex space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center text-secondary">
-                      {playdate.children.name.charAt(0)}
-                    </div>
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={playdate.parent.avatar} alt={playdate.parent.name} />
+                      <AvatarFallback className="bg-secondary/20 text-secondary">
+                        {playdate.parent.name[0]}
+                      </AvatarFallback>
+                    </Avatar>
                     <div>
-                      <span className="block text-sm font-medium">{playdate.children.name}</span>
-                      <span className="block text-xs text-muted-foreground">{playdate.children.distance} • {playdate.children.group}</span>
+                      <span className="block text-sm font-medium">{playdate.parent.name}</span>
+                      <span className="block text-xs text-muted-foreground">with {playdate.children}</span>
                     </div>
                   </div>
                 </div>
