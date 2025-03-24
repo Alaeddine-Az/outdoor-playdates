@@ -84,22 +84,22 @@ const HowItWorks = ({ id }: HowItWorksProps) => {
               <StepItem 
                 number="1"
                 icon={<MapPin className="h-6 w-6 text-primary" />}
-                title="Find Nearby Playdates"
-                description="See outdoor meetups and events happening near you."
+                title="Discover Local Playdates"
+                description="Find outdoor fun near you."
               />
               
               <StepItem 
                 number="2"
                 icon={<Calendar className="h-6 w-6 text-primary" />}
-                title="Join or Create One"
-                description="RSVP to existing playdates or organize your own in just a few taps."
+                title="Join or Host"
+                description="RSVP or set one up in seconds."
               />
               
               <StepItem 
                 number="3"
                 icon={<Users className="h-6 w-6 text-primary" />}
                 title="Play, Laugh, Connect"
-                description="Let your kids explore and socialize while you connect with other parents."
+                description="Kids play. Parents connect."
               />
             </div>
           </div>
