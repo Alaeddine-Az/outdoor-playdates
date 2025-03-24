@@ -168,7 +168,13 @@ const PlaymateCard = ({ parentName, parentInitial, children, location, interests
           )}
         </div>
       </div>
-      <Button size="sm" variant="outline" className="flex-shrink-0 h-9">Connect</Button>
+      <Button 
+        size="sm" 
+        variant="outline" 
+        className="flex-shrink-0 h-9 hidden sm:inline-flex"
+      >
+        Connect
+      </Button>
     </div>
     
     <div className="ml-11">
