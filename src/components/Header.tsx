@@ -80,7 +80,7 @@ const Header = () => {
 
       {/* Always render MobileMenu but conditionally show it */}
       <MobileMenu 
-        isOpen={isMenuOpen}
+        isOpen={true} // 🔧 Force menu open for testing
         user={user}
         scrollToSection={scrollToSection}
         handleSignOut={handleSignOut}
