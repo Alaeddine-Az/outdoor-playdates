@@ -139,7 +139,7 @@ const Hero = () => {
               <span className="block">Spark Outdoor Adventures.</span>
             </h1>
             
-            <p className="text-xl text-muted-foreground" mb-6>
+            <p className="text-xl text-muted-foreground" mb-10>
               GoPlayNow makes it easy to find trusted playmates, schedule outdoor fun, and keep kids engaged with exciting challenges.
             </p>
             
