@@ -59,7 +59,7 @@ const DesktopNav = ({ user, scrollToSection, handleSignOut }: DesktopNavProps) =
               Sign In
             </Button>
           </Link>
-          <Link to="/auth">
+          <Link to="/register">
             <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
               Get Started
             </Button>
