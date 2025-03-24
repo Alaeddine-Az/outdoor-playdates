@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { Button } from "@/components/ui/button";
@@ -77,6 +78,7 @@ const samplePlaydates = [{
   },
   children: "Charlotte (6) and Benjamin (8)"
 }];
+
 const Hero = () => {
   const [playdateIndex, setPlaydateIndex] = useState(0);
   const [playdate, setPlaydate] = useState(samplePlaydates[0]);
@@ -92,14 +94,27 @@ const Hero = () => {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
-  const {
-    ref,
-    isIntersecting
-  } = useIntersectionObserver({
+
+  const { ref, isIntersecting } = useIntersectionObserver({
     threshold: 0.1,
     triggerOnce: true
   });
-  return <section ref={ref as React.RefObject<HTMLDivElement>} className="relative min-h-screen flex items-center px-6 pt-16 pb-20 overflow-hidden">
+
+  // Scroll functions
+  const scrollToFeatures = () => {
+    document.getElementById('features')?.scrollIntoView({
+      behavior: 'smooth'
+    });
+  };
+
+  const scrollToOnboarding = () => {
+    document.getElementById('onboarding')?.scrollIntoView({
+      behavior: 'smooth'
+    });
+  };
+
+  return (
+    <section ref={ref as React.RefObject<HTMLDivElement>} className="relative min-h-screen flex items-center px-6 pt-16 pb-20 overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-radial from-primary/5 to-transparent my-0 py-0"></div>
@@ -129,14 +144,19 @@ const Hero = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start">
-              <Button size="lg" className="button-glow bg-primary hover:bg-primary/90 text-white rounded-xl" onClick={() => document.getElementById('onboarding')?.scrollIntoView({
-              behavior: 'smooth'
-            })}>
+              <Button 
+                size="lg" 
+                className="button-glow bg-primary hover:bg-primary/90 text-white rounded-xl" 
+                onClick={scrollToOnboarding}
+              >
                 Get Started <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button size="lg" variant="outline" className="rounded-xl" onClick={() => document.getElementById('features')?.scrollIntoView({
-              behavior: 'smooth'
-            })}>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="rounded-xl" 
+                onClick={scrollToFeatures}
+              >
                 Learn More
               </Button>
             </div>
@@ -184,12 +204,12 @@ const Hero = () => {
       </div>
       
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
-        <button onClick={() => document.getElementById('features')?.scrollIntoView({
-        behavior: 'smooth'
-      })} aria-label="Scroll to features" className="animate-bounce flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-soft my-0 py-0">
+        <button onClick={scrollToFeatures} aria-label="Scroll to features" className="animate-bounce flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-soft my-0 py-0">
           <ArrowRight className="h-5 w-5 text-primary transform rotate-90" />
         </button>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default Hero;
