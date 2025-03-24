@@ -35,17 +35,18 @@ const DesktopNav = ({ user, scrollToSection, handleSignOut }: DesktopNavProps) =
         </>
       ) : (
         <>
-          <button 
-            onClick={() => scrollToSection('features')}
-            className="text-sm font-medium transition-colors hover:text-primary"
-          >
-            Features
-          </button>
+        
           <button 
             onClick={() => scrollToSection('HowItWorks')}
             className="text-sm font-medium transition-colors hover:text-primary"
           >
             How It Works
+          </button>
+          <button 
+            onClick={() => scrollToSection('features')}
+            className="text-sm font-medium transition-colors hover:text-primary"
+          >
+            Features
           </button>
           <button 
             onClick={() => scrollToSection('TestimonialsCarousel')}
