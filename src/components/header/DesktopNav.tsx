@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
 import { Button } from "@/components/ui/button";
-import { UserMenu } from './UserMenu';
+import UserMenu from './UserMenu';
 
 interface DesktopNavProps {
   user: User | null;
@@ -34,7 +34,7 @@ const DesktopNav = ({ user, scrollToSection, handleSignOut }: DesktopNavProps) =
             </Link>
           </div>
           
-          <UserMenu user={user} signOut={handleSignOut} />
+          <UserMenu onSignOut={handleSignOut} />
         </>
       ) : (
         <>
