@@ -58,6 +58,7 @@ const DesktopNav = ({ user, scrollToSection, handleSignOut }: DesktopNavProps) =
             <Button variant="default" className="bg-primary hover:bg-primary/90">
               Sign In
             </Button>
+            </Link>
           <Button 
             size="lg" 
             className="button-glow bg-primary hover:bg-primary/90 text-white rounded-xl"
@@ -65,7 +66,7 @@ const DesktopNav = ({ user, scrollToSection, handleSignOut }: DesktopNavProps) =
           >
             Get Started <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
-          </Link>
+          
         </>
       )}
     </nav>
