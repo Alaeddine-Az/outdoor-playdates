@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
 import { Button } from "@/components/ui/button";
+import { ArrowRight } from 'lucide-react';
 import UserMenu from './UserMenu';
 
 interface DesktopNavProps {
@@ -35,27 +35,41 @@ const DesktopNav = ({ user, scrollToSection, handleSignOut }: DesktopNavProps) =
         </>
       ) : (
         <>
-          <button 
-            onClick={() => scrollToSection('features')}
-            className="text-sm font-medium transition-colors hover:text-primary"
-          >
-            Features
-          </button>
-          <button 
-            onClick={() => scrollToSection('how-it-works')}
-            className="text-sm font-medium transition-colors hover:text-primary"
-          >
-            How It Works
-          </button>
-          <button 
-            onClick={() => scrollToSection('testimonials')}
-            className="text-sm font-medium transition-colors hover:text-primary"
-          >
-            Testimonials
-          </button>
+          {isHomePage && (
+            <>
+              <button
+                onClick={() => scrollToSection('HowItWorks')}
+                className="text-sm font-medium transition-colors hover:text-primary"
+              >
+                How It Works
+              </button>
+              <button
+                onClick={() => scrollToSection('features')}
+                className="text-sm font-medium transition-colors hover:text-primary"
+              >
+                Features
+              </button>
+              <button
+                onClick={() => scrollToSection('TestimonialsCarousel')}
+                className="text-sm font-medium transition-colors hover:text-primary"
+              >
+                Testimonials
+              </button>
+            </>
+          )}
+
           <Link to="/auth">
-            <Button variant="default" className="bg-primary hover:bg-primary/90">
+            <Button variant="outline" className="rounded-xl">
               Sign In
+            </Button>
+          </Link>
+
+          <Link to="/register">
+            <Button 
+              size="lg" 
+              className="button-glow bg-primary hover:bg-primary/90 text-white rounded-xl"
+            >
+              Get Started <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
         </>

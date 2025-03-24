@@ -16,7 +16,7 @@ const TestimonialsCarousel = () => {
       ref={ref as React.RefObject<HTMLDivElement>}
       className="py-24 px-6 relative overflow-hidden"
     >
-      <div className="absolute inset-0 overflow-hidden">
+      <div id="TestimonialsCarousel" className="absolute inset-0 overflow-hidden">
         <div className="absolute top-[30%] right-[10%] w-[25%] h-[25%] rounded-full bg-primary/5 filter blur-3xl"></div>
         <div className="absolute bottom-[20%] left-[5%] w-[20%] h-[20%] rounded-full bg-secondary/5 filter blur-3xl"></div>
       </div>
