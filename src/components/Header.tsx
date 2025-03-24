@@ -58,30 +58,35 @@ const Header = () => {
   };
 
   return (
-  <>
-    <header className="sticky top-0 z-40 w-full backdrop-blur-sm border-b bg-white/90 border-muted">
-      <div className="container flex h-14 sm:h-16 items-center justify-between">
-        <HeaderLogo />
-        <DesktopNav ... />
-        <button
-          className="block md:hidden"
-          onClick={toggleMenu}
-          aria-label="Toggle navigation menu"
-          data-menu-toggle
-        >
-          {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
-      </div>
-    </header>
+    <>
+      <header className="sticky top-0 z-40 w-full backdrop-blur-sm border-b bg-white/90 border-muted">
+        <div className="container flex h-14 sm:h-16 items-center justify-between">
+          <HeaderLogo />
+          <DesktopNav 
+            user={user} 
+            scrollToSection={scrollToSection} 
+            handleSignOut={handleSignOut} 
+          />
+          <button
+            className="block md:hidden"
+            onClick={toggleMenu}
+            aria-label="Toggle navigation menu"
+            data-menu-toggle
+          >
+            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+      </header>
 
-    {/* ✅ Must be here (outside header!) */}
-    <MobileMenu
-      isOpen={isMenuOpen}
-      user={user}
-      scrollToSection={scrollToSection}
-      handleSignOut={handleSignOut}
-    />
-  </>
-);
+      {/* ✅ Must be here (outside header!) */}
+      <MobileMenu
+        isOpen={isMenuOpen}
+        user={user}
+        scrollToSection={scrollToSection}
+        handleSignOut={handleSignOut}
+      />
+    </>
+  );
+};
   
 export default Header;
