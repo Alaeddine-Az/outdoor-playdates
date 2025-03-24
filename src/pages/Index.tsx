@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
@@ -39,7 +38,7 @@ const Index = () => {
       <PlaydateSchedulerPreview />
       <GamifiedChallengePreview />
       <CommunityPreview />
-      <TestimonialsCarousel id="TestimonialsCarousel" />
+      <TestimonialsCarousel />
       <OnboardingFlow id="onboarding" />
 
       {/* Footer */}
@@ -109,15 +108,15 @@ const Index = () => {
 
       {/* Scroll to top button */}
       <button
-  className={cn(
-    "fixed bottom-6 right-6 w-10 h-10 z-[9999] rounded-full bg-primary text-white shadow-button flex items-center justify-center transition-all duration-300 transform",
-    showScrollTop ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10 pointer-events-none"
-  )}
-  onClick={scrollToTop}
-  aria-label="Scroll to top"
->
-  <ArrowUp className="h-5 w-5" />
-</button>
+        className={cn(
+          "fixed bottom-6 right-6 w-10 h-10 z-[9999] rounded-full bg-primary text-white shadow-button flex items-center justify-center transition-all duration-300 transform",
+          showScrollTop ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10 pointer-events-none"
+        )}
+        onClick={scrollToTop}
+        aria-label="Scroll to top"
+      >
+        <ArrowUp className="h-5 w-5" />
+      </button>
     </div>
   );
 };
