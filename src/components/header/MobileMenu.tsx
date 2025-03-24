@@ -13,6 +13,7 @@ interface MobileMenuProps {
 }
 
 const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenuProps) => {
+  // Return null when closed to fix the issue
   if (!isOpen) return null;
 
   return (

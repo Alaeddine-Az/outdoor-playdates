@@ -74,7 +74,6 @@ const Index = () => {
                 <ul className="space-y-2">
                   <li><Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">About</Link></li>
                   <li><Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors">Contact</Link></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Careers</a></li>
                 </ul>
               </div>
 
@@ -82,8 +81,6 @@ const Index = () => {
                 <h4 className="font-medium mb-3">Legal</h4>
                 <ul className="space-y-2">
                   <li><Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms</Link></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Privacy</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Cookies</a></li>
                 </ul>
               </div>
             </div>

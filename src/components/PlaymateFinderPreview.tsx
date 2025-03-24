@@ -75,26 +75,34 @@ const PlaymateFinderPreview = () => {
               
               <div className="space-y-3">
                 <PlaymateCard 
-                  name="Oliver (6) & Sophia (4)"
-                  distance="0.5 miles away"
+                  parentName="Sarah Johnson"
+                  parentInitial="SJ"
+                  children={[{name: "Oliver", age: 6}, {name: "Sophia", age: 4}]}
+                  location="0.5 miles away"
                   interests={["Nature Explorers", "LEGO Building"]}
                   verified={true}
                 />
                 <PlaymateCard 
-                  name="Emma (5)"
-                  distance="0.8 miles away"
+                  parentName="David Brown"
+                  parentInitial="DB"
+                  children={[{name: "Emma", age: 5}]}
+                  location="0.8 miles away"
                   interests={["Arts & Crafts", "Sports"]}
                   verified={true}
                 />
                 <PlaymateCard 
-                  name="Liam (7) & Ava (5)"
-                  distance="1.2 miles away"
+                  parentName="Jessica & Mike Taylor"
+                  parentInitial="JT"
+                  children={[{name: "Liam", age: 7}, {name: "Ava", age: 5}]}
+                  location="1.2 miles away"
                   interests={["STEM Activities", "Outdoor Games"]}
                   verified={true}
                 />
                 <PlaymateCard 
-                  name="Noah (6)"
-                  distance="1.5 miles away"
+                  parentName="Thomas Wilson"
+                  parentInitial="TW"
+                  children={[{name: "Noah", age: 6}]}
+                  location="1.5 miles away"
                   interests={["Sports", "Nature Explorers"]}
                   verified={true}
                 />
@@ -129,26 +137,53 @@ const FeaturePoint = ({ icon, title, description }: FeaturePointProps) => (
   </div>
 );
 
-interface PlaymateCardProps {
+interface Child {
   name: string;
-  distance: string;
+  age: number;
+}
+
+interface PlaymateCardProps {
+  parentName: string;
+  parentInitial: string;
+  children: Child[];
+  location: string;
   interests: string[];
   verified: boolean;
 }
 
-const PlaymateCard = ({ name, distance, interests, verified }: PlaymateCardProps) => (
-  <div className="bg-muted/50 hover:bg-muted/80 transition-colors rounded-xl p-4 flex justify-between items-center">
-    <div>
-      <div className="flex items-center">
-        <h4 className="font-medium">{name}</h4>
-        {verified && (
-          <div className="ml-2 flex items-center text-play-green text-xs">
-            <Shield className="h-3.5 w-3.5 mr-0.5" />
-            <span>Verified</span>
-          </div>
-        )}
+const PlaymateCard = ({ parentName, parentInitial, children, location, interests, verified }: PlaymateCardProps) => (
+  <div className="bg-muted/50 hover:bg-muted/80 transition-colors rounded-xl p-4">
+    <div className="flex items-center mb-2">
+      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium mr-3">
+        {parentInitial}
       </div>
-      <p className="text-sm text-muted-foreground">{distance}</p>
+      <div className="flex-1">
+        <div className="flex items-center">
+          <h4 className="font-medium">{parentName}</h4>
+          {verified && (
+            <div className="ml-2 flex items-center text-play-green text-xs">
+              <Shield className="h-3.5 w-3.5 mr-0.5" />
+              <span>Verified</span>
+            </div>
+          )}
+        </div>
+      </div>
+      <Button size="sm" variant="outline" className="flex-shrink-0 h-9">Connect</Button>
+    </div>
+    
+    <div className="ml-11">
+      <div className="mb-1">
+        {children.map((child, index) => (
+          <span key={index} className="text-sm">
+            {child.name} ({child.age}){index < children.length - 1 ? ' & ' : ''}
+          </span>
+        ))}
+      </div>
+      
+      <p className="text-sm text-muted-foreground mb-2">
+        <MapPin className="h-3.5 w-3.5 inline mr-1" /> {location}
+      </p>
+      
       <div className="flex flex-wrap gap-1 mt-1">
         {interests.map((interest, index) => (
           <span 
@@ -160,7 +195,6 @@ const PlaymateCard = ({ name, distance, interests, verified }: PlaymateCardProps
         ))}
       </div>
     </div>
-    <Button size="sm" variant="outline" className="flex-shrink-0 h-9">Connect</Button>
   </div>
 );
 

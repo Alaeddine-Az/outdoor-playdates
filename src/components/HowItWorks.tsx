@@ -118,7 +118,7 @@ interface StepItemProps {
 
 const StepItem = ({ number, icon, title, description }: StepItemProps) => {
   return (
-    <div className="flex gap-4">
+    <div className="flex items-start gap-4">
       <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center relative">
         <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-[10px] text-white font-bold flex items-center justify-center">
           {number}
