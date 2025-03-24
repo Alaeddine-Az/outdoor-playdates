@@ -38,70 +38,41 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
   };
 
   const handleCompleteSetup = async () => {
-    setIsSubmitting(true);
+  setIsSubmitting(true);
 
-    try {
-      // Step 1: Register the user with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            parent_name: parentName,
-            location,
-          },
+  try {
+    // Sign up the user and attach parent info + children + interests as metadata
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          parent_name: parentName,
+          location,
+          children,
+          interests,
         },
-      });
+      },
+    });
 
-      if (authError) {
-        if (authError.message === 'User already registered') {
-          toast({
-            title: 'Email already registered',
-            description: 'This email is already in our system. Please try another email or sign in.',
-            variant: 'destructive',
-          });
-          setIsSubmitting(false);
-          return;
-        }
-        throw authError;
-      }
+    if (authError) throw authError;
 
-      // Step 2: Save the signup data, but adjust the structure to match the database table
-      const { error: signupError } = await supabase.from('early_signups').insert({
-        email,
-        parent_name: parentName,
-        location,
-        interests,
-        // Since 'children' is not directly supported in the database, store child info in a different way
-        child_name: children[0]?.name, // Store first child's name
-        child_age: children[0]?.age,  // Store first child's age
-      });
+    // ✅ Success — user is created and auto-added to `profiles` by Supabase trigger
 
-      if (signupError) {
-        console.error('Insert error:', signupError);
+    // Redirect to thank you
+    navigate('/thank-you', { state: { email } });
 
-        // Don't treat this as a fatal error since auth user was created successfully
-        toast({
-          title: 'Profile saved partially',
-          description: 'Your account was created, but we had trouble saving some additional details. You can update them later.',
-          variant: 'default',
-        });
-      }
-
-      // ✅ Step 3: Redirect to thank you page whether or not there was an error with the early_signups table
-      navigate('/thank-you', { state: { email } });
-
-    } catch (err: any) {
-      console.error('Error in signup process:', err);
-      toast({
-        title: 'Something went wrong',
-        description: err.message || 'Please try again later.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  } catch (err: any) {
+    console.error('Signup error:', err);
+    toast({
+      title: 'Something went wrong',
+      description: err.message || 'Please try again later.',
+      variant: 'destructive',
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <section 
