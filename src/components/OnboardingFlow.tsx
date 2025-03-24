@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
@@ -39,70 +38,44 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
   };
 
   const handleCompleteSetup = async () => {
-    setIsSubmitting(true);
-    
-    try {
-      // First, register the user with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            parent_name: parentName,
-            location,
-          }
-        }
-      });
-      
-      if (authError) throw authError;
-      
-      // If auth signup is successful but we're using the waitlist approach
-      for (const child of children) {
-        const { error } = await supabase
-          .from('early_signups')
-          .insert({
-            email,
-            parent_name: parentName,
-            location,
-            child_name: child.name,
-            child_age: child.age,
-            interests,
-          });
-        
-        if (error) {
-          console.error('Error saving signup data:', error);
-          if (error.code === '23505') { // Unique constraint violation
-            toast({
-              title: 'Email already registered',
-              description: 'This email is already in our waiting list.',
-              variant: 'destructive',
-            });
-          } else {
-            toast({
-              title: 'Signup Error',
-              description: 'There was an error saving your information. Please try again.',
-              variant: 'destructive',
-            });
-          }
-          setIsSubmitting(false);
-          return;
-        }
-      }
-      
-      // Redirect to thank you page with email in state
-      navigate('/thank-you', { state: { email } });
-      
-    } catch (err: any) {
-      console.error('Error in signup process:', err);
-      toast({
-        title: 'Something went wrong',
-        description: err.message || 'Please try again later.',
-        variant: 'destructive',
-      });
-      setIsSubmitting(false);
-    }
-  };
+  setIsSubmitting(true);
 
+  try {
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (authError) throw authError;
+
+    // Save custom info in early_signups
+    const { error: signupError } = await supabase
+      .from('early_signups')
+      .upsert({
+        email,
+        parent_name: parentName,
+        location,
+        interests,
+        children,
+      }, {
+        onConflict: 'email' // remove this line if 'email' is not unique
+      });
+
+    if (signupError) throw signupError;
+
+    navigate('/thank-you', { state: { email } });
+
+  } catch (err: any) {
+    console.error(err);
+    toast({
+      title: 'Signup Error',
+      description: err.message || 'Please try again.',
+      variant: 'destructive',
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
   return (
     <section 
       id={id}
@@ -148,6 +121,8 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
                   nextStep={nextStep}
                 />
               </div>
+              
+              {/* Steps 2-4 rendering logic */}
               
               {/* Step 2: Parent Profile */}
               <div className={cn(

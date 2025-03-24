@@ -64,7 +64,7 @@ const HowItWorks = ({ id }: HowItWorksProps) => {
             <span className="text-primary">How It Works</span> - Get Started in Minutes
           </h2>
           <p className="text-xl text-muted-foreground">
-            Our platform makes finding and organizing playdates simple and fun for parents and children alike.
+            GoPlayNow makes finding and organizing playdates simple and fun for parents and children alike.
           </p>
         </div>
 
@@ -84,22 +84,22 @@ const HowItWorks = ({ id }: HowItWorksProps) => {
               <StepItem 
                 number="1"
                 icon={<MapPin className="h-6 w-6 text-primary" />}
-                title="Find Nearby Playdates"
-                description="See outdoor meetups and events happening near you."
+                title="Discover Local Playdates"
+                description="Find outdoor fun near you."
               />
               
               <StepItem 
                 number="2"
                 icon={<Calendar className="h-6 w-6 text-primary" />}
-                title="Join or Create One"
-                description="RSVP to existing playdates or organize your own in just a few taps."
+                title="Join or Host"
+                description="RSVP or set one up in seconds."
               />
               
               <StepItem 
                 number="3"
                 icon={<Users className="h-6 w-6 text-primary" />}
                 title="Play, Laugh, Connect"
-                description="Let your kids explore and socialize while you connect with other parents."
+                description="Kids play. Parents connect."
               />
             </div>
           </div>
@@ -118,7 +118,7 @@ interface StepItemProps {
 
 const StepItem = ({ number, icon, title, description }: StepItemProps) => {
   return (
-    <div className="flex gap-4">
+    <div className="flex items-start gap-4">
       <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center relative">
         <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-[10px] text-white font-bold flex items-center justify-center">
           {number}

@@ -12,6 +12,7 @@ import TestimonialsCarousel from '@/components/TestimonialsCarousel';
 import OnboardingFlow from '@/components/OnboardingFlow';
 import { ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
   const [showScrollTop, setShowScrollTop] = React.useState(false);
@@ -33,13 +34,13 @@ const Index = () => {
     <div className="min-h-screen">
       <Header />
       <Hero />
-      <HowItWorks id="HowItWorks" />
+      <HowItWorks id="how-it-works" />
       <FeatureSection id="features" />
       <PlaymateFinderPreview />
       <PlaydateSchedulerPreview />
       <GamifiedChallengePreview />
       <CommunityPreview />
-      <TestimonialsCarousel id="TestimonialsCarousel" />
+      <TestimonialsCarousel />
       <OnboardingFlow id="onboarding" />
 
       {/* Footer */}
@@ -63,26 +64,23 @@ const Index = () => {
                 <h4 className="font-medium mb-3">Product</h4>
                 <ul className="space-y-2">
                   <li><a href="#features" className="text-muted-foreground hover:text-primary transition-colors">Features</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Pricing</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">FAQ</a></li>
+                  <li><a href="#how-it-works" className="text-muted-foreground hover:text-primary transition-colors">How It Works</a></li>
+                  <li><Link to="/faq" className="text-muted-foreground hover:text-primary transition-colors">FAQ</Link></li>
                 </ul>
               </div>
 
               <div>
                 <h4 className="font-medium mb-3">Company</h4>
                 <ul className="space-y-2">
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">About</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Blog</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Careers</a></li>
+                  <li><Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">About</Link></li>
+                  <li><Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors">Contact</Link></li>
                 </ul>
               </div>
 
               <div>
-                <h4 className="font-medium mb-3">Support</h4>
+                <h4 className="font-medium mb-3">Legal</h4>
                 <ul className="space-y-2">
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Contact</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Privacy</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Terms</a></li>
+                  <li><Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms</Link></li>
                 </ul>
               </div>
             </div>
@@ -109,15 +107,15 @@ const Index = () => {
 
       {/* Scroll to top button */}
       <button
-  className={cn(
-    "fixed bottom-6 right-6 w-10 h-10 z-[9999] rounded-full bg-primary text-white shadow-button flex items-center justify-center transition-all duration-300 transform",
-    showScrollTop ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10 pointer-events-none"
-  )}
-  onClick={scrollToTop}
-  aria-label="Scroll to top"
->
-  <ArrowUp className="h-5 w-5" />
-</button>
+        className={cn(
+          "fixed bottom-6 right-6 w-10 h-10 z-[9999] rounded-full bg-primary text-white shadow-button flex items-center justify-center transition-all duration-300 transform",
+          showScrollTop ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10 pointer-events-none"
+        )}
+        onClick={scrollToTop}
+        aria-label="Scroll to top"
+      >
+        <ArrowUp className="h-5 w-5" />
+      </button>
     </div>
   );
 };

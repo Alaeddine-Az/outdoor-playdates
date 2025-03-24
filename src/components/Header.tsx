@@ -19,7 +19,10 @@ const Header = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (isMenuOpen && !target.closest('[data-mobile-menu]') && !target.closest('button')) {
+      // Only close if clicking outside menu and not on the toggle button
+      if (isMenuOpen && 
+          !target.closest('[data-mobile-menu]') && 
+          !target.closest('[data-menu-toggle]')) {
         setIsMenuOpen(false);
       }
     };
@@ -55,33 +58,35 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-sm border-b bg-white/90 border-muted">
-      <div className="container flex h-14 sm:h-16 items-center justify-between">
-        <HeaderLogo />
-        
-        <DesktopNav 
-          user={user} 
-          scrollToSection={scrollToSection} 
-          handleSignOut={handleSignOut} 
-        />
+    <>
+      <header className="sticky top-0 z-40 w-full backdrop-blur-sm border-b bg-white/90 border-muted">
+        <div className="container flex h-14 sm:h-16 items-center justify-between">
+          <HeaderLogo />
+          <DesktopNav 
+            user={user} 
+            scrollToSection={scrollToSection} 
+            handleSignOut={handleSignOut} 
+          />
+          <button
+            className="block md:hidden"
+            onClick={toggleMenu}
+            aria-label="Toggle navigation menu"
+            data-menu-toggle
+          >
+            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+      </header>
 
-        <button
-          className="block md:hidden"
-          onClick={toggleMenu}
-          aria-label="Toggle navigation menu"
-        >
-          {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
-      </div>
-
-      <MobileMenu 
+      {/* Mobile menu - conditionally rendered based on isMenuOpen */}
+      <MobileMenu
         isOpen={isMenuOpen}
         user={user}
         scrollToSection={scrollToSection}
         handleSignOut={handleSignOut}
       />
-    </header>
+    </>
   );
 };
-
+  
 export default Header;

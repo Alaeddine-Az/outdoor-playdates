@@ -13,13 +13,19 @@ interface MobileMenuProps {
 }
 
 const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenuProps) => {
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return (
-    <div className="md:hidden fixed inset-0 z-50 pt-14 bg-white/95 backdrop-blur-sm" data-mobile-menu>
+    <div
+      className="md:hidden fixed inset-0 z-50 pt-16 bg-white/95 backdrop-blur-sm overflow-y-auto"
+      data-mobile-menu
+    >
       <div className="container py-4 h-full overflow-y-auto">
         <div className="flex flex-col h-full pb-safe">
           {user ? (
+            // User menu items
             <>
               <div className="flex items-center space-x-3 p-4 mb-2 border-b">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
@@ -83,6 +89,7 @@ const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenu
               </div>
             </>
           ) : (
+            // Non-authenticated menu items
             <>
               <button
                 onClick={() => scrollToSection('features')}
@@ -96,22 +103,23 @@ const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenu
               >
                 <span>How It Works</span>
               </button>
-              <button
-                onClick={() => scrollToSection('testimonials')}
-                className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted"
-              >
-                <span>Testimonials</span>
-              </button>
+              <Link to="/about" className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted">
+                <span>About</span>
+              </Link>
+              <Link to="/faq" className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted">
+                <span>FAQ</span>
+              </Link>
+              <Link to="/contact" className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted">
+                <span>Contact</span>
+              </Link>
               
               <div className="px-4 mt-4">
-                <Link 
-                  to="/auth"
-                  className="block w-full"
+                <Button 
+                  onClick={() => scrollToSection('onboarding')}
+                  className="w-full bg-primary hover:bg-primary/90 py-6 text-base"
                 >
-                  <Button className="w-full bg-primary hover:bg-primary/90 py-6 text-base">
-                    Sign In
-                  </Button>
-                </Link>
+                  Get Started
+                </Button>
               </div>
             </>
           )}
