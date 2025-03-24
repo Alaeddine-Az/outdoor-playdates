@@ -108,11 +108,11 @@ const Hero = () => {
         <div className="absolute top-[60%] right-[20%] w-[15%] h-[15%] rounded-full bg-accent/10 filter blur-3xl"></div>
       </div>
 
-      <div className="container mx-auto relative z-10 -mt-12">
+      <div className="container mx-auto relative z-10 -mt-12 my-0">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
           <div className="">
-            <div className="inline-block rounded-full bg-muted px-4 py-1.5 mb-4">
-              <span className="text-sm font-medium text-foreground/80">
+            <div className="inline-block rounded-full bg-muted mb-4 px-[12px] mx-0 py-[6px]">
+              <span className="text-sm font-medium text-foreground/80 text-center">
                 Connecting families for safe outdoor play
               </span>
             </div>
