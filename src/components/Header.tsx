@@ -78,7 +78,7 @@ const Header = () => {
         </button>
       </div>
 
-      {/* Make sure MobileMenu is always rendered but conditionally visible */}
+      {/* Always render MobileMenu but conditionally show it */}
       <MobileMenu 
         isOpen={isMenuOpen}
         user={user}
