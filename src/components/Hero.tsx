@@ -215,7 +215,7 @@ const Hero = () => {
         </div>
       </div>
       
-      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2">
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
         <button 
           className="animate-bounce flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-soft"
           onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
