@@ -59,17 +59,10 @@ const Header = () => {
 
   return (
   <>
-    {/* STICKY HEADER SECTION */}
     <header className="sticky top-0 z-40 w-full backdrop-blur-sm border-b bg-white/90 border-muted">
       <div className="container flex h-14 sm:h-16 items-center justify-between">
-        <HeaderLogo /> {/* ✅ YES keep this here */}
-
-        <DesktopNav 
-          user={user}
-          scrollToSection={scrollToSection}
-          handleSignOut={handleSignOut}
-        />
-
+        <HeaderLogo />
+        <DesktopNav ... />
         <button
           className="block md:hidden"
           onClick={toggleMenu}
@@ -81,8 +74,8 @@ const Header = () => {
       </div>
     </header>
 
-    {/* FULLSCREEN OVERLAY MENU - move outside header */}
-    <MobileMenu 
+    {/* ✅ Must be here (outside header!) */}
+    <MobileMenu
       isOpen={isMenuOpen}
       user={user}
       scrollToSection={scrollToSection}
