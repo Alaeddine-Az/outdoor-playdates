@@ -58,14 +58,16 @@ const Header = () => {
   };
 
   return (
+  <>
+    {/* STICKY HEADER SECTION */}
     <header className="sticky top-0 z-40 w-full backdrop-blur-sm border-b bg-white/90 border-muted">
       <div className="container flex h-14 sm:h-16 items-center justify-between">
-        <HeaderLogo />
-        
+        <HeaderLogo /> {/* ✅ YES keep this here */}
+
         <DesktopNav 
-          user={user} 
-          scrollToSection={scrollToSection} 
-          handleSignOut={handleSignOut} 
+          user={user}
+          scrollToSection={scrollToSection}
+          handleSignOut={handleSignOut}
         />
 
         <button
@@ -77,16 +79,16 @@ const Header = () => {
           {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
-
-      {/* Always render MobileMenu but conditionally show it */}
-      <MobileMenu 
-        isOpen={true} // 🔧 Force menu open for testing
-        user={user}
-        scrollToSection={scrollToSection}
-        handleSignOut={handleSignOut}
-      />
     </header>
-  );
-};
 
+    {/* FULLSCREEN OVERLAY MENU - move outside header */}
+    <MobileMenu 
+      isOpen={isMenuOpen}
+      user={user}
+      scrollToSection={scrollToSection}
+      handleSignOut={handleSignOut}
+    />
+  </>
+);
+  
 export default Header;
