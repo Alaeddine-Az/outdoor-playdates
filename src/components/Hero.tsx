@@ -132,7 +132,7 @@ const Hero = () => {
               </span>
             </div>
             
-            <h1 className="font-bold tracking-tight">
+            <h1 className="font-bold tracking-tight mb-6">
               <span className="block">
             </span>
               <span className="block text-primary">Connect with Families.</span>
