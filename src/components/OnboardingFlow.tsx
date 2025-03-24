@@ -41,39 +41,41 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
   setIsSubmitting(true);
 
   try {
-    // Sign up the user and attach parent info + children + interests as metadata
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: {
-          parent_name: parentName,
-          location,
-          children,
-          interests,
-        },
-      },
     });
 
     if (authError) throw authError;
 
-    // ✅ Success — user is created and auto-added to `profiles` by Supabase trigger
+    // Save custom info in early_signups
+    const { error: signupError } = await supabase
+      .from('early_signups')
+      .upsert({
+        email,
+        parent_name: parentName,
+        location,
+        interests,
+        children,
+      }, {
+        onConflict: 'email' // remove this line if 'email' is not unique
+      });
 
-    // Redirect to thank you
+    if (signupError) throw signupError;
+
     navigate('/thank-you', { state: { email } });
 
   } catch (err: any) {
-    console.error('Signup error:', err);
+    console.error(err);
     toast({
-      title: 'Something went wrong',
-      description: err.message || 'Please try again later.',
+      title: 'Signup Error',
+      description: err.message || 'Please try again.',
       variant: 'destructive',
     });
   } finally {
     setIsSubmitting(false);
   }
 };
-
   return (
     <section 
       id={id}
