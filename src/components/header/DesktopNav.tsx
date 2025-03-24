@@ -58,11 +58,13 @@ const DesktopNav = ({ user, scrollToSection, handleSignOut }: DesktopNavProps) =
             <Button variant="default" className="bg-primary hover:bg-primary/90">
               Sign In
             </Button>
-          </Link>
-          <Link to="/register">
-            <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
-              Get Started
-            </Button>
+          <Button 
+            size="lg" 
+            className="button-glow bg-primary hover:bg-primary/90 text-white rounded-xl"
+            onClick={() => document.getElementById('onboarding')?.scrollIntoView({ behavior: 'smooth' })}
+          >
+            Get Started <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
           </Link>
         </>
       )}
