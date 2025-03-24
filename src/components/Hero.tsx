@@ -111,7 +111,7 @@ const Hero = () => {
   return (
     <section 
       ref={ref as React.RefObject<HTMLDivElement>}
-      className="relative min-h-screen flex items-center px-6 py-32 overflow-hidden"
+      className="relative min-h-screen flex items-center px-6 pt-16 pb-20 overflow-hidden"
     >
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
