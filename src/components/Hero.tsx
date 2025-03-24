@@ -117,8 +117,8 @@ const Hero = () => {
             
             <h1 className="font-bold tracking-tight">
               <span className="block">Connect with Families. </span>
-              <span className="block text-primary">Spark Outdoor </span>
-              <span className="block">Adventures.
+              <span className="block text-primary">Spark Outdoor Adventures.</span>
+              
             </span>
             </h1>
             
