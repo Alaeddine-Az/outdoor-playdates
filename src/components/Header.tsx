@@ -19,7 +19,7 @@ const Header = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (isMenuOpen && !target.closest('[data-mobile-menu]')) {
+      if (isMenuOpen && !target.closest('[data-mobile-menu]') && !target.closest('button')) {
         setIsMenuOpen(false);
       }
     };
@@ -29,6 +29,7 @@ const Header = () => {
   }, [isMenuOpen]);
 
   useEffect(() => {
+    // Close menu when route changes
     setIsMenuOpen(false);
   }, [location.pathname]);
 
@@ -43,7 +44,10 @@ const Header = () => {
 
   const scrollToSection = (id: string) => {
     if (isHomePage) {
-      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
     } else {
       navigate(`/#${id}`);
     }

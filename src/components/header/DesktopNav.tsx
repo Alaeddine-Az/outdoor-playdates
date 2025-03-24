@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
 import { Button } from "@/components/ui/button";
 import UserMenu from './UserMenu';
@@ -12,6 +12,9 @@ interface DesktopNavProps {
 }
 
 const DesktopNav = ({ user, scrollToSection, handleSignOut }: DesktopNavProps) => {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+
   return (
     <nav className="hidden md:flex items-center gap-4 lg:gap-6">
       {user ? (

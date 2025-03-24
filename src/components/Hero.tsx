@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { Button } from "@/components/ui/button";
@@ -214,20 +213,6 @@ const Hero = () => {
             <div className="absolute bottom-[-5%] left-[-5%] h-24 w-24 bg-secondary/10 rounded-full filter blur-xl"></div>
           </div>
         </div>
-        
-        <div className="mt-24 flex justify-center">
-          <div 
-            className={cn(
-              "flex flex-wrap justify-center gap-12 items-center py-8 px-8 rounded-2xl bg-white/50 backdrop-blur-sm border border-muted/60 shadow-soft",
-              isIntersecting ? "animate-fade-in" : "opacity-0"
-            )}
-            style={{ animationDelay: "0.4s" }}
-          >
-            <TrustBadge icon={<Check className="h-5 w-5 text-primary" />} label="Parent-Approved Activities" />
-            <TrustBadge icon={<Check className="h-5 w-5 text-primary" />} label="Your Privacy is Safe" />
-            <TrustBadge icon={<Check className="h-5 w-5 text-primary" />} label="Free to Join, Always" />
-          </div>
-        </div>
       </div>
       
       <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2">
@@ -242,19 +227,5 @@ const Hero = () => {
     </section>
   );
 };
-
-interface TrustBadgeProps {
-  icon?: React.ReactNode;
-  label: string;
-  value?: string;
-}
-
-const TrustBadge = ({ icon, label, value }: TrustBadgeProps) => (
-  <div className="text-center px-2 flex items-center gap-2">
-    {icon}
-    <div className="text-sm font-medium text-foreground">{label}</div>
-    {value && <div className="text-sm text-muted-foreground">{value}</div>}
-  </div>
-);
 
 export default Hero;

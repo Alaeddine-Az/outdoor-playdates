@@ -22,47 +22,7 @@ const CommunityPreview = () => {
       </div>
 
       <div className="container mx-auto relative z-10">
-        <div className="flex flex-col lg:flex-row-reverse items-center gap-16">
-          <div className={cn(
-            "max-w-xl",
-            isIntersecting ? "animate-fade-in" : "opacity-0"
-          )}>
-            <div className="inline-block rounded-full bg-play-purple/10 px-4 py-1.5 mb-4">
-              <span className="text-sm font-medium text-play-purple">
-                Private Parent Community
-              </span>
-            </div>
-            <h2 className="font-bold tracking-tight mb-6">
-              Connect in Safe, <br />Interest-Based Groups
-            </h2>
-            <div className="space-y-6">
-              <FeaturePoint 
-                icon={<Users className="h-5 w-5 text-play-purple" />}
-                title="Interest-Based Groups"
-                description="Join communities based on your child's interests, like STEM Kids, Nature Explorers, or Arts & Sports Families."
-              />
-              <FeaturePoint 
-                icon={<Shield className="h-5 w-5 text-play-purple" />}
-                title="Trust & Safety Features"
-                description="Our verification system, reporting tools, and community guidelines ensure a safe environment for all families."
-              />
-              <FeaturePoint 
-                icon={<MessageSquare className="h-5 w-5 text-play-purple" />}
-                title="Private Messaging"
-                description="Only mutually connected parents can exchange messages, maintaining privacy and security."
-              />
-            </div>
-            <div className="mt-8">
-              <Button 
-                size="lg" 
-                className="button-glow bg-play-purple hover:bg-play-purple/90 text-white rounded-xl"
-                onClick={() => document.getElementById('onboarding')?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                Join Our Community
-              </Button>
-            </div>
-          </div>
-          
+        <div className="flex flex-col lg:flex-row items-center gap-16">
           <div className={cn(
             "w-full max-w-xl",
             isIntersecting ? "animate-slide-in-left" : "opacity-0"
@@ -118,6 +78,46 @@ const CommunityPreview = () => {
                   View All Communities
                 </Button>
               </div>
+            </div>
+          </div>
+          
+          <div className={cn(
+            "max-w-xl",
+            isIntersecting ? "animate-fade-in" : "opacity-0"
+          )}>
+            <div className="inline-block rounded-full bg-play-purple/10 px-4 py-1.5 mb-4">
+              <span className="text-sm font-medium text-play-purple">
+                Private Parent Community
+              </span>
+            </div>
+            <h2 className="font-bold tracking-tight mb-6">
+              Connect in Safe, <br />Interest-Based Groups
+            </h2>
+            <div className="space-y-6">
+              <FeaturePoint 
+                icon={<Users className="h-5 w-5 text-play-purple" />}
+                title="Interest-Based Groups"
+                description="Join communities based on your child's interests, like STEM Kids, Nature Explorers, or Arts & Sports Families."
+              />
+              <FeaturePoint 
+                icon={<Shield className="h-5 w-5 text-play-purple" />}
+                title="Trust & Safety Features"
+                description="Our verification system, reporting tools, and community guidelines ensure a safe environment for all families."
+              />
+              <FeaturePoint 
+                icon={<MessageSquare className="h-5 w-5 text-play-purple" />}
+                title="Private Messaging"
+                description="Only mutually connected parents can exchange messages, maintaining privacy and security."
+              />
+            </div>
+            <div className="mt-8">
+              <Button 
+                size="lg" 
+                className="button-glow bg-play-purple hover:bg-play-purple/90 text-white rounded-xl"
+                onClick={() => document.getElementById('onboarding')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                Join Our Community
+              </Button>
             </div>
           </div>
         </div>
