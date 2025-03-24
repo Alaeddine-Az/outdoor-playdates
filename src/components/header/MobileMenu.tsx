@@ -18,8 +18,10 @@ const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenu
   }
 
   return (
-    <div 
-      className="md:hidden fixed inset-0 z-50 pt-14 bg-white/95 backdrop-blur-sm overflow-y-auto"
+    <div
+      className={`md:hidden fixed inset-0 z-50 pt-16 bg-white/95 backdrop-blur-sm overflow-y-auto transition-all duration-300 ${
+        isOpen ? 'block' : 'hidden'
+      }`}
       data-mobile-menu
     >
       <div className="container py-4 h-full overflow-y-auto">
