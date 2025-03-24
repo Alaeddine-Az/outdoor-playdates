@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
@@ -12,22 +13,19 @@ interface MobileMenuProps {
 }
 
 const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenuProps) => {
-  // Use a CSS class to conditionally show/hide the menu instead of returning null
   if (!isOpen) {
     return null;
   }
 
   return (
     <div
-      className={`md:hidden fixed inset-0 z-50 pt-16 bg-white/95 backdrop-blur-sm overflow-y-auto transition-all duration-300 ${
-        isOpen ? 'block' : 'hidden'
-      }`}
+      className="md:hidden fixed inset-0 z-50 pt-16 bg-white/95 backdrop-blur-sm overflow-y-auto"
       data-mobile-menu
     >
       <div className="container py-4 h-full overflow-y-auto">
         <div className="flex flex-col h-full pb-safe">
           {user ? (
-            // ... keep existing code (user menu items)
+            // User menu items
             <>
               <div className="flex items-center space-x-3 p-4 mb-2 border-b">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
@@ -91,7 +89,7 @@ const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenu
               </div>
             </>
           ) : (
-            // ... keep existing code (non-authenticated menu items)
+            // Non-authenticated menu items
             <>
               <button
                 onClick={() => scrollToSection('features')}

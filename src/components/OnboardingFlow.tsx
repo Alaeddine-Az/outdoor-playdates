@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
@@ -38,70 +37,71 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
     setStep(step - 1);
   };
 
-const handleCompleteSetup = async () => {
-  setIsSubmitting(true);
+  const handleCompleteSetup = async () => {
+    setIsSubmitting(true);
 
-  try {
-    // Step 1: Register the user with Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          parent_name: parentName,
-          location,
+    try {
+      // Step 1: Register the user with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            parent_name: parentName,
+            location,
+          },
         },
-      },
-    });
+      });
 
-    if (authError) throw authError;
+      if (authError) {
+        if (authError.message === 'User already registered') {
+          toast({
+            title: 'Email already registered',
+            description: 'This email is already in our system. Please try another email or sign in.',
+            variant: 'destructive',
+          });
+          setIsSubmitting(false);
+          return;
+        }
+        throw authError;
+      }
 
-    // Step 2: Save the signup data in a single insert (no loop!)
-    const { error: signupError } = await supabase.from('early_signups').upsert({
-      email,
-      parent_name: parentName,
-      location,
-      interests,
-      children,
-    }, {
-      onConflict: 'email' // Adjust if needed based on your DB constraints
-    });
+      // Step 2: Save the signup data, but adjust the structure to match the database table
+      const { error: signupError } = await supabase.from('early_signups').insert({
+        email,
+        parent_name: parentName,
+        location,
+        interests,
+        // Since 'children' is not directly supported in the database, store child info in a different way
+        child_name: children[0]?.name, // Store first child's name
+        child_age: children[0]?.age,  // Store first child's age
+      });
 
-    if (signupError) {
-      console.error('Insert error:', signupError);
+      if (signupError) {
+        console.error('Insert error:', signupError);
 
-      if (signupError.code === '23505') {
+        // Don't treat this as a fatal error since auth user was created successfully
         toast({
-          title: 'Email already registered',
-          description: 'This email is already in our waiting list.',
-          variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: 'Signup Error',
-          description: 'There was an error saving your information. Please try again.',
-          variant: 'destructive',
+          title: 'Profile saved partially',
+          description: 'Your account was created, but we had trouble saving some additional details. You can update them later.',
+          variant: 'default',
         });
       }
 
+      // ✅ Step 3: Redirect to thank you page whether or not there was an error with the early_signups table
+      navigate('/thank-you', { state: { email } });
+
+    } catch (err: any) {
+      console.error('Error in signup process:', err);
+      toast({
+        title: 'Something went wrong',
+        description: err.message || 'Please try again later.',
+        variant: 'destructive',
+      });
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-
-    // ✅ Step 3: Redirect to thank you page
-    navigate('/thank-you', { state: { email } });
-
-  } catch (err: any) {
-    console.error('Error in signup process:', err);
-    toast({
-      title: 'Something went wrong',
-      description: err.message || 'Please try again later.',
-      variant: 'destructive',
-    });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   return (
     <section 
@@ -148,6 +148,8 @@ const handleCompleteSetup = async () => {
                   nextStep={nextStep}
                 />
               </div>
+              
+              {/* Steps 2-4 rendering logic */}
               
               {/* Step 2: Parent Profile */}
               <div className={cn(

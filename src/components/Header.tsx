@@ -78,7 +78,7 @@ const Header = () => {
         </div>
       </header>
 
-      {/* ✅ Must be here (outside header!) */}
+      {/* Mobile menu - conditionally rendered based on isMenuOpen */}
       <MobileMenu
         isOpen={isMenuOpen}
         user={user}
