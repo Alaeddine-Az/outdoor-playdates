@@ -96,22 +96,23 @@ const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenu
               >
                 <span>How It Works</span>
               </button>
-              <button
-                onClick={() => scrollToSection('testimonials')}
-                className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted"
-              >
-                <span>Testimonials</span>
-              </button>
+              <Link to="/about" className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted">
+                <span>About</span>
+              </Link>
+              <Link to="/faq" className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted">
+                <span>FAQ</span>
+              </Link>
+              <Link to="/contact" className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted">
+                <span>Contact</span>
+              </Link>
               
               <div className="px-4 mt-4">
-                <Link 
-                  to="/auth"
-                  className="block w-full"
+                <Button 
+                  onClick={() => scrollToSection('onboarding')}
+                  className="w-full bg-primary hover:bg-primary/90 py-6 text-base"
                 >
-                  <Button className="w-full bg-primary hover:bg-primary/90 py-6 text-base">
-                    Sign In
-                  </Button>
-                </Link>
+                  Get Started
+                </Button>
               </div>
             </>
           )}

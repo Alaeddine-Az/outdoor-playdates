@@ -19,7 +19,10 @@ const Header = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (isMenuOpen && !target.closest('[data-mobile-menu]') && !target.closest('button')) {
+      // Only close if clicking outside menu and not on the toggle button
+      if (isMenuOpen && 
+          !target.closest('[data-mobile-menu]') && 
+          !target.closest('[data-menu-toggle]')) {
         setIsMenuOpen(false);
       }
     };
@@ -69,6 +72,7 @@ const Header = () => {
           className="block md:hidden"
           onClick={toggleMenu}
           aria-label="Toggle navigation menu"
+          data-menu-toggle
         >
           {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>

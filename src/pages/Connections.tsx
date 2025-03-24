@@ -50,7 +50,7 @@ const Connections = () => {
               <div className="space-y-4">
                 <ConnectionCard 
                   name="Sarah Thompson"
-                  childName="Oliver (6) & Sophia (4)"
+                  childInfo="Oliver (6) & Sophia (4)"
                   location="Signal Hill, Calgary"
                   distance="0.5 mi"
                   interests={["Nature", "STEM", "Arts & Crafts"]}
@@ -60,7 +60,7 @@ const Connections = () => {
                 
                 <ConnectionCard 
                   name="Michael Rogers"
-                  childName="Emma (5)"
+                  childInfo="Emma (5)"
                   location="Bowness, Calgary"
                   distance="1.2 mi"
                   interests={["Sports", "Outdoor Play"]}
@@ -70,7 +70,7 @@ const Connections = () => {
                 
                 <ConnectionCard 
                   name="Jennifer Wilson"
-                  childName="Liam (7) & Noah (5)"
+                  childInfo="Liam (7) & Noah (5)"
                   location="Kensington, Calgary"
                   distance="2.3 mi"
                   interests={["STEM", "Reading", "Music"]}
@@ -98,7 +98,7 @@ const Connections = () => {
               <div className="space-y-4">
                 <ConnectionRequestCard 
                   name="David Miller"
-                  childName="Ava (6)"
+                  childInfo="Ava (6)"
                   location="Beltline, Calgary"
                   distance="1.8 mi"
                   interests={["Sports", "Arts & Crafts"]}
@@ -107,7 +107,7 @@ const Connections = () => {
                 
                 <ConnectionRequestCard 
                   name="Amanda Chen"
-                  childName="Ethan (5) & Mia (3)"
+                  childInfo="Ethan (5) & Mia (3)"
                   location="Bridgeland, Calgary"
                   distance="2.1 mi"
                   interests={["Nature", "Reading"]}
@@ -125,7 +125,7 @@ const Connections = () => {
               <div className="space-y-3">
                 <SuggestedConnectionCard 
                   name="Robert Carter"
-                  childName="Mason (6)"
+                  childInfo="Mason (6)"
                   location="Inglewood, Calgary"
                   distance="1.5 mi"
                   interests={["STEM", "Sports"]}
@@ -134,7 +134,7 @@ const Connections = () => {
                 
                 <SuggestedConnectionCard 
                   name="Lisa Morgan"
-                  childName="Charlotte (5)"
+                  childInfo="Charlotte (5)"
                   location="Sunnyside, Calgary"
                   distance="0.9 mi"
                   interests={["Arts & Crafts", "Nature"]}
@@ -143,7 +143,7 @@ const Connections = () => {
                 
                 <SuggestedConnectionCard 
                   name="Daniel Wilson"
-                  childName="Lucas (7) & Lily (4)"
+                  childInfo="Lucas (7) & Lily (4)"
                   location="Mission, Calgary"
                   distance="1.2 mi"
                   interests={["Sports", "Music"]}
@@ -196,7 +196,7 @@ const Connections = () => {
 
 interface ConnectionCardProps {
   name: string;
-  childName: string;
+  childInfo: string;
   location: string;
   distance: string;
   interests: string[];
@@ -204,7 +204,7 @@ interface ConnectionCardProps {
   status: 'active' | 'pending';
 }
 
-const ConnectionCard = ({ name, childName, location, distance, interests, lastPlaydate, status }: ConnectionCardProps) => {
+const ConnectionCard = ({ name, childInfo, location, distance, interests, lastPlaydate, status }: ConnectionCardProps) => {
   return (
     <div className="p-4 rounded-lg border border-muted bg-muted/10 hover:bg-muted/30 transition-colors">
       <div className="flex items-start">
@@ -218,10 +218,10 @@ const ConnectionCard = ({ name, childName, location, distance, interests, lastPl
                 {name}
                 <Shield className="h-3.5 w-3.5 ml-2 text-primary" />
               </h3>
+              <div className="text-sm text-muted-foreground mt-0.5">
+                <span>{childInfo}</span>
+              </div>
               <div className="flex items-center mt-1 text-sm text-muted-foreground">
-                <Users className="h-3.5 w-3.5 mr-1" />
-                <span>{childName}</span>
-                <span className="mx-1">•</span>
                 <MapPin className="h-3.5 w-3.5 mr-1" />
                 <span>{location} ({distance})</span>
               </div>
@@ -255,14 +255,14 @@ const ConnectionCard = ({ name, childName, location, distance, interests, lastPl
 
 interface ConnectionRequestCardProps {
   name: string;
-  childName: string;
+  childInfo: string;
   location: string;
   distance: string;
   interests: string[];
   mutualConnections: number;
 }
 
-const ConnectionRequestCard = ({ name, childName, location, distance, interests, mutualConnections }: ConnectionRequestCardProps) => {
+const ConnectionRequestCard = ({ name, childInfo, location, distance, interests, mutualConnections }: ConnectionRequestCardProps) => {
   return (
     <div className="p-4 rounded-lg border border-muted bg-muted/10 hover:bg-muted/30 transition-colors">
       <div className="flex items-start">
@@ -276,10 +276,10 @@ const ConnectionRequestCard = ({ name, childName, location, distance, interests,
                 {name}
                 <Shield className="h-3.5 w-3.5 ml-2 text-primary" />
               </h3>
+              <div className="text-sm text-muted-foreground mt-0.5">
+                <span>{childInfo}</span>
+              </div>
               <div className="flex items-center mt-1 text-sm text-muted-foreground">
-                <Users className="h-3.5 w-3.5 mr-1" />
-                <span>{childName}</span>
-                <span className="mx-1">•</span>
                 <MapPin className="h-3.5 w-3.5 mr-1" />
                 <span>{location} ({distance})</span>
               </div>
@@ -311,14 +311,14 @@ const ConnectionRequestCard = ({ name, childName, location, distance, interests,
 
 interface SuggestedConnectionCardProps {
   name: string;
-  childName: string;
+  childInfo: string;
   location: string;
   distance: string;
   interests: string[];
   compatibility: number;
 }
 
-const SuggestedConnectionCard = ({ name, childName, location, distance, interests, compatibility }: SuggestedConnectionCardProps) => {
+const SuggestedConnectionCard = ({ name, childInfo, location, distance, interests, compatibility }: SuggestedConnectionCardProps) => {
   return (
     <div className="p-3 rounded-lg border border-muted hover:border-primary/20 transition-colors">
       <div className="flex items-center">
@@ -329,7 +329,7 @@ const SuggestedConnectionCard = ({ name, childName, location, distance, interest
           <h4 className="font-medium text-sm">{name}</h4>
           <div className="flex items-center text-xs text-muted-foreground">
             <Users className="h-3 w-3 mr-0.5" />
-            <span>{childName}</span>
+            <span>{childInfo}</span>
           </div>
         </div>
       </div>

@@ -56,7 +56,7 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
       
       if (authError) throw authError;
       
-      // If auth signup is successful but we're using the waitlist approach
+      // Save the signup data
       for (const child of children) {
         const { error } = await supabase
           .from('early_signups')
@@ -89,7 +89,7 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
         }
       }
       
-      // Redirect to thank you page with email in state
+      // Redirect to thank you page
       navigate('/thank-you', { state: { email } });
       
     } catch (err: any) {

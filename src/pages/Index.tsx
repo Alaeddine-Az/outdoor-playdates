@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
@@ -11,6 +12,7 @@ import TestimonialsCarousel from '@/components/TestimonialsCarousel';
 import OnboardingFlow from '@/components/OnboardingFlow';
 import { ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
   const [showScrollTop, setShowScrollTop] = React.useState(false);
@@ -32,7 +34,7 @@ const Index = () => {
     <div className="min-h-screen">
       <Header />
       <Hero />
-      <HowItWorks id="HowItWorks" />
+      <HowItWorks id="how-it-works" />
       <FeatureSection id="features" />
       <PlaymateFinderPreview />
       <PlaydateSchedulerPreview />
@@ -62,26 +64,26 @@ const Index = () => {
                 <h4 className="font-medium mb-3">Product</h4>
                 <ul className="space-y-2">
                   <li><a href="#features" className="text-muted-foreground hover:text-primary transition-colors">Features</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Pricing</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">FAQ</a></li>
+                  <li><a href="#how-it-works" className="text-muted-foreground hover:text-primary transition-colors">How It Works</a></li>
+                  <li><Link to="/faq" className="text-muted-foreground hover:text-primary transition-colors">FAQ</Link></li>
                 </ul>
               </div>
 
               <div>
                 <h4 className="font-medium mb-3">Company</h4>
                 <ul className="space-y-2">
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">About</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Blog</a></li>
+                  <li><Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">About</Link></li>
+                  <li><Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors">Contact</Link></li>
                   <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Careers</a></li>
                 </ul>
               </div>
 
               <div>
-                <h4 className="font-medium mb-3">Support</h4>
+                <h4 className="font-medium mb-3">Legal</h4>
                 <ul className="space-y-2">
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Contact</a></li>
+                  <li><Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms</Link></li>
                   <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Privacy</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Terms</a></li>
+                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Cookies</a></li>
                 </ul>
               </div>
             </div>

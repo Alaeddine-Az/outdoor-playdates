@@ -19,6 +19,10 @@ import ThankYou from './pages/ThankYou';
 import Auth from './pages/Auth';
 import CreatePlaydate from './pages/CreatePlaydate';
 import AddChild from './pages/AddChild';
+import About from './pages/About';
+import FAQ from './pages/FAQ';
+import Terms from './pages/Terms';
+import Contact from './pages/Contact';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -49,6 +53,10 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/thank-you" element={<ThankYou />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/contact" element={<Contact />} />
             
             {/* Protected routes */}
             <Route
