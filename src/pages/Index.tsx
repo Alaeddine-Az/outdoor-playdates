@@ -33,13 +33,13 @@ const Index = () => {
     <div className="min-h-screen">
       <Header />
       <Hero />
-      <HowItWorks /> id="HowItWorks" />
+      <HowItWorks id="HowItWorks" />
       <FeatureSection id="features" />
       <PlaymateFinderPreview />
       <PlaydateSchedulerPreview />
       <GamifiedChallengePreview />
       <CommunityPreview />
-      <TestimonialsCarousel /> id="TestimonialsCarousel" />
+      <TestimonialsCarousel id="TestimonialsCarousel" />
       <OnboardingFlow id="onboarding" />
 
       {/* Footer */}
