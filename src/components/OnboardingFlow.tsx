@@ -38,70 +38,70 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
     setStep(step - 1);
   };
 
-  const handleCompleteSetup = async () => {
-    setIsSubmitting(true);
-    
-    try {
-      // First, register the user with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            parent_name: parentName,
-            location,
-          }
-        }
-      });
-      
-      if (authError) throw authError;
-      
-      // Save the signup data
-      for (const child of children) {
-        const { error } = await supabase
-          .from('early_signups')
-          .insert({
-            email,
-            parent_name: parentName,
-            location,
-            child_name: child.name,
-            child_age: child.age,
-            interests,
-          });
-        
-        if (error) {
-          console.error('Error saving signup data:', error);
-          if (error.code === '23505') { // Unique constraint violation
-            toast({
-              title: 'Email already registered',
-              description: 'This email is already in our waiting list.',
-              variant: 'destructive',
-            });
-          } else {
-            toast({
-              title: 'Signup Error',
-              description: 'There was an error saving your information. Please try again.',
-              variant: 'destructive',
-            });
-          }
-          setIsSubmitting(false);
-          return;
-        }
+const handleCompleteSetup = async () => {
+  setIsSubmitting(true);
+
+  try {
+    // Step 1: Register the user with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          parent_name: parentName,
+          location,
+        },
+      },
+    });
+
+    if (authError) throw authError;
+
+    // Step 2: Save the signup data in a single insert (no loop!)
+    const { error: signupError } = await supabase.from('early_signups').upsert({
+      email,
+      parent_name: parentName,
+      location,
+      interests,
+      children,
+    }, {
+      onConflict: 'email' // Adjust if needed based on your DB constraints
+    });
+
+    if (signupError) {
+      console.error('Insert error:', signupError);
+
+      if (signupError.code === '23505') {
+        toast({
+          title: 'Email already registered',
+          description: 'This email is already in our waiting list.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Signup Error',
+          description: 'There was an error saving your information. Please try again.',
+          variant: 'destructive',
+        });
       }
-      
-      // Redirect to thank you page
-      navigate('/thank-you', { state: { email } });
-      
-    } catch (err: any) {
-      console.error('Error in signup process:', err);
-      toast({
-        title: 'Something went wrong',
-        description: err.message || 'Please try again later.',
-        variant: 'destructive',
-      });
+
       setIsSubmitting(false);
+      return;
     }
-  };
+
+    // ✅ Step 3: Redirect to thank you page
+    navigate('/thank-you', { state: { email } });
+
+  } catch (err: any) {
+    console.error('Error in signup process:', err);
+    toast({
+      title: 'Something went wrong',
+      description: err.message || 'Please try again later.',
+      variant: 'destructive',
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <section 
