@@ -136,7 +136,7 @@ const Hero = () => {
             </div>
             
             <h1 className="font-bold tracking-tight">
-              <span className="block">Schedule Safe and Fun</span>
+              <span className="block">Find Safe and Fun</span>
               <span className="block text-primary">Outdoor Playdates</span>
               <span className="block">For Your Kids</span>
             </h1>
