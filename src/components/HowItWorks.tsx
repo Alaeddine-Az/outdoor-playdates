@@ -64,7 +64,7 @@ const HowItWorks = ({ id }: HowItWorksProps) => {
             <span className="text-primary">How It Works</span> - Get Started in Minutes
           </h2>
           <p className="text-xl text-muted-foreground">
-            Our platform makes finding and organizing playdates simple and fun for parents and children alike.
+            GoPlayNow makes finding and organizing playdates simple and fun for parents and children alike.
           </p>
         </div>
 
