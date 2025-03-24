@@ -112,17 +112,21 @@ const Hero = () => {
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12 py-[13px]">
           <div className="">
             <div className="inline-block rounded-full bg-muted mb-4 px-[12px] mx-0 py-[6px]">
-              <span className="text-sm font-medium text-foreground/80 text-center">Safe, Fun Outdoor Playdates for Kids</span>
+              <span className="text-sm font-medium text-foreground/80 text-center">
+                Connecting families for safe outdoor play
+              </span>
             </div>
             
             <h1 className="font-bold tracking-tight">
-              <span className="block">Connect with Families. </span>
-              <span className="block text-primary">Spark Outdoor </span>
-              <span className="block">Adventures.
+              <span className="block">
             </span>
+              <span className="block text-primary">Outdoor Playdates</span>
+              <span className="block">For Your Kids</span>
             </h1>
             
-            <p className="text-xl text-muted-foreground">GoPlayNow makes it easy to find trusted playmates, schedule outdoor fun, and keep kids engaged with exciting challenges.</p>
+            <p className="text-xl text-muted-foreground">
+              GoPlayNow helps parents organize safe, structured outdoor playdates, find playmates with similar interests, and make outdoor play more engaging through gamified challenges.
+            </p>
             
             <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start">
               <Button size="lg" className="button-glow bg-primary hover:bg-primary/90 text-white rounded-xl" onClick={() => document.getElementById('onboarding')?.scrollIntoView({
