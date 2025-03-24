@@ -102,14 +102,14 @@ const Hero = () => {
   return <section ref={ref as React.RefObject<HTMLDivElement>} className="relative min-h-screen flex items-center px-6 pt-16 pb-20 overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-radial from-primary/5 to-transparent"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-radial from-primary/5 to-transparent my-0 py-0"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/10 filter blur-3xl"></div>
         <div className="absolute top-[20%] left-[-5%] w-[30%] h-[30%] rounded-full bg-primary/10 filter blur-3xl"></div>
         <div className="absolute top-[60%] right-[20%] w-[15%] h-[15%] rounded-full bg-accent/10 filter blur-3xl"></div>
       </div>
 
       <div className="container mx-auto relative z-10 -mt-12 my-0">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-12 py-[13px]">
           <div className="">
             <div className="inline-block rounded-full bg-muted mb-4 px-[12px] mx-0 py-[6px]">
               <span className="text-sm font-medium text-foreground/80 text-center">
@@ -142,7 +142,7 @@ const Hero = () => {
           </div>
           
           <div className={cn("relative w-full max-w-lg", isIntersecting ? "animate-scale-up" : "opacity-0")}>
-            <div className="relative z-10 bg-white rounded-2xl shadow-soft p-6 backdrop-blur-sm border border-muted">
+            <div className="relative z-10 bg-white rounded-2xl shadow-soft p-6 backdrop-blur-sm border border-muted py-[24px]">
               <div className="aspect-video w-full rounded-xl overflow-hidden">
                 <img src={playdate.image} alt="Playdate activity" className="w-full h-full object-cover transition-opacity duration-500" key={playdateIndex} />
               </div>
@@ -183,9 +183,9 @@ const Hero = () => {
       </div>
       
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
-        <button className="animate-bounce flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-soft" onClick={() => document.getElementById('features')?.scrollIntoView({
+        <button onClick={() => document.getElementById('features')?.scrollIntoView({
         behavior: 'smooth'
-      })} aria-label="Scroll to features">
+      })} aria-label="Scroll to features" className="animate-bounce flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-soft my-0 py-0">
           <ArrowRight className="h-5 w-5 text-primary transform rotate-90" />
         </button>
       </div>
