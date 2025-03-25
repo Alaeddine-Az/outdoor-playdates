@@ -54,7 +54,7 @@ export const OnboardingProvider: React.FC<{
   const [parentName, setParentName] = useState('');
   const [location, setLocation] = useState('');
   const [referrer, setReferrer] = useState('');
-  const [childProfiles, setChildProfiles] = useState<ChildInfo[]>([{ name: '', age: '' }]);
+  const [childProfiles, setChildProfiles] = useState<ChildInfo[]>([{ name: "", age: "" }]);
   const [interests, setInterests] = useState<string[]>([]);
   
   // Navigation state
