@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import AppLayout from '@/components/AppLayout';
 import { useEvents } from '@/hooks/useEvents';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,6 @@ import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import EventCard from '@/components/EventCard';
 import { supabase } from '@/integrations/supabase/client';
-import { useState, useEffect } from 'react';
 import { ParentProfile } from '@/types';
 
 const EventsPage = () => {
@@ -42,22 +41,23 @@ const EventsPage = () => {
         }
       }
       
-      // Fetch participant counts for each event using RPC
-      const eventIds = events.map(event => event.id);
-      
-      if (eventIds.length > 0) {
-        const { data: countData, error: countError } = await supabase
-          .rpc('get_event_participant_counts', { 
-            event_ids: eventIds 
-          });
+      // Fetch participant counts for each event
+      if (events.length > 0) {
+        const eventIds = events.map(event => event.id);
+        
+        // Get all participants
+        const { data: participantsData, error: countError } = await supabase
+          .from('event_participants')
+          .select('event_id');
           
         if (countError) {
           console.error('Error fetching participant counts:', countError);
-        } else if (countData) {
+        } else if (participantsData) {
           const countMap: Record<string, number> = {};
           
-          countData.forEach((item: any) => {
-            countMap[item.event_id] = parseInt(item.participant_count);
+          // Count participants per event
+          eventIds.forEach(eventId => {
+            countMap[eventId] = participantsData.filter(p => p.event_id === eventId).length;
           });
           
           setParticipantCounts(countMap);

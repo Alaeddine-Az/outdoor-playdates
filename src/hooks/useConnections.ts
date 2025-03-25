@@ -25,10 +25,11 @@ export function useConnections() {
       setError(null);
       
       try {
-        // Fetch all connections related to the user using rpc call
+        // Fetch all connections related to the user using raw query with type casting
         const { data, error: connectionsError } = await supabase
-          .rpc('get_user_connections', { user_id: user.id })
-          .select('*');
+          .from('connections')
+          .select('*')
+          .or(`requester_id.eq.${user.id},recipient_id.eq.${user.id}`);
 
         if (connectionsError) throw connectionsError;
 
@@ -96,30 +97,33 @@ export function useConnections() {
     if (recipientId === user.id) return { success: false, error: 'Cannot connect with yourself' };
 
     try {
-      // Check if connection already exists using rpc call
+      // Check if connection already exists
       const { data: existing, error: checkError } = await supabase
-        .rpc('check_connection_exists', { 
-          user1_id: user.id,
-          user2_id: recipientId
-        });
+        .from('connections')
+        .select('*')
+        .or(`and(requester_id.eq.${user.id},recipient_id.eq.${recipientId}),and(requester_id.eq.${recipientId},recipient_id.eq.${user.id})`)
+        .single();
 
-      if (checkError) throw checkError;
+      if (checkError && checkError.code !== 'PGRST116') throw checkError;
       
-      if (existing && existing.length > 0) {
+      if (existing) {
         return { 
           success: false, 
-          error: existing[0].status === 'pending' 
+          error: existing.status === 'pending' 
             ? 'Connection request already pending' 
             : 'Already connected'
         };
       }
 
-      // Create new connection request through rpc call
+      // Create new connection request
       const { data, error } = await supabase
-        .rpc('create_connection', {
-          req_id: user.id, 
-          rec_id: recipientId
-        });
+        .from('connections')
+        .insert([{ 
+          requester_id: user.id, 
+          recipient_id: recipientId,
+          status: 'pending'
+        }])
+        .select();
 
       if (error) throw error;
 
@@ -149,13 +153,13 @@ export function useConnections() {
     try {
       const newStatus = accept ? 'accepted' : 'declined';
       
-      // Update connection status through rpc call
+      // Update connection status
       const { data, error } = await supabase
-        .rpc('update_connection_status', {
-          conn_id: connectionId,
-          user_id: user.id,
-          new_status: newStatus
-        });
+        .from('connections')
+        .update({ status: newStatus })
+        .eq('id', connectionId)
+        .eq('recipient_id', user.id)
+        .select();
 
       if (error) throw error;
 

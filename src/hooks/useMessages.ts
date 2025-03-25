@@ -33,16 +33,17 @@ export function useMessages(otherId?: string) {
         if (profileError) throw profileError;
         setOtherProfile(profileData as ParentProfile);
 
-        // Check if users are connected using RPC
+        // Check if users are connected
         const { data: connectionData, error: connectionError } = await supabase
-          .rpc('check_connection_status', { 
-            user1_id: user.id, 
-            user2_id: otherId 
-          });
+          .from('connections')
+          .select('*')
+          .or(`and(requester_id.eq.${user.id},recipient_id.eq.${otherId}),and(requester_id.eq.${otherId},recipient_id.eq.${user.id})`)
+          .eq('status', 'accepted')
+          .single();
 
-        if (connectionError) throw connectionError;
+        if (connectionError && connectionError.code !== 'PGRST116') throw connectionError;
 
-        if (!connectionData || connectionData !== 'accepted') {
+        if (!connectionData) {
           setError('Not connected with this user');
           setMessages([]);
           setLoading(false);
@@ -51,25 +52,25 @@ export function useMessages(otherId?: string) {
 
         // Fetch messages between the users
         const { data: messagesData, error: messagesError } = await supabase
-          .rpc('get_conversation', { 
-            user1_id: user.id, 
-            user2_id: otherId 
-          });
+          .from('messages')
+          .select('*')
+          .or(`and(sender_id.eq.${user.id},recipient_id.eq.${otherId}),and(sender_id.eq.${otherId},recipient_id.eq.${user.id})`)
+          .order('created_at');
 
         if (messagesError) throw messagesError;
         setMessages(messagesData as Message[] || []);
 
         // Mark received messages as read
         if (messagesData && messagesData.length > 0) {
-          const unreadMessages = messagesData.filter((m: any) => 
+          const unreadMessages = messagesData.filter(m => 
             m.recipient_id === user.id && !m.read
           );
           
           if (unreadMessages.length > 0) {
             await supabase
-              .rpc('mark_messages_as_read', {
-                msg_ids: unreadMessages.map((m: any) => m.id)
-              });
+              .from('messages')
+              .update({ read: true })
+              .in('id', unreadMessages.map(m => m.id));
           }
         }
 
@@ -88,9 +89,9 @@ export function useMessages(otherId?: string) {
             // Mark message as read if we're the recipient
             if (newMessage.recipient_id === user.id) {
               supabase
-                .rpc('mark_messages_as_read', {
-                  msg_ids: [newMessage.id]
-                });
+                .from('messages')
+                .update({ read: true })
+                .eq('id', newMessage.id);
             }
           })
           .subscribe();
@@ -120,11 +121,13 @@ export function useMessages(otherId?: string) {
 
     try {
       const { data, error } = await supabase
-        .rpc('send_message', {
-          sender_user_id: user.id,
-          recipient_user_id: otherId,
-          msg_content: content.trim()
-        });
+        .from('messages')
+        .insert([{
+          sender_id: user.id,
+          recipient_id: otherId,
+          content: content.trim()
+        }])
+        .select();
 
       if (error) throw error;
 
