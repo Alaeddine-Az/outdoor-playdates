@@ -34,9 +34,9 @@ interface ParentProfileStepProps {
 const formSchema = z.object({
   parentName: z.string().min(2, "Name must be at least 2 characters").max(50, "Name cannot exceed 50 characters")
     .regex(/^[A-Za-z\s]+$/, "Only letters and spaces are allowed"),
-  zipCode: z.string().min(5, "Please enter a valid ZIP code").max(10, "ZIP code is too long")
-    .refine(value => /^\d{5}(-\d{4})?$/.test(value), {
-      message: "Please enter a valid ZIP code (5 digits, or 5+4 format)"
+  zipCode: z.string().min(6, "Please enter a valid Canadian postal code").max(7, "Postal code is too long")
+    .refine(value => /^[A-Za-z]\d[A-Za-z][ ]?\d[A-Za-z]\d$/.test(value.toUpperCase()), {
+      message: "Please enter a valid Canadian postal code (e.g., T2A 3K1)"
     }),
   referrer: z.string().optional()
 });
@@ -71,7 +71,7 @@ const ParentProfileStep: React.FC<ParentProfileStepProps> = ({
     if (!isValid) {
       form.setError('zipCode', { 
         type: 'manual', 
-        message: 'This ZIP code could not be verified. Please enter a valid US ZIP code.' 
+        message: 'This postal code could not be verified. Please enter a valid Canadian postal code.' 
       });
       return;
     }
@@ -85,7 +85,7 @@ const ParentProfileStep: React.FC<ParentProfileStepProps> = ({
   // Validate ZIP code when it changes
   useEffect(() => {
     const zipCodeValue = form.watch('zipCode');
-    if (zipCodeValue && zipCodeValue.length >= 5) {
+    if (zipCodeValue && zipCodeValue.length >= 6) {
       // Debounce the validation to avoid too many API calls
       const timer = setTimeout(() => {
         validateZipCode(zipCodeValue);
@@ -130,19 +130,19 @@ const ParentProfileStep: React.FC<ParentProfileStepProps> = ({
             name="zipCode"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>ZIP Code</FormLabel>
+                <FormLabel>Postal Code</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                     <Input 
                       className={`pl-10 ${
-                        field.value && field.value.length >= 5
+                        field.value && field.value.length >= 6
                           ? isValidZipCode
                             ? "border-green-500 focus-visible:ring-green-500"
                             : "border-red-500 focus-visible:ring-red-500"
                           : ""
                       }`}
-                      placeholder="Your ZIP code (e.g., 10001)"
+                      placeholder="Your postal code (e.g., T2A 3K1)"
                       {...field}
                     />
                   </div>

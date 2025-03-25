@@ -108,19 +108,23 @@ export const OnboardingProvider: React.FC<{
   const validateRequiredFields = (): boolean => {
     // Check for all required fields before submission
     if (!email || !password || !parentName || !zipCode || !isValidZipCode) {
+      console.log("Missing basic fields:", { email, password, parentName, zipCode, isValidZipCode });
       return false;
     }
     
     // Validate child profiles - each child must have a name and age
     if (childProfiles.length === 0 || !childProfiles.every(child => child.name && child.age)) {
+      console.log("Missing child profiles data:", childProfiles);
       return false;
     }
     
     // Check that at least one interest is selected
     if (interests.length === 0) {
+      console.log("No interests selected");
       return false;
     }
     
+    console.log("All required fields validated successfully");
     return true;
   };
 
