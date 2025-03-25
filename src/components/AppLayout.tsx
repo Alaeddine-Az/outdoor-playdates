@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -129,7 +128,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <input 
                 type="search"
-                placeholder="Search..."
+                placeholder="Search playdates, parents, or interests..."
                 className="pl-9 pr-4 py-1.5 rounded-lg bg-muted/50 border border-transparent focus:border-input focus:bg-white focus:ring-1 focus:ring-primary/30 focus:outline-none w-64"
               />
             </div>
