@@ -117,7 +117,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw error;
       
       // Special handling for admin and test users
-      if (email === 'admin') {
+      if (email === 'admin@admin.com') {
         // Navigate admin to admin dashboard
         toast({
           title: "Admin account created!",
@@ -148,7 +148,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(true);
       
       // Special case for admin login
-      if (email === 'admin' && password === 'admin') {
+      if (email === 'admin@admin.com' && password === '@dmin1234') {
         // Create admin account if it doesn't exist
         const { data: checkData, error: checkError } = await supabase.auth.signInWithPassword({
           email,
@@ -187,7 +187,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       // Special case for test user login
-      if (email === 'testuser' && password === 'testuser') {
+      if (email === 'test@user.com' && password === 'testuser1@') {
         // Create test user account if it doesn't exist
         const { data: checkData, error: checkError } = await supabase.auth.signInWithPassword({
           email,
