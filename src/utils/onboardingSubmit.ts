@@ -17,44 +17,69 @@ export async function submitOnboardingData(
   data: OnboardingSubmitData,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Log all the data to make sure everything is included
-    console.log("Submitting onboarding data:", {
+    // Enhanced debugging: Log all data with clear structure
+    console.log("📝 SUBMITTING ONBOARDING DATA:", {
       email: data.email,
       parentName: data.parentName,
       zipCode: data.zipCode,
-      referrer: data.referrer,
-      childProfilesCount: data.childProfiles.length,
-      childProfiles: data.childProfiles,
-      interestsCount: data.interests.length,
-      interests: data.interests
+      referrer: data.referrer || 'None provided',
+      children: {
+        count: data.childProfiles.length,
+        details: data.childProfiles
+      },
+      interests: {
+        count: data.interests.length,
+        selected: data.interests
+      }
     });
 
-    // Validate all required data is present
-    if (!data.email || !data.password || !data.parentName || !data.zipCode) {
+    // Comprehensive validation checks
+    if (!data.email || !data.password) {
+      console.error("❌ Missing credentials");
       return {
         success: false,
-        error: 'Missing required information. Please fill out all fields.'
+        error: 'Email and password are required.'
       };
     }
 
-    if (data.childProfiles.length === 0 || !data.childProfiles.every(child => child.name && child.age)) {
+    if (!data.parentName || !data.zipCode) {
+      console.error("❌ Missing profile information");
       return {
         success: false,
-        error: 'Please provide complete information for all children.'
+        error: 'Parent name and location are required.'
       };
+    }
+
+    if (data.childProfiles.length === 0) {
+      console.error("❌ No children added");
+      return {
+        success: false,
+        error: 'Please add at least one child profile.'
+      };
+    }
+
+    for (const child of data.childProfiles) {
+      if (!child.name || !child.age) {
+        console.error("❌ Incomplete child data", child);
+        return {
+          success: false,
+          error: 'Please complete all child profile information.'
+        };
+      }
     }
 
     if (data.interests.length === 0) {
+      console.error("❌ No interests selected");
       return {
         success: false,
         error: 'Please select at least one interest.'
       };
     }
 
-    // Convert childProfiles to the correct JSON format for Supabase
+    // Convert childProfiles to JSON format for Supabase
     const childrenData = data.childProfiles as unknown as Json[];
 
-    // Prepare the data for early_signups table
+    // Prepare data for early_signups table with clean formatting
     const signupData = {
       email: data.email,
       parent_name: data.parentName,
@@ -62,32 +87,43 @@ export async function submitOnboardingData(
       referrer: data.referrer || null,
       interests: data.interests,
       children: childrenData,
-      status: 'pending', // Set initial status
+      status: 'pending',
     };
 
-    console.log("Saving signup data:", signupData);
+    console.log("🔄 Saving to Supabase:", signupData);
 
-    // Save to early_signups with upsert to handle the unique email constraint
-    const { error: signupError } = await supabase
+    // Use upsert with explicit conflict handling
+    const { data: insertedData, error: signupError } = await supabase
       .from('early_signups')
       .upsert(signupData, {
-        onConflict: 'email'
+        onConflict: 'email',
+        returning: 'minimal'
       });
 
     if (signupError) {
-      console.error('Error saving early signup data:', signupError);
+      console.error('❌ Supabase Error:', signupError);
+      
+      // Provide more specific error messages based on error code
+      if (signupError.code === '23505') {
+        return { 
+          success: false, 
+          error: 'This email is already registered. Please use a different email address.' 
+        };
+      }
+      
       return { 
         success: false, 
-        error: 'There was an error saving your information. Please try again.' 
+        error: 'Database error: ' + signupError.message
       };
     }
 
+    console.log("✅ Signup successful!");
     return { success: true };
   } catch (err: any) {
-    console.error('Signup error:', err);
+    console.error('❌ Unexpected error:', err);
     return {
       success: false,
-      error: err.message || 'There was an error creating your account. Please try again.'
+      error: 'There was an unexpected error. Please try again later.'
     };
   }
 }

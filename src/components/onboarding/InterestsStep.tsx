@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
@@ -50,42 +49,59 @@ const InterestsStep: React.FC<InterestsStepProps> = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      interests
+      interests: interests || []
     },
     mode: 'onChange'
   });
 
-  // When interests prop changes, update the form
+  // Initialize form with parent state when component mounts
   useEffect(() => {
-    form.setValue('interests', interests);
-  }, [interests, form]);
+    console.log("📋 Setting initial interests:", interests);
+    form.setValue('interests', interests || []);
+  }, [form]);
 
+  // Keep parent state in sync with form state
   const selectedInterests = form.watch('interests');
-
-  // Synchronize form with parent state on any change
+  
   useEffect(() => {
-    if (JSON.stringify(selectedInterests) !== JSON.stringify(interests)) {
-      setInterests(selectedInterests);
+    const currentInterests = selectedInterests || [];
+    const parentInterests = interests || [];
+    
+    if (JSON.stringify(currentInterests) !== JSON.stringify(parentInterests)) {
+      console.log("🔄 Syncing interests state:", currentInterests);
+      setInterests(currentInterests);
     }
   }, [selectedInterests, setInterests, interests]);
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    // Make sure to update the parent state before submitting
+    console.log("✅ Form submitted with interests:", data.interests);
+    
+    // Ensure interests are updated in parent state
     setInterests(data.interests);
-    // Log interests before calling handleCompleteSetup
-    console.log("Submitting interests:", data.interests);
+    
+    // Complete setup
     handleCompleteSetup();
   };
 
   const toggleInterest = (interest: string) => {
-    const currentInterests = form.getValues().interests;
+    const currentInterests = form.getValues('interests') || [];
+    let newInterests: string[];
+    
+    // Toggle the interest
     if (currentInterests.includes(interest)) {
-      form.setValue('interests', currentInterests.filter(i => i !== interest));
+      console.log("➖ Removing interest:", interest);
+      newInterests = currentInterests.filter(i => i !== interest);
     } else {
-      if (currentInterests.length < 5) {
-        form.setValue('interests', [...currentInterests, interest]);
+      if (currentInterests.length >= 5) {
+        console.log("⚠️ Maximum interests reached");
+        return;
       }
+      console.log("➕ Adding interest:", interest);
+      newInterests = [...currentInterests, interest];
     }
+    
+    // Update form value and validate
+    form.setValue('interests', newInterests);
     form.trigger('interests');
   };
 
@@ -111,16 +127,16 @@ const InterestsStep: React.FC<InterestsStepProps> = ({
                         type="button"
                         className={cn(
                           "px-4 py-3 rounded-xl border transition-colors text-sm font-medium flex items-center justify-center text-center h-16",
-                          selectedInterests.includes(interest) 
+                          selectedInterests?.includes(interest) 
                             ? "border-primary bg-primary/10 text-primary" 
                             : "border-muted bg-white hover:bg-muted/5 text-foreground",
-                          selectedInterests.length >= 5 && !selectedInterests.includes(interest) && "opacity-50 cursor-not-allowed"
+                          selectedInterests?.length >= 5 && !selectedInterests?.includes(interest) && "opacity-50 cursor-not-allowed"
                         )}
                         onClick={() => toggleInterest(interest)}
-                        disabled={selectedInterests.length >= 5 && !selectedInterests.includes(interest) || isSubmitting}
+                        disabled={(selectedInterests?.length >= 5 && !selectedInterests?.includes(interest)) || isSubmitting}
                       >
                         {interest}
-                        {selectedInterests.includes(interest) && (
+                        {selectedInterests?.includes(interest) && (
                           <CheckCircle className="ml-2 h-4 w-4 text-primary" />
                         )}
                       </button>
@@ -128,7 +144,7 @@ const InterestsStep: React.FC<InterestsStepProps> = ({
                   </div>
                 </FormControl>
                 <div className="text-sm text-muted-foreground mt-2">
-                  Select 1-5 interests ({selectedInterests.length}/5 selected)
+                  Select 1-5 interests ({selectedInterests?.length || 0}/5 selected)
                 </div>
                 <FormMessage />
               </FormItem>

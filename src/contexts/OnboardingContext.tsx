@@ -57,24 +57,39 @@ export const OnboardingProvider: React.FC<{
   const navigate = useNavigate();
 
   const handleCompleteSetup = async () => {
-    // Make sure the ZIP code is valid
+    console.log("🚀 Starting onboarding submission process");
+    
+    // Validate ZIP code first
+    console.log("🧪 Validating postal code:", form.zipCode);
     const zipIsValid = await form.validateZipCode(form.zipCode);
     form.setIsValidZipCode(zipIsValid);
+    
+    if (!zipIsValid) {
+      console.error("❌ Invalid postal code");
+      toast({
+        title: 'Invalid Postal Code',
+        description: 'Please enter a valid Canadian postal code.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
-    // First debug all field values to see what might be missing
-    console.log("Checking form fields before submission:", {
+    // Debug log all form fields 
+    console.log("📋 Form state before submission:", {
       email: form.email,
-      password: form.password.length > 0 ? "Password set" : "No password",
+      passwordSet: form.password.length > 0,
       parentName: form.parentName,
       zipCode: form.zipCode,
       zipCodeValid: form.isValidZipCode,
-      childProfiles: form.childProfiles,
+      childrenCount: form.childProfiles.length,
+      children: form.childProfiles,
       interestsCount: form.interests.length,
       interests: form.interests
     });
 
-    // Validate all required fields
+    // Comprehensive validation
     if (!form.validateRequiredFields()) {
+      console.error("❌ Form validation failed");
       toast({
         title: 'Missing Information',
         description: 'Please complete all required fields before submitting.',
@@ -83,9 +98,12 @@ export const OnboardingProvider: React.FC<{
       return;
     }
 
+    // Set submission state
     navigation.setIsSubmitting(true);
+    console.log("⏳ Submission in progress...");
 
     try {
+      // Submit data to backend
       const result = await submitOnboardingData({
         email: form.email,
         password: form.password,
@@ -97,29 +115,33 @@ export const OnboardingProvider: React.FC<{
       });
 
       if (!result.success) {
-        throw new Error(result.error);
+        throw new Error(result.error || "Unknown error occurred");
       }
 
+      console.log("✅ Submission successful for:", form.email);
+      
+      // Show success message
       toast({
-        title: 'Signup Successful',
+        title: 'Registration Successful',
         description: 'Thank you for signing up! We\'ll be in touch soon.',
       });
 
+      // Handle completion callback or navigation
       if (onComplete) {
         onComplete(form.email);
       } else {
         navigate('/thank-you', { state: { email: form.email } });
       }
-
     } catch (err: any) {
-      console.error('Signup error:', err);
+      console.error("❌ Submission error:", err);
       toast({
-        title: 'Signup Error',
+        title: 'Registration Failed',
         description: err.message || 'There was an error creating your account. Please try again.',
         variant: 'destructive',
       });
     } finally {
       navigation.setIsSubmitting(false);
+      console.log("🏁 Submission process complete");
     }
   };
 
