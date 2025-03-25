@@ -42,8 +42,7 @@ const StepManager: React.FC = () => {
           <AccountCreationStep 
             email={email}
             setEmail={setEmail}
-            password={password}
-            setPassword={setPassword}
+            password={setPassword}
             nextStep={nextStep}
             isSubmitting={isSubmitting}
           />

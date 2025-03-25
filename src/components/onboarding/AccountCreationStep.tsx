@@ -14,7 +14,7 @@ interface AccountCreationStepProps {
   email: string;
   setEmail: (email: string) => void;
   password: string;
-  setPassword: (password: string) => void;
+  setPassword?: (password: string) => void;
   nextStep: () => void;
   isSubmitting: boolean;
 }
@@ -31,7 +31,7 @@ const AccountCreationStep: React.FC<AccountCreationStepProps> = ({
   email,
   setEmail,
   password,
-  setPassword,
+  setPassword = () => {},
   nextStep,
   isSubmitting
 }) => {
