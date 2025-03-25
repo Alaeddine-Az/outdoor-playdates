@@ -14,20 +14,38 @@ import {
 } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import Header from '@/components/Header';
+import { useAdminFunctions } from '@/hooks/useAdminFunctions';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Json } from '@/integrations/supabase/types';
 
 interface EarlySignup {
   id: string;
   email: string;
   parent_name: string;
-  location: string;
-  children: any[];
-  interests: string[];
+  location: string | null;
+  children: Json[] | null;
+  interests: string[] | null;
   status: 'pending' | 'approved' | 'rejected' | 'converted';
-  created_at: string;
+  created_at: string | null;
+  invited_at: string | null;
+  child_age?: string | null;
+  child_name?: string | null;
+  converted_at?: string | null;
+  converted_user_id?: string | null;
+  referrer?: string | null;
+  updated_at?: string | null;
 }
 
 const AdminDashboard = () => {
   const { user } = useAuth();
+  const { approvePendingSignup, rejectPendingSignup } = useAdminFunctions();
   const [loading, setLoading] = useState(true);
   const [pendingSignups, setPendingSignups] = useState<EarlySignup[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -60,14 +78,17 @@ const AdminDashboard = () => {
       setLoading(true);
       try {
         // Fetch pending signups
-        const { data, error } = await supabase
-          .from('early_signups')
-          .select('*')
-          .eq('status', 'pending')
-          .order('created_at', { ascending: false });
+        const { data, error } = await supabase.rpc('get_pending_early_signups');
 
         if (error) throw error;
-        setPendingSignups(data || []);
+        
+        // Cast the data to ensure type compatibility
+        const typedData = (data || []).map(signup => ({
+          ...signup,
+          status: signup.status as 'pending' | 'approved' | 'rejected' | 'converted'
+        }));
+        
+        setPendingSignups(typedData);
       } catch (error) {
         console.error('Error fetching pending signups:', error);
         toast({
@@ -86,56 +107,20 @@ const AdminDashboard = () => {
   }, [isAdmin]);
 
   const handleApprove = async (signupId: string) => {
-    try {
-      const { error } = await supabase
-        .from('early_signups')
-        .update({ status: 'approved' })
-        .eq('id', signupId);
-
-      if (error) throw error;
-
+    const result = await approvePendingSignup(signupId);
+    if (result.success) {
       setPendingSignups(prevSignups => 
         prevSignups.filter(signup => signup.id !== signupId)
       );
-
-      toast({
-        title: 'Signup approved',
-        description: 'The user can now register with their email.',
-      });
-    } catch (error) {
-      console.error('Error approving signup:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to approve signup.',
-        variant: 'destructive',
-      });
     }
   };
 
   const handleReject = async (signupId: string) => {
-    try {
-      const { error } = await supabase
-        .from('early_signups')
-        .update({ status: 'rejected' })
-        .eq('id', signupId);
-
-      if (error) throw error;
-
+    const result = await rejectPendingSignup(signupId);
+    if (result.success) {
       setPendingSignups(prevSignups => 
         prevSignups.filter(signup => signup.id !== signupId)
       );
-
-      toast({
-        title: 'Signup rejected',
-        description: 'The signup request has been rejected.',
-      });
-    } catch (error) {
-      console.error('Error rejecting signup:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to reject signup.',
-        variant: 'destructive',
-      });
     }
   };
 
@@ -172,10 +157,10 @@ const AdminDashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      <p><span className="font-medium">Location:</span> {signup.location}</p>
+                      <p><span className="font-medium">Location:</span> {signup.location || 'Not specified'}</p>
                       <p><span className="font-medium">Children:</span> {signup.children?.length || 0}</p>
-                      <p><span className="font-medium">Interests:</span> {signup.interests?.join(', ')}</p>
-                      <p><span className="font-medium">Signed up:</span> {new Date(signup.created_at).toLocaleDateString()}</p>
+                      <p><span className="font-medium">Interests:</span> {signup.interests?.join(', ') || 'Not specified'}</p>
+                      <p><span className="font-medium">Signed up:</span> {signup.created_at ? new Date(signup.created_at).toLocaleDateString() : 'Unknown'}</p>
                     </div>
                   </CardContent>
                   <CardFooter className="flex justify-between">
