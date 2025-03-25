@@ -154,6 +154,8 @@ export const OnboardingProvider: React.FC<{
         children: childrenData,
       };
 
+      console.log("Saving signup data:", signupData);
+
       // Save to early_signups - skip the auth.signUp since we're not creating full users yet
       const { error: signupError } = await supabase
         .from('early_signups')
