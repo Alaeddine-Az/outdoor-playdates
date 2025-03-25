@@ -2,7 +2,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircle, MinusCircle, ChevronRight } from 'lucide-react';
 import { 
@@ -12,7 +11,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription
 } from '@/components/ui/form';
 import { z } from 'zod';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -66,7 +64,13 @@ const ChildProfileStep: React.FC<ChildProfileStepProps> = ({
   });
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
-    onChange(data.children);
+    // Ensure all children have required properties
+    const validChildren: ChildInfo[] = data.children.map(child => ({
+      name: child.name,
+      age: child.age
+    }));
+    
+    onChange(validChildren);
     nextStep();
   };
 
