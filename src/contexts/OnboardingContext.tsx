@@ -122,12 +122,12 @@ export const OnboardingProvider: React.FC<{
       
       // Show success message
       toast({
-        title: 'Registration Successful',
-        description: 'Thank you for signing up! We\'ll be in touch soon.',
+        title: 'Registration Request Submitted',
+        description: 'Thank you for signing up! Your request is pending admin approval. We\'ll notify you when your account is approved.',
       });
 
       // Navigate to thank you page
-      navigate('/thank-you', { state: { email: form.email } });
+      navigate('/thank-you', { state: { email: form.email, pendingApproval: true } });
       
     } catch (err: any) {
       console.error("❌ Submission error:", err);

@@ -62,12 +62,17 @@ const DesktopNav = ({ user, scrollToSection, handleSignOut }: DesktopNavProps) =
             </Link>
           </div>
           
-          <Button 
-            onClick={() => scrollToSection('onboarding')}
-            className="bg-primary hover:bg-primary/90"
-          >
-            Get Started
-          </Button>
+          <div className="flex items-center space-x-3">
+            <Link to="/auth">
+              <Button variant="outline">Sign In</Button>
+            </Link>
+            <Button 
+              onClick={() => scrollToSection('onboarding')}
+              className="bg-primary hover:bg-primary/90"
+            >
+              Get Started
+            </Button>
+          </div>
         </>
       )}
     </nav>
