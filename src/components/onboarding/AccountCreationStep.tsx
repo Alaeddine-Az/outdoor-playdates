@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, Mail, Lock } from 'lucide-react';
+import { ChevronRight, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { 
   Form,
@@ -15,6 +15,8 @@ import {
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 interface AccountCreationStepProps {
   email: string;
@@ -22,13 +24,14 @@ interface AccountCreationStepProps {
   password: string;
   setPassword: (password: string) => void;
   nextStep: () => void;
+  isSubmitting: boolean;
 }
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters").regex(
-    /^(?=.*[0-9])(?=.*[!@#$%^&*])/,
-    "Password must contain at least one number and one special character"
+    /^(?=.*[0-9!@#$%^&*])/,
+    "Password must contain at least one number or special character"
   )
 });
 
@@ -37,20 +40,80 @@ const AccountCreationStep: React.FC<AccountCreationStepProps> = ({
   setEmail,
   password,
   setPassword,
-  nextStep
+  nextStep,
+  isSubmitting
 }) => {
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [checkingEmail, setCheckingEmail] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email,
       password
     },
+    mode: 'onChange'
   });
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    setEmail(data.email);
-    setPassword(data.password);
-    nextStep();
+  const togglePasswordVisibility = () => {
+    setPasswordVisible(!passwordVisible);
+  };
+
+  const checkEmailExists = async (email: string) => {
+    if (!email || !form.formState.dirtyFields.email) return;
+    
+    try {
+      setCheckingEmail(true);
+      
+      const { data, error } = await supabase
+        .from('early_signups')
+        .select('email')
+        .eq('email', email)
+        .maybeSingle();
+        
+      if (error) throw error;
+      
+      if (data) {
+        form.setError('email', {
+          type: 'manual',
+          message: 'This email is already registered. Please use a different email.'
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error checking email:', error);
+    } finally {
+      setCheckingEmail(false);
+    }
+  };
+
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      const { data: existingUser, error } = await supabase
+        .from('early_signups')
+        .select('email')
+        .eq('email', data.email)
+        .maybeSingle();
+        
+      if (existingUser) {
+        form.setError('email', {
+          type: 'manual',
+          message: 'This email is already registered. Please use a different email.'
+        });
+        return;
+      }
+    
+      setEmail(data.email);
+      setPassword(data.password);
+      nextStep();
+    } catch (error) {
+      console.error('Error during email check:', error);
+      toast({
+        title: 'Error',
+        description: 'There was an error checking your email. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -76,6 +139,10 @@ const AccountCreationStep: React.FC<AccountCreationStepProps> = ({
                       className="pl-10" 
                       placeholder="your@email.com"
                       {...field}
+                      onBlur={(e) => {
+                        field.onBlur();
+                        checkEmailExists(e.target.value);
+                      }}
                     />
                   </div>
                 </FormControl>
@@ -94,15 +161,26 @@ const AccountCreationStep: React.FC<AccountCreationStepProps> = ({
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                     <Input 
-                      type="password" 
-                      className="pl-10"
+                      type={passwordVisible ? "text" : "password"} 
+                      className="pl-10 pr-10"
                       placeholder="Create a secure password"
                       {...field}
                     />
+                    <button 
+                      type="button"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                      onClick={togglePasswordVisibility}
+                      tabIndex={-1}
+                    >
+                      {passwordVisible ? 
+                        <EyeOff className="h-5 w-5" /> : 
+                        <Eye className="h-5 w-5" />
+                      }
+                    </button>
                   </div>
                 </FormControl>
                 <FormDescription>
-                  Must be at least 8 characters with a number and special character.
+                  Must be at least 8 characters with a number or special character.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -112,9 +190,10 @@ const AccountCreationStep: React.FC<AccountCreationStepProps> = ({
           <div className="pt-4">
             <Button 
               type="submit"
-              className="w-full button-glow bg-primary hover:bg-primary/90 text-white rounded-xl"
+              className="w-full button-glow bg-primary hover:bg-primary/90 text-white rounded-xl h-12"
+              disabled={isSubmitting || checkingEmail || !form.formState.isValid}
             >
-              Continue <ChevronRight className="ml-2 h-4 w-4" />
+              {checkingEmail ? 'Checking...' : 'Continue'} <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </form>

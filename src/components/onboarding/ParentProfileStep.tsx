@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, User, MapPin } from 'lucide-react';
+import { ChevronRight, User, MapPin, Gift } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { 
   Form,
@@ -21,13 +21,18 @@ interface ParentProfileStepProps {
   setParentName: (name: string) => void;
   location: string;
   setLocation: (location: string) => void;
+  referrer: string;
+  setReferrer: (referrer: string) => void;
   nextStep: () => void;
   prevStep: () => void;
+  isSubmitting: boolean;
 }
 
 const formSchema = z.object({
-  parentName: z.string().min(1, "Your name is required"),
-  location: z.string().min(5, "Please enter a valid address")
+  parentName: z.string().min(2, "Name must be at least 2 characters").max(50, "Name cannot exceed 50 characters")
+    .regex(/^[A-Za-z\s]+$/, "Only letters and spaces are allowed"),
+  location: z.string().min(3, "Please enter a valid location"),
+  referrer: z.string().optional()
 });
 
 const ParentProfileStep: React.FC<ParentProfileStepProps> = ({
@@ -35,20 +40,26 @@ const ParentProfileStep: React.FC<ParentProfileStepProps> = ({
   setParentName,
   location,
   setLocation,
+  referrer,
+  setReferrer,
   nextStep,
-  prevStep
+  prevStep,
+  isSubmitting
 }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       parentName,
-      location
+      location,
+      referrer: referrer || ''
     },
+    mode: 'onChange'
   });
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     setParentName(data.parentName);
     setLocation(data.location);
+    setReferrer(data.referrer || '');
     nextStep();
   };
 
@@ -106,18 +117,44 @@ const ParentProfileStep: React.FC<ParentProfileStepProps> = ({
             )}
           />
           
+          <FormField
+            control={form.control}
+            name="referrer"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Referral Code (Optional)</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Gift className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                    <Input 
+                      className="pl-10"
+                      placeholder="Enter referral code if you have one"
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormDescription>
+                  If someone invited you, enter their code.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
           <div className="pt-4 flex space-x-3">
             <Button 
               type="button"
               variant="outline"
-              className="flex-1 rounded-xl"
+              className="flex-1 rounded-xl h-12"
               onClick={prevStep}
+              disabled={isSubmitting}
             >
               Back
             </Button>
             <Button 
               type="submit"
-              className="flex-1 button-glow bg-primary hover:bg-primary/90 text-white rounded-xl"
+              className="flex-1 button-glow bg-primary hover:bg-primary/90 text-white rounded-xl h-12"
+              disabled={isSubmitting || !form.formState.isValid}
             >
               Continue <ChevronRight className="ml-2 h-4 w-4" />
             </Button>

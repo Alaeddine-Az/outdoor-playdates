@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
@@ -26,18 +27,30 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
   const [password, setPassword] = useState('');
   const [parentName, setParentName] = useState('');
   const [location, setLocation] = useState('');
+  const [referrer, setReferrer] = useState('');
   const [children, setChildren] = useState<ChildInfo[]>([{ name: '', age: '' }]);
   const [interests, setInterests] = useState<string[]>([]);
   
   const nextStep = () => {
     setStep(step + 1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
   const prevStep = () => {
     setStep(step - 1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCompleteSetup = async () => {
+    if (!email || !parentName || children.length === 0 || interests.length === 0) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please complete all required fields before submitting.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -47,37 +60,33 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
         password,
       });
 
-      // Special handling for when the user is already registered
-      if (authError?.message?.includes('already registered')) {
-        console.log('User already registered, proceeding with early signup data');
-        // Continue with saving early signup data
-      } else if (authError) {
-        // For any other auth errors, throw to be caught
-        throw authError;
-      }
+      // Prepare the data for early_signups table
+      const signupData = {
+        email,
+        parent_name: parentName,
+        location,
+        referrer: referrer || null,
+        interests,
+        children: children,
+      };
 
-      // Always try to save custom info in early_signups, even if there was an auth "already registered" error
+      // Save to early_signups
       const { error: signupError } = await supabase
         .from('early_signups')
         .upsert({
-          email,
-          parent_name: parentName,
-          location,
-          interests,
-          children,
+          ...signupData
         }, {
           onConflict: 'email'
         });
 
-      // If there's an error with the early_signups table but the auth worked,
-      // we'll log the error but still redirect the user to thank you page
       if (signupError) {
         console.error('Error saving early signup data:', signupError);
         toast({
-          title: 'Partial Success',
-          description: 'Your account was created, but there was an issue saving some of your information.',
-          variant: 'default',
+          title: 'Signup Error',
+          description: 'There was an error saving your information. Please try again.',
+          variant: 'destructive',
         });
+        return;
       }
 
       // Always redirect to thank you page
@@ -99,19 +108,19 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
     <section 
       id={id}
       ref={ref as React.RefObject<HTMLDivElement>}
-      className="py-24 px-6 relative overflow-hidden bg-muted/30"
+      className="py-16 md:py-24 px-4 sm:px-6 relative overflow-hidden bg-muted/30"
     >
       <div className="container mx-auto relative z-10 max-w-6xl">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="inline-block rounded-full bg-primary/10 px-4 py-1.5 mb-4">
             <span className="text-sm font-medium text-primary">
               Quick & Easy Setup
             </span>
           </div>
-          <h2 className="font-bold tracking-tight mb-4">
+          <h2 className="font-bold tracking-tight mb-4 text-2xl sm:text-3xl">
             Join GoPlayNow in <span className="text-primary">Under 2 Minutes</span>
           </h2>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-lg sm:text-xl text-muted-foreground">
             Create your profile, connect with trusted families, and start scheduling safe, fun playdates for your kids.
           </p>
         </div>
@@ -120,10 +129,12 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
           "max-w-4xl mx-auto bg-white rounded-2xl shadow-soft border border-muted overflow-hidden",
           isIntersecting ? "animate-scale-up" : "opacity-0"
         )}>
-          <div className="p-8">
-            <div className="flex justify-between items-center mb-8">
-              <h3 className="text-2xl font-medium">Create Your Account</h3>
-              <ProgressIndicator currentStep={step} totalSteps={4} />
+          <div className="p-4 md:p-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+              <h3 className="text-xl md:text-2xl font-medium">Create Your Account</h3>
+              <div className="w-full md:w-auto">
+                <ProgressIndicator currentStep={step} totalSteps={4} />
+              </div>
             </div>
             
             <div className="relative overflow-hidden">
@@ -138,10 +149,9 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
                   password={password}
                   setPassword={setPassword}
                   nextStep={nextStep}
+                  isSubmitting={isSubmitting}
                 />
               </div>
-              
-              {/* Steps 2-4 rendering logic */}
               
               {/* Step 2: Parent Profile */}
               <div className={cn(
@@ -153,8 +163,11 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
                   setParentName={setParentName}
                   location={location}
                   setLocation={setLocation}
+                  referrer={referrer}
+                  setReferrer={setReferrer}
                   nextStep={nextStep}
                   prevStep={prevStep}
+                  isSubmitting={isSubmitting}
                 />
               </div>
               
@@ -166,8 +179,9 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
                 <ChildProfileStep 
                   children={children}
                   onChange={setChildren}
-                  onNext={nextStep}
-                  onBack={prevStep}
+                  nextStep={nextStep}
+                  prevStep={prevStep}
+                  isSubmitting={isSubmitting}
                 />
               </div>
               
@@ -182,8 +196,6 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
                   handleCompleteSetup={handleCompleteSetup}
                   prevStep={prevStep}
                   isSubmitting={isSubmitting}
-                  email={email}
-                  parentName={parentName}
                 />
               </div>
             </div>

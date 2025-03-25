@@ -84,32 +84,38 @@ export type Database = {
         Row: {
           child_age: string | null
           child_name: string | null
+          children: Json[] | null
           created_at: string | null
           email: string
           id: string
           interests: string[] | null
           location: string | null
           parent_name: string
+          referrer: string | null
         }
         Insert: {
           child_age?: string | null
           child_name?: string | null
+          children?: Json[] | null
           created_at?: string | null
           email: string
           id?: string
           interests?: string[] | null
           location?: string | null
           parent_name: string
+          referrer?: string | null
         }
         Update: {
           child_age?: string | null
           child_name?: string | null
+          children?: Json[] | null
           created_at?: string | null
           email?: string
           id?: string
           interests?: string[] | null
           location?: string | null
           parent_name?: string
+          referrer?: string | null
         }
         Relationships: []
       }

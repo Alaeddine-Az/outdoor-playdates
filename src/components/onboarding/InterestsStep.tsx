@@ -20,12 +20,12 @@ interface InterestsStepProps {
   handleCompleteSetup: () => void;
   prevStep: () => void;
   isSubmitting: boolean;
-  email: string;
-  parentName: string;
 }
 
 const formSchema = z.object({
-  interests: z.array(z.string()).min(1, "Please select at least one interest")
+  interests: z.array(z.string())
+    .min(1, "Please select at least one interest")
+    .max(5, "Please select no more than 5 interests")
 });
 
 const InterestsStep: React.FC<InterestsStepProps> = ({
@@ -33,9 +33,7 @@ const InterestsStep: React.FC<InterestsStepProps> = ({
   setInterests,
   handleCompleteSetup,
   prevStep,
-  isSubmitting,
-  email,
-  parentName
+  isSubmitting
 }) => {
   const interestOptions = [
     'Arts & Crafts', 
@@ -54,7 +52,10 @@ const InterestsStep: React.FC<InterestsStepProps> = ({
     defaultValues: {
       interests
     },
+    mode: 'onChange'
   });
+
+  const selectedInterests = form.watch('interests');
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     setInterests(data.interests);
@@ -66,8 +67,11 @@ const InterestsStep: React.FC<InterestsStepProps> = ({
     if (currentInterests.includes(interest)) {
       form.setValue('interests', currentInterests.filter(i => i !== interest));
     } else {
-      form.setValue('interests', [...currentInterests, interest]);
+      if (currentInterests.length < 5) {
+        form.setValue('interests', [...currentInterests, interest]);
+      }
     }
+    form.trigger('interests');
   };
 
   return (
@@ -91,18 +95,23 @@ const InterestsStep: React.FC<InterestsStepProps> = ({
                         key={interest}
                         type="button"
                         className={cn(
-                          "px-4 py-3 rounded-xl border transition-colors text-sm font-medium flex items-center justify-center text-center",
-                          form.watch('interests').includes(interest) 
+                          "px-4 py-3 rounded-xl border transition-colors text-sm font-medium flex items-center justify-center text-center h-16",
+                          selectedInterests.includes(interest) 
                             ? "border-primary bg-primary/10 text-primary" 
-                            : "border-muted bg-white hover:bg-muted/5 text-foreground"
+                            : "border-muted bg-white hover:bg-muted/5 text-foreground",
+                          selectedInterests.length >= 5 && !selectedInterests.includes(interest) && "opacity-50 cursor-not-allowed"
                         )}
                         onClick={() => toggleInterest(interest)}
+                        disabled={selectedInterests.length >= 5 && !selectedInterests.includes(interest) || isSubmitting}
                       >
                         {interest}
                       </button>
                     ))}
                   </div>
                 </FormControl>
+                <div className="text-sm text-muted-foreground mt-2">
+                  Select 1-5 interests ({selectedInterests.length}/5 selected)
+                </div>
                 <FormMessage />
               </FormItem>
             )}
@@ -112,17 +121,26 @@ const InterestsStep: React.FC<InterestsStepProps> = ({
             <Button 
               type="button"
               variant="outline"
-              className="flex-1 rounded-xl"
+              className="flex-1 rounded-xl h-12"
               onClick={prevStep}
+              disabled={isSubmitting}
             >
               Back
             </Button>
             <Button 
               type="submit"
-              className="flex-1 button-glow bg-primary hover:bg-primary/90 text-white rounded-xl"
-              disabled={isSubmitting || !email || !parentName}
+              className="flex-1 button-glow bg-primary hover:bg-primary/90 text-white rounded-xl h-12"
+              disabled={isSubmitting || !form.formState.isValid}
             >
-              {isSubmitting ? 'Submitting...' : 'Complete Setup'} <CheckCircle className="ml-2 h-4 w-4" />
+              {isSubmitting ? (
+                <>
+                  <span className="animate-spin mr-2">⧗</span> Submitting...
+                </>
+              ) : (
+                <>
+                  Complete Setup <CheckCircle className="ml-2 h-4 w-4" />
+                </>
+              )}
             </Button>
           </div>
         </form>
