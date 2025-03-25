@@ -75,7 +75,7 @@ const InterestsStep: React.FC<InterestsStepProps> = ({
   };
 
   return (
-    <div>
+    <div className="md:min-h-[400px]">
       <h4 className="text-xl font-medium mb-4">Select Interests</h4>
       <p className="text-muted-foreground mb-6">
         Choose activities your child enjoys. This helps us match with compatible playmates.
@@ -105,6 +105,9 @@ const InterestsStep: React.FC<InterestsStepProps> = ({
                         disabled={selectedInterests.length >= 5 && !selectedInterests.includes(interest) || isSubmitting}
                       >
                         {interest}
+                        {selectedInterests.includes(interest) && (
+                          <CheckCircle className="ml-2 h-4 w-4 text-primary" />
+                        )}
                       </button>
                     ))}
                   </div>

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, User, MapPin, Gift } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -15,12 +15,15 @@ import {
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useOnboarding } from '@/contexts/OnboardingContext';
 
 interface ParentProfileStepProps {
   parentName: string;
   setParentName: (name: string) => void;
-  location: string;
-  setLocation: (location: string) => void;
+  zipCode: string;
+  setZipCode: (zipCode: string) => void;
+  isValidZipCode: boolean;
+  validateZipCode: (zipCode: string) => Promise<boolean>;
   referrer: string;
   setReferrer: (referrer: string) => void;
   nextStep: () => void;
@@ -31,15 +34,20 @@ interface ParentProfileStepProps {
 const formSchema = z.object({
   parentName: z.string().min(2, "Name must be at least 2 characters").max(50, "Name cannot exceed 50 characters")
     .regex(/^[A-Za-z\s]+$/, "Only letters and spaces are allowed"),
-  location: z.string().min(3, "Please enter a valid location"),
+  zipCode: z.string().min(5, "Please enter a valid ZIP code").max(10, "ZIP code is too long")
+    .refine(value => /^\d{5}(-\d{4})?$/.test(value), {
+      message: "Please enter a valid ZIP code (5 digits, or 5+4 format)"
+    }),
   referrer: z.string().optional()
 });
 
 const ParentProfileStep: React.FC<ParentProfileStepProps> = ({
   parentName,
   setParentName,
-  location,
-  setLocation,
+  zipCode,
+  setZipCode,
+  isValidZipCode,
+  validateZipCode,
   referrer,
   setReferrer,
   nextStep,
@@ -50,21 +58,45 @@ const ParentProfileStep: React.FC<ParentProfileStepProps> = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       parentName,
-      location,
+      zipCode,
       referrer: referrer || ''
     },
     mode: 'onChange'
   });
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    // Validate ZIP code before proceeding
+    const isValid = await validateZipCode(data.zipCode);
+    
+    if (!isValid) {
+      form.setError('zipCode', { 
+        type: 'manual', 
+        message: 'This ZIP code could not be verified. Please enter a valid US ZIP code.' 
+      });
+      return;
+    }
+    
     setParentName(data.parentName);
-    setLocation(data.location);
+    setZipCode(data.zipCode);
     setReferrer(data.referrer || '');
     nextStep();
   };
 
+  // Validate ZIP code when it changes
+  useEffect(() => {
+    const zipCodeValue = form.watch('zipCode');
+    if (zipCodeValue && zipCodeValue.length >= 5) {
+      // Debounce the validation to avoid too many API calls
+      const timer = setTimeout(() => {
+        validateZipCode(zipCodeValue);
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [form.watch('zipCode'), validateZipCode]);
+
   return (
-    <div>
+    <div className="md:min-h-[400px]">
       <h4 className="text-xl font-medium mb-4">Parent Profile</h4>
       <p className="text-muted-foreground mb-6">
         Tell us a bit about yourself. This helps other parents connect with you.
@@ -95,16 +127,22 @@ const ParentProfileStep: React.FC<ParentProfileStepProps> = ({
           
           <FormField
             control={form.control}
-            name="location"
+            name="zipCode"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Location</FormLabel>
+                <FormLabel>ZIP Code</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                     <Input 
-                      className="pl-10"
-                      placeholder="Your neighborhood or city"
+                      className={`pl-10 ${
+                        field.value && field.value.length >= 5
+                          ? isValidZipCode
+                            ? "border-green-500 focus-visible:ring-green-500"
+                            : "border-red-500 focus-visible:ring-red-500"
+                          : ""
+                      }`}
+                      placeholder="Your ZIP code (e.g., 10001)"
                       {...field}
                     />
                   </div>

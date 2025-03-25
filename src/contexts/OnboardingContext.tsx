@@ -14,8 +14,8 @@ interface OnboardingContextType {
   setPassword: (password: string) => void;
   parentName: string;
   setParentName: (name: string) => void;
-  location: string;
-  setLocation: (location: string) => void;
+  zipCode: string;
+  setZipCode: (zipCode: string) => void;
   referrer: string;
   setReferrer: (referrer: string) => void;
   childProfiles: ChildInfo[];
@@ -31,6 +31,9 @@ interface OnboardingContextType {
   // Submission state
   isSubmitting: boolean;
   setIsSubmitting: (value: boolean) => void;
+  isValidZipCode: boolean;
+  setIsValidZipCode: (value: boolean) => void;
+  validateZipCode: (zipCode: string) => Promise<boolean>;
   handleCompleteSetup: () => Promise<void>;
 }
 
@@ -52,10 +55,11 @@ export const OnboardingProvider: React.FC<{
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [parentName, setParentName] = useState('');
-  const [location, setLocation] = useState('');
+  const [zipCode, setZipCode] = useState('');
   const [referrer, setReferrer] = useState('');
   const [childProfiles, setChildProfiles] = useState<ChildInfo[]>([{ name: "", age: "" }]);
   const [interests, setInterests] = useState<string[]>([]);
+  const [isValidZipCode, setIsValidZipCode] = useState(false);
   
   // Navigation state
   const [step, setStep] = useState(1);
@@ -63,18 +67,61 @@ export const OnboardingProvider: React.FC<{
   
   const nextStep = () => {
     setStep(step + 1);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Removed automatic scroll to top to fix issue #1
   };
   
   const prevStep = () => {
     setStep(step - 1);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Removed automatic scroll to top to fix issue #1
   };
 
   const navigate = useNavigate();
 
+  // Validate ZIP code with an API
+  const validateZipCode = async (zipCode: string): Promise<boolean> => {
+    if (!zipCode) return false;
+    
+    // Perform basic validation first (US format: 5 digits)
+    if (!/^\d{5}(-\d{4})?$/.test(zipCode)) {
+      setIsValidZipCode(false);
+      return false;
+    }
+    
+    try {
+      // Use Zippopotam.us API for ZIP validation (free and no API key required)
+      const response = await fetch(`https://api.zippopotam.us/us/${zipCode}`);
+      const isValid = response.ok;
+      setIsValidZipCode(isValid);
+      return isValid;
+    } catch (error) {
+      console.error('Error validating ZIP code:', error);
+      // Fallback to basic validation if API is unavailable
+      setIsValidZipCode(true);
+      return true;
+    }
+  };
+
+  const validateRequiredFields = (): boolean => {
+    // Check for all required fields before submission
+    if (!email || !password || !parentName || !zipCode || !isValidZipCode) {
+      return false;
+    }
+    
+    // Validate child profiles - each child must have a name and age
+    if (childProfiles.length === 0 || !childProfiles.every(child => child.name && child.age)) {
+      return false;
+    }
+    
+    // Check that at least one interest is selected
+    if (interests.length === 0) {
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleCompleteSetup = async () => {
-    if (!email || !parentName || childProfiles.length === 0 || interests.length === 0) {
+    if (!validateRequiredFields()) {
       toast({
         title: 'Missing Information',
         description: 'Please complete all required fields before submitting.',
@@ -86,12 +133,6 @@ export const OnboardingProvider: React.FC<{
     setIsSubmitting(true);
 
     try {
-      // First attempt to sign up the user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
       // Convert childProfiles to the correct JSON format for Supabase
       const childrenData = childProfiles as unknown as Json[];
 
@@ -99,13 +140,13 @@ export const OnboardingProvider: React.FC<{
       const signupData = {
         email,
         parent_name: parentName,
-        location,
+        location: zipCode, // Using zipCode instead of location
         referrer: referrer || null,
         interests,
         children: childrenData,
       };
 
-      // Save to early_signups
+      // Save to early_signups - skip the auth.signUp since we're not creating full users yet
       const { error: signupError } = await supabase
         .from('early_signups')
         .upsert(signupData, {
@@ -148,8 +189,8 @@ export const OnboardingProvider: React.FC<{
     setPassword,
     parentName,
     setParentName,
-    location,
-    setLocation,
+    zipCode,
+    setZipCode,
     referrer,
     setReferrer,
     childProfiles,
@@ -161,6 +202,9 @@ export const OnboardingProvider: React.FC<{
     prevStep,
     isSubmitting,
     setIsSubmitting,
+    isValidZipCode,
+    setIsValidZipCode,
+    validateZipCode,
     handleCompleteSetup,
   };
 

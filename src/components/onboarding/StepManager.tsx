@@ -14,7 +14,8 @@ const StepManager: React.FC = () => {
     email, setEmail,
     password, setPassword,
     parentName, setParentName,
-    location, setLocation,
+    zipCode, setZipCode,
+    isValidZipCode, setIsValidZipCode, validateZipCode,
     referrer, setReferrer,
     childProfiles, setChildProfiles,
     interests, setInterests,
@@ -56,8 +57,10 @@ const StepManager: React.FC = () => {
           <ParentProfileStep 
             parentName={parentName}
             setParentName={setParentName}
-            location={location}
-            setLocation={setLocation}
+            zipCode={zipCode}
+            setZipCode={setZipCode}
+            isValidZipCode={isValidZipCode}
+            validateZipCode={validateZipCode}
             referrer={referrer}
             setReferrer={setReferrer}
             nextStep={nextStep}
