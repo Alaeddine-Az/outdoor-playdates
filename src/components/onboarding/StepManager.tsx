@@ -16,7 +16,7 @@ const StepManager: React.FC = () => {
     parentName, setParentName,
     location, setLocation,
     referrer, setReferrer,
-    children, setChildren,
+    childProfiles, setChildProfiles,
     interests, setInterests,
     nextStep, prevStep,
     isSubmitting,
@@ -72,8 +72,8 @@ const StepManager: React.FC = () => {
           step === 3 ? "opacity-100 translate-x-0" : "opacity-0 absolute top-0 left-0 right-0 translate-x-[100%]"
         )}>
           <ChildProfileStep 
-            children={children}
-            onChange={setChildren}
+            children={childProfiles}
+            onChange={setChildProfiles}
             nextStep={nextStep}
             prevStep={prevStep}
             isSubmitting={isSubmitting}

@@ -4,6 +4,7 @@ import { ChildInfo } from '@/components/onboarding/ChildProfileStep';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { Json } from '@/integrations/supabase/types';
 
 interface OnboardingContextType {
   // Form state
@@ -17,8 +18,8 @@ interface OnboardingContextType {
   setLocation: (location: string) => void;
   referrer: string;
   setReferrer: (referrer: string) => void;
-  children: ChildInfo[];
-  setChildren: React.Dispatch<React.SetStateAction<ChildInfo[]>>;
+  childProfiles: ChildInfo[];
+  setChildProfiles: React.Dispatch<React.SetStateAction<ChildInfo[]>>;
   interests: string[];
   setInterests: React.Dispatch<React.SetStateAction<string[]>>;
   
@@ -53,7 +54,7 @@ export const OnboardingProvider: React.FC<{
   const [parentName, setParentName] = useState('');
   const [location, setLocation] = useState('');
   const [referrer, setReferrer] = useState('');
-  const [children, setChildren] = useState<ChildInfo[]>([{ name: '', age: '' }]);
+  const [childProfiles, setChildProfiles] = useState<ChildInfo[]>([{ name: '', age: '' }]);
   const [interests, setInterests] = useState<string[]>([]);
   
   // Navigation state
@@ -73,7 +74,7 @@ export const OnboardingProvider: React.FC<{
   const navigate = useNavigate();
 
   const handleCompleteSetup = async () => {
-    if (!email || !parentName || children.length === 0 || interests.length === 0) {
+    if (!email || !parentName || childProfiles.length === 0 || interests.length === 0) {
       toast({
         title: 'Missing Information',
         description: 'Please complete all required fields before submitting.',
@@ -91,6 +92,9 @@ export const OnboardingProvider: React.FC<{
         password,
       });
 
+      // Convert childProfiles to the correct JSON format for Supabase
+      const childrenData = childProfiles as unknown as Json[];
+
       // Prepare the data for early_signups table
       const signupData = {
         email,
@@ -98,7 +102,7 @@ export const OnboardingProvider: React.FC<{
         location,
         referrer: referrer || null,
         interests,
-        children: JSON.stringify(children),
+        children: childrenData,
       };
 
       // Save to early_signups
@@ -148,8 +152,8 @@ export const OnboardingProvider: React.FC<{
     setLocation,
     referrer,
     setReferrer,
-    children,
-    setChildren,
+    childProfiles,
+    setChildProfiles,
     interests,
     setInterests,
     step,
