@@ -78,25 +78,29 @@ export const OnboardingProvider: React.FC<{
   const navigate = useNavigate();
 
   // Validate ZIP code with an API
-  const validateZipCode = async (zipCode: string): Promise<boolean> => {
-    if (!zipCode) return false;
-    
-    // Perform basic validation first (US format: 5 digits)
-    if (!/^\d{5}(-\d{4})?$/.test(zipCode)) {
+  const validateZipCode = async (zip: string): Promise<boolean> => {
+    if (!zip) return false;
+
+  // Normalize ZIP (remove spaces for consistent API formatting)
+    const trimmedZip = zip.trim().toUpperCase();
+
+  // 🇨🇦 Check Canadian format
+    const canadianPostalCodeRegex = /^[A-Za-z]\d[A-Za-z][ ]?\d[A-Za-z]\d$/;
+    const isCanadian = canadianPostalCodeRegex.test(trimmedZip);
+
+    if (!isCanadian) {
       setIsValidZipCode(false);
       return false;
     }
-    
+
     try {
-      // Use Zippopotam.us API for ZIP validation (free and no API key required)
-      const response = await fetch(`https://api.zippopotam.us/us/${zipCode}`);
-      const isValid = response.ok;
-      setIsValidZipCode(isValid);
-      return isValid;
-    } catch (error) {
-      console.error('Error validating ZIP code:', error);
-      // Fallback to basic validation if API is unavailable
+    // Optional: Validate against external API (e.g., Geoapify, PositionStack) if you want
+    // For now, just accept valid Canadian format
       setIsValidZipCode(true);
+      return true;
+    } catch (error) {
+      console.error('ZIP validation failed:', error);
+      setIsValidZipCode(true); // fallback: still consider valid if regex passed
       return true;
     }
   };
