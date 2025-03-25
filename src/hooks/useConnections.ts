@@ -25,54 +25,55 @@ export function useConnections() {
       setError(null);
       
       try {
-        // Fetch all connections related to the user
+        // Fetch all connections related to the user using rpc call
         const { data, error: connectionsError } = await supabase
-          .from('connections')
-          .select('*')
-          .or(`requester_id.eq.${user.id},recipient_id.eq.${user.id}`);
+          .rpc('get_user_connections', { user_id: user.id })
+          .select('*');
 
         if (connectionsError) throw connectionsError;
 
-        // Sort connections by status
-        const pending = data?.filter(c => 
-          c.status === 'pending' && c.recipient_id === user.id
-        ) || [];
-        
-        const sent = data?.filter(c => 
-          c.status === 'pending' && c.requester_id === user.id
-        ) || [];
-        
-        const accepted = data?.filter(c => 
-          c.status === 'accepted'
-        ) || [];
+        if (data) {
+          // Sort connections by status
+          const pending = data.filter(c => 
+            c.status === 'pending' && c.recipient_id === user.id
+          ) as Connection[];
+          
+          const sent = data.filter(c => 
+            c.status === 'pending' && c.requester_id === user.id
+          ) as Connection[];
+          
+          const accepted = data.filter(c => 
+            c.status === 'accepted'
+          ) as Connection[];
 
-        setPendingRequests(pending);
-        setSentRequests(sent);
-        setConnections(accepted);
+          setPendingRequests(pending);
+          setSentRequests(sent);
+          setConnections(accepted);
 
-        // Get unique IDs of all connection parties
-        const allProfileIds = new Set<string>();
-        data?.forEach(c => {
-          allProfileIds.add(c.requester_id);
-          allProfileIds.add(c.recipient_id);
-        });
-        allProfileIds.delete(user.id);
-
-        // Fetch profiles for all connections
-        if (allProfileIds.size > 0) {
-          const { data: profiles, error: profilesError } = await supabase
-            .from('profiles')
-            .select('*')
-            .in('id', Array.from(allProfileIds));
-
-          if (profilesError) throw profilesError;
-
-          const profileMap: Record<string, ParentProfile> = {};
-          profiles?.forEach(profile => {
-            profileMap[profile.id] = profile;
+          // Get unique IDs of all connection parties
+          const allProfileIds = new Set<string>();
+          data.forEach((c: Connection) => {
+            allProfileIds.add(c.requester_id);
+            allProfileIds.add(c.recipient_id);
           });
+          allProfileIds.delete(user.id);
 
-          setConnectionProfiles(profileMap);
+          // Fetch profiles for all connections
+          if (allProfileIds.size > 0) {
+            const { data: profiles, error: profilesError } = await supabase
+              .from('profiles')
+              .select('*')
+              .in('id', Array.from(allProfileIds));
+
+            if (profilesError) throw profilesError;
+
+            const profileMap: Record<string, ParentProfile> = {};
+            profiles?.forEach(profile => {
+              profileMap[profile.id] = profile as ParentProfile;
+            });
+
+            setConnectionProfiles(profileMap);
+          }
         }
       } catch (e: any) {
         console.error('Error loading connections:', e);
@@ -95,38 +96,35 @@ export function useConnections() {
     if (recipientId === user.id) return { success: false, error: 'Cannot connect with yourself' };
 
     try {
-      // Check if connection already exists
+      // Check if connection already exists using rpc call
       const { data: existing, error: checkError } = await supabase
-        .from('connections')
-        .select('*')
-        .or(`and(requester_id.eq.${user.id},recipient_id.eq.${recipientId}),and(requester_id.eq.${recipientId},recipient_id.eq.${user.id})`)
-        .maybeSingle();
+        .rpc('check_connection_exists', { 
+          user1_id: user.id,
+          user2_id: recipientId
+        });
 
       if (checkError) throw checkError;
       
-      if (existing) {
+      if (existing && existing.length > 0) {
         return { 
           success: false, 
-          error: existing.status === 'pending' 
+          error: existing[0].status === 'pending' 
             ? 'Connection request already pending' 
             : 'Already connected'
         };
       }
 
-      // Create new connection request
+      // Create new connection request through rpc call
       const { data, error } = await supabase
-        .from('connections')
-        .insert([{ 
-          requester_id: user.id, 
-          recipient_id: recipientId,
-          status: 'pending'
-        }])
-        .select();
+        .rpc('create_connection', {
+          req_id: user.id, 
+          rec_id: recipientId
+        });
 
       if (error) throw error;
 
       if (data) {
-        setSentRequests(prev => [...prev, data[0]]);
+        setSentRequests(prev => [...prev, data[0] as Connection]);
         toast({
           title: 'Connection request sent',
           description: 'Your connection request has been sent.',
@@ -151,12 +149,13 @@ export function useConnections() {
     try {
       const newStatus = accept ? 'accepted' : 'declined';
       
+      // Update connection status through rpc call
       const { data, error } = await supabase
-        .from('connections')
-        .update({ status: newStatus })
-        .eq('id', connectionId)
-        .eq('recipient_id', user.id)
-        .select();
+        .rpc('update_connection_status', {
+          conn_id: connectionId,
+          user_id: user.id,
+          new_status: newStatus
+        });
 
       if (error) throw error;
 
@@ -164,7 +163,7 @@ export function useConnections() {
         setPendingRequests(prev => prev.filter(req => req.id !== connectionId));
         
         if (accept) {
-          setConnections(prev => [...prev, data[0]]);
+          setConnections(prev => [...prev, data[0] as Connection]);
           toast({
             title: 'Connection accepted',
             description: 'You are now connected.',

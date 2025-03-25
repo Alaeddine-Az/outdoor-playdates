@@ -19,46 +19,30 @@ export function useEvents() {
       setError(null);
       
       try {
-        // Fetch all events (public)
+        // Fetch all events using rpc call
         const { data: eventsData, error: eventsError } = await supabase
-          .from('events')
-          .select('*')
-          .order('start_time', { ascending: true });
+          .rpc('get_all_events')
+          .select('*');
 
         if (eventsError) throw eventsError;
-        setEvents(eventsData || []);
+        setEvents(eventsData as Event[] || []);
 
         if (user) {
-          // Fetch hosted events
+          // Fetch hosted events using rpc call
           const { data: hostedData, error: hostedError } = await supabase
-            .from('events')
-            .select('*')
-            .eq('host_id', user.id)
-            .order('start_time', { ascending: true });
+            .rpc('get_hosted_events', { host_user_id: user.id })
+            .select('*');
 
           if (hostedError) throw hostedError;
-          setHostedEvents(hostedData || []);
+          setHostedEvents(hostedData as Event[] || []);
 
-          // Fetch events the user has joined
-          const { data: participationData, error: participationError } = await supabase
-            .from('event_participants')
-            .select('event_id')
-            .eq('parent_id', user.id);
+          // Fetch events the user has joined using rpc call
+          const { data: joinedData, error: joinedError } = await supabase
+            .rpc('get_joined_events', { participant_user_id: user.id })
+            .select('*');
 
-          if (participationError) throw participationError;
-          
-          if (participationData && participationData.length > 0) {
-            const eventIds = participationData.map(p => p.event_id);
-            
-            const { data: joinedData, error: joinedError } = await supabase
-              .from('events')
-              .select('*')
-              .in('id', eventIds)
-              .order('start_time', { ascending: true });
-
-            if (joinedError) throw joinedError;
-            setJoinedEvents(joinedData || []);
-          }
+          if (joinedError) throw joinedError;
+          setJoinedEvents(joinedData as Event[] || []);
         }
       } catch (e: any) {
         console.error('Error loading events:', e);
@@ -107,15 +91,14 @@ export function useEventDetails(eventId: string) {
       setError(null);
       
       try {
-        // Fetch event details
+        // Fetch event details using rpc call
         const { data: eventData, error: eventError } = await supabase
-          .from('events')
+          .rpc('get_event_by_id', { event_id: eventId })
           .select('*')
-          .eq('id', eventId)
           .single();
 
         if (eventError) throw eventError;
-        setEvent(eventData);
+        setEvent(eventData as Event);
 
         // Fetch host profile
         const { data: hostData, error: hostError } = await supabase
@@ -125,25 +108,24 @@ export function useEventDetails(eventId: string) {
           .single();
 
         if (hostError) throw hostError;
-        setHost(hostData);
+        setHost(hostData as ParentProfile);
 
-        // Fetch participants
+        // Fetch participants using rpc call
         const { data: participantsData, error: participantsError } = await supabase
-          .from('event_participants')
-          .select('*')
-          .eq('event_id', eventId);
+          .rpc('get_event_participants', { event_id: eventId })
+          .select('*');
 
         if (participantsError) throw participantsError;
-        setParticipants(participantsData || []);
+        setParticipants(participantsData as EventParticipant[] || []);
 
         // Check if current user is joined
         if (user && participantsData) {
-          setIsJoined(participantsData.some(p => p.parent_id === user.id));
+          setIsJoined(participantsData.some((p: any) => p.parent_id === user.id));
         }
 
         // Fetch participant profiles
         if (participantsData && participantsData.length > 0) {
-          const parentIds = participantsData.map(p => p.parent_id);
+          const parentIds = participantsData.map((p: any) => p.parent_id);
           
           const { data: profilesData, error: profilesError } = await supabase
             .from('profiles')
@@ -154,13 +136,18 @@ export function useEventDetails(eventId: string) {
           
           const profileMap: Record<string, ParentProfile> = {};
           profilesData?.forEach(profile => {
-            profileMap[profile.id] = profile;
+            profileMap[profile.id] = profile as ParentProfile;
           });
           
           setParticipantProfiles(profileMap);
 
           // Fetch all children of participants
-          const allChildrenIds = participantsData.flatMap(p => p.children_ids);
+          const allChildrenIds: string[] = [];
+          participantsData.forEach((p: any) => {
+            if (p.children_ids && Array.isArray(p.children_ids)) {
+              allChildrenIds.push(...p.children_ids);
+            }
+          });
           
           if (allChildrenIds.length > 0) {
             const { data: childrenData, error: childrenError } = await supabase
@@ -169,7 +156,7 @@ export function useEventDetails(eventId: string) {
               .in('id', allChildrenIds);
 
             if (childrenError) throw childrenError;
-            setParticipantChildren(childrenData || []);
+            setParticipantChildren(childrenData as ChildProfile[] || []);
           }
         }
       } catch (e: any) {
@@ -195,19 +182,18 @@ export function useEventDetails(eventId: string) {
     if (childrenIds.length === 0) return { success: false, error: 'Please select at least one child' };
 
     try {
+      // Join event using rpc call
       const { data, error } = await supabase
-        .from('event_participants')
-        .insert([{
+        .rpc('join_event', {
           event_id: event.id,
-          parent_id: user.id,
+          user_id: user.id,
           children_ids: childrenIds
-        }])
-        .select();
+        });
 
       if (error) throw error;
 
       if (data) {
-        setParticipants(prev => [...prev, data[0]]);
+        setParticipants(prev => [...prev, data[0] as EventParticipant]);
         setIsJoined(true);
         
         // Get current user profile
@@ -220,7 +206,7 @@ export function useEventDetails(eventId: string) {
         if (profileData) {
           setParticipantProfiles(prev => ({
             ...prev,
-            [user.id]: profileData
+            [user.id]: profileData as ParentProfile
           }));
         }
 
@@ -248,11 +234,12 @@ export function useEventDetails(eventId: string) {
     if (!isJoined) return { success: false, error: 'Not joined this event' };
 
     try {
+      // Leave event using rpc call
       const { error } = await supabase
-        .from('event_participants')
-        .delete()
-        .eq('event_id', event.id)
-        .eq('parent_id', user.id);
+        .rpc('leave_event', {
+          event_id: event.id,
+          user_id: user.id
+        });
 
       if (error) throw error;
 

@@ -36,31 +36,28 @@ const EventsPage = () => {
         } else if (hostProfiles) {
           const hostMap: Record<string, ParentProfile> = {};
           hostProfiles.forEach(profile => {
-            hostMap[profile.id] = profile;
+            hostMap[profile.id] = profile as ParentProfile;
           });
           setEventHosts(hostMap);
         }
       }
       
-      // Fetch participant counts for each event
+      // Fetch participant counts for each event using RPC
       const eventIds = events.map(event => event.id);
       
       if (eventIds.length > 0) {
-        const { data: participantData, error: participantError } = await supabase
-          .from('event_participants')
-          .select('event_id, id')
-          .in('event_id', eventIds);
+        const { data: countData, error: countError } = await supabase
+          .rpc('get_event_participant_counts', { 
+            event_ids: eventIds 
+          });
           
-        if (participantError) {
-          console.error('Error fetching participant counts:', participantError);
-        } else if (participantData) {
+        if (countError) {
+          console.error('Error fetching participant counts:', countError);
+        } else if (countData) {
           const countMap: Record<string, number> = {};
           
-          participantData.forEach(p => {
-            if (!countMap[p.event_id]) {
-              countMap[p.event_id] = 0;
-            }
-            countMap[p.event_id]++;
+          countData.forEach((item: any) => {
+            countMap[item.event_id] = parseInt(item.participant_count);
           });
           
           setParticipantCounts(countMap);
