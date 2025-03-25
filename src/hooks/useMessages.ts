@@ -39,7 +39,7 @@ export function useMessages(otherId?: string) {
           .select('*')
           .or(`and(requester_id.eq.${user.id},recipient_id.eq.${otherId}),and(requester_id.eq.${otherId},recipient_id.eq.${user.id})`)
           .eq('status', 'accepted')
-          .single();
+          .maybeSingle();
 
         if (connectionError && connectionError.code !== 'PGRST116') throw connectionError;
 

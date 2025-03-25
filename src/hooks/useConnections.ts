@@ -25,7 +25,7 @@ export function useConnections() {
       setError(null);
       
       try {
-        // Fetch all connections related to the user using raw query with type casting
+        // Fetch all connections related to the user using direct table query
         const { data, error: connectionsError } = await supabase
           .from('connections')
           .select('*')
@@ -34,18 +34,20 @@ export function useConnections() {
         if (connectionsError) throw connectionsError;
 
         if (data) {
-          // Sort connections by status
-          const pending = data.filter(c => 
+          // Cast and sort connections by status
+          const allConnections = data as Connection[];
+          
+          const pending = allConnections.filter(c => 
             c.status === 'pending' && c.recipient_id === user.id
-          ) as Connection[];
+          );
           
-          const sent = data.filter(c => 
+          const sent = allConnections.filter(c => 
             c.status === 'pending' && c.requester_id === user.id
-          ) as Connection[];
+          );
           
-          const accepted = data.filter(c => 
+          const accepted = allConnections.filter(c => 
             c.status === 'accepted'
-          ) as Connection[];
+          );
 
           setPendingRequests(pending);
           setSentRequests(sent);
@@ -53,7 +55,7 @@ export function useConnections() {
 
           // Get unique IDs of all connection parties
           const allProfileIds = new Set<string>();
-          data.forEach((c: Connection) => {
+          allConnections.forEach((c: Connection) => {
             allProfileIds.add(c.requester_id);
             allProfileIds.add(c.recipient_id);
           });
@@ -102,9 +104,9 @@ export function useConnections() {
         .from('connections')
         .select('*')
         .or(`and(requester_id.eq.${user.id},recipient_id.eq.${recipientId}),and(requester_id.eq.${recipientId},recipient_id.eq.${user.id})`)
-        .single();
+        .maybeSingle();
 
-      if (checkError && checkError.code !== 'PGRST116') throw checkError;
+      if (checkError) throw checkError;
       
       if (existing) {
         return { 
