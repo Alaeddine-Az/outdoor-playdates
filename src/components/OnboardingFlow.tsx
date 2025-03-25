@@ -38,44 +38,63 @@ const OnboardingFlow = ({ id }: { id?: string }) => {
   };
 
   const handleCompleteSetup = async () => {
-  setIsSubmitting(true);
+    setIsSubmitting(true);
 
-  try {
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (authError) throw authError;
-
-    // Save custom info in early_signups
-    const { error: signupError } = await supabase
-      .from('early_signups')
-      .upsert({
+    try {
+      // First attempt to sign up the user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
-        parent_name: parentName,
-        location,
-        interests,
-        children,
-      }, {
-        onConflict: 'email' // remove this line if 'email' is not unique
+        password,
       });
 
-    if (signupError) throw signupError;
+      // Special handling for when the user is already registered
+      if (authError?.message?.includes('already registered')) {
+        console.log('User already registered, proceeding with early signup data');
+        // Continue with saving early signup data
+      } else if (authError) {
+        // For any other auth errors, throw to be caught
+        throw authError;
+      }
 
-    navigate('/thank-you', { state: { email } });
+      // Always try to save custom info in early_signups, even if there was an auth "already registered" error
+      const { error: signupError } = await supabase
+        .from('early_signups')
+        .upsert({
+          email,
+          parent_name: parentName,
+          location,
+          interests,
+          children,
+        }, {
+          onConflict: 'email'
+        });
 
-  } catch (err: any) {
-    console.error(err);
-    toast({
-      title: 'Signup Error',
-      description: err.message || 'Please try again.',
-      variant: 'destructive',
-    });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      // If there's an error with the early_signups table but the auth worked,
+      // we'll log the error but still redirect the user to thank you page
+      if (signupError) {
+        console.error('Error saving early signup data:', signupError);
+        toast({
+          title: 'Partial Success',
+          description: 'Your account was created, but there was an issue saving some of your information.',
+          variant: 'default',
+        });
+      }
+
+      // Always redirect to thank you page
+      navigate('/thank-you', { state: { email } });
+
+    } catch (err: any) {
+      console.error('Signup error:', err);
+      toast({
+        title: 'Signup Error',
+        description: err.message || 'There was an error creating your account. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
   return (
     <section 
       id={id}

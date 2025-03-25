@@ -40,16 +40,16 @@ const DesktopNav = ({ user, scrollToSection, handleSignOut }: DesktopNavProps) =
         <>
           <div className="flex items-center space-x-5">
             <button 
-              onClick={() => scrollToSection('features')}
-              className="text-sm font-medium transition-colors hover:text-primary"
-            >
-              Features
-            </button>
-            <button 
               onClick={() => scrollToSection('how-it-works')}
               className="text-sm font-medium transition-colors hover:text-primary"
             >
               How It Works
+            </button>            
+            <button 
+              onClick={() => scrollToSection('features')}
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
+              Features
             </button>
             <Link to="/about" className="text-sm font-medium transition-colors hover:text-primary">
               About

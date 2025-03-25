@@ -32,7 +32,7 @@ const About = () => {
                 GoPlayNow was born from a simple observation: in today's digital world, children spend less time playing outdoors and making real-world connections.
               </p>
               <p className="mb-4">
-                Founded in 2023 by a group of concerned parents in Calgary, our platform aims to reverse this trend by making it easy for families to connect, schedule outdoor activities, and help children develop essential social skills while having fun in nature.
+                Founded in 2025 by a group of concerned parents in Calgary, our platform aims to reverse this trend by making it easy for families to connect, schedule outdoor activities, and help children develop essential social skills while having fun in nature.
               </p>
               <p className="mb-8">
                 We believe that meaningful childhood experiences happen when kids are free to explore, create, and connect with peers in safe outdoor environments. Our platform makes this possible by connecting like-minded families who share these values.

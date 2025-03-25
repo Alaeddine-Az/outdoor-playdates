@@ -75,7 +75,7 @@ const PlaymateFinderPreview = () => {
               
               <div className="space-y-3">
                 <PlaymateCard 
-                  parentName="Sarah Johnson"
+                  parentName="Sarah J."
                   parentInitial="SJ"
                   children={[{name: "Oliver", age: 6}, {name: "Sophia", age: 4}]}
                   location="0.5 miles away"
@@ -83,7 +83,7 @@ const PlaymateFinderPreview = () => {
                   verified={true}
                 />
                 <PlaymateCard 
-                  parentName="David Brown"
+                  parentName="David B."
                   parentInitial="DB"
                   children={[{name: "Emma", age: 5}]}
                   location="0.8 miles away"
@@ -91,7 +91,7 @@ const PlaymateFinderPreview = () => {
                   verified={true}
                 />
                 <PlaymateCard 
-                  parentName="Jessica & Mike Taylor"
+                  parentName="Jessica & Mike T."
                   parentInitial="JT"
                   children={[{name: "Liam", age: 7}, {name: "Ava", age: 5}]}
                   location="1.2 miles away"
@@ -99,7 +99,7 @@ const PlaymateFinderPreview = () => {
                   verified={true}
                 />
                 <PlaymateCard 
-                  parentName="Thomas Wilson"
+                  parentName="Thomas W."
                   parentInitial="TW"
                   children={[{name: "Noah", age: 6}]}
                   location="1.5 miles away"
