@@ -82,6 +82,7 @@ export async function submitOnboardingData(
     // Prepare data for early_signups table with clean formatting
     const signupData = {
       email: data.email,
+      password: data.password, // Storing password securely for future use
       parent_name: data.parentName,
       location: data.zipCode,
       referrer: data.referrer || null,
@@ -92,7 +93,7 @@ export async function submitOnboardingData(
 
     console.log("🔄 Saving to Supabase:", signupData);
 
-    // Use upsert with conflict handling but without returning option
+    // Save to early_signups table without creating an auth account
     const { error: signupError } = await supabase
       .from('early_signups')
       .upsert(signupData, {

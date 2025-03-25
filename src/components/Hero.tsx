@@ -154,7 +154,7 @@ const Hero = () => {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="rounded-xl" 
+                className="rounded-xl hover:bg-primary hover:text-white" 
                 onClick={scrollToFeatures}
               >
                 Learn More
