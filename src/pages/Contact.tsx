@@ -164,7 +164,7 @@ const Contact = () => {
                       </div>
                       <div className="ml-4">
                         <h3 className="text-lg font-medium">Phone</h3>
-                        <p className="text-muted-foreground">(403) 123-4567</p>
+                        <p className="text-muted-foreground">(825) 747-6308</p>
                         <p className="text-muted-foreground">Monday-Friday: 9am-5pm MST</p>
                       </div>
                     </div>
