@@ -1,7 +1,5 @@
 
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
 import { Json } from '@/integrations/supabase/types';
 import type { ChildInfo } from '@/components/onboarding/ChildProfileStep';
 
@@ -17,9 +15,42 @@ export interface OnboardingSubmitData {
 
 export async function submitOnboardingData(
   data: OnboardingSubmitData,
-  onSuccess?: (email: string) => void
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // Log all the data to make sure everything is included
+    console.log("Submitting onboarding data:", {
+      email: data.email,
+      parentName: data.parentName,
+      zipCode: data.zipCode,
+      referrer: data.referrer,
+      childProfilesCount: data.childProfiles.length,
+      childProfiles: data.childProfiles,
+      interestsCount: data.interests.length,
+      interests: data.interests
+    });
+
+    // Validate all required data is present
+    if (!data.email || !data.password || !data.parentName || !data.zipCode) {
+      return {
+        success: false,
+        error: 'Missing required information. Please fill out all fields.'
+      };
+    }
+
+    if (data.childProfiles.length === 0 || !data.childProfiles.every(child => child.name && child.age)) {
+      return {
+        success: false,
+        error: 'Please provide complete information for all children.'
+      };
+    }
+
+    if (data.interests.length === 0) {
+      return {
+        success: false,
+        error: 'Please select at least one interest.'
+      };
+    }
+
     // Convert childProfiles to the correct JSON format for Supabase
     const childrenData = data.childProfiles as unknown as Json[];
 

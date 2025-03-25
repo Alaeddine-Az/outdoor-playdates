@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -55,10 +55,25 @@ const InterestsStep: React.FC<InterestsStepProps> = ({
     mode: 'onChange'
   });
 
+  // When interests prop changes, update the form
+  useEffect(() => {
+    form.setValue('interests', interests);
+  }, [interests, form]);
+
   const selectedInterests = form.watch('interests');
 
+  // Synchronize form with parent state on any change
+  useEffect(() => {
+    if (JSON.stringify(selectedInterests) !== JSON.stringify(interests)) {
+      setInterests(selectedInterests);
+    }
+  }, [selectedInterests, setInterests, interests]);
+
   const onSubmit = (data: z.infer<typeof formSchema>) => {
+    // Make sure to update the parent state before submitting
     setInterests(data.interests);
+    // Log interests before calling handleCompleteSetup
+    console.log("Submitting interests:", data.interests);
     handleCompleteSetup();
   };
 

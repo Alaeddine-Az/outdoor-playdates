@@ -57,10 +57,23 @@ export const OnboardingProvider: React.FC<{
   const navigate = useNavigate();
 
   const handleCompleteSetup = async () => {
-    // ✅ Force ZIP code validation before checking required fields
+    // Make sure the ZIP code is valid
     const zipIsValid = await form.validateZipCode(form.zipCode);
     form.setIsValidZipCode(zipIsValid);
 
+    // First debug all field values to see what might be missing
+    console.log("Checking form fields before submission:", {
+      email: form.email,
+      password: form.password.length > 0 ? "Password set" : "No password",
+      parentName: form.parentName,
+      zipCode: form.zipCode,
+      zipCodeValid: form.isValidZipCode,
+      childProfiles: form.childProfiles,
+      interestsCount: form.interests.length,
+      interests: form.interests
+    });
+
+    // Validate all required fields
     if (!form.validateRequiredFields()) {
       toast({
         title: 'Missing Information',
