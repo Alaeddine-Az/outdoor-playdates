@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         // Check if user is admin
         if (session?.user) {
-          if (session.user.email === 'admin') {
+          if (session.user.email === 'admin@admin.com') {
             setIsAdmin(true);
           } else {
             try {
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // Check if user is admin
       if (session?.user) {
-        if (session.user.email === 'admin') {
+        if (session.user.email === 'admin@admin.com') {
           setIsAdmin(true);
         } else {
           try {
@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(true);
       
       // First check if email exists in approved signups
-      if (email !== 'admin' && email !== 'testuser') {
+      if (email !== 'admin@admin.com' && email !== 'test@user.com') {
         const { data: signupData, error: signupError } = await supabase
           .from('early_signups')
           .select('status')
@@ -240,7 +240,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         description: "You've successfully signed in.",
       });
       
-      if (email === 'admin') {
+      if (email === 'admin@admin.com') {
         setIsAdmin(true);
         navigate('/admin');
       } else {
