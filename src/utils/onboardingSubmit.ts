@@ -92,12 +92,11 @@ export async function submitOnboardingData(
 
     console.log("🔄 Saving to Supabase:", signupData);
 
-    // Use upsert with explicit conflict handling
-    const { data: insertedData, error: signupError } = await supabase
+    // Use upsert with conflict handling but without returning option
+    const { error: signupError } = await supabase
       .from('early_signups')
       .upsert(signupData, {
-        onConflict: 'email',
-        returning: 'minimal'
+        onConflict: 'email'
       });
 
     if (signupError) {

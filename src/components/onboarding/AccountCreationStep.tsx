@@ -1,22 +1,14 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { ChevronRight, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { 
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage 
-} from '@/components/ui/form';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { Form } from '@/components/ui/form';
+import { EmailField } from './account/EmailField';
+import { PasswordField } from './account/PasswordField';
+import { FormButtons } from './FormButtons';
 
 interface AccountCreationStepProps {
   email: string;
@@ -43,7 +35,6 @@ const AccountCreationStep: React.FC<AccountCreationStepProps> = ({
   nextStep,
   isSubmitting
 }) => {
-  const [passwordVisible, setPasswordVisible] = useState(false);
   const [checkingEmail, setCheckingEmail] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,10 +45,6 @@ const AccountCreationStep: React.FC<AccountCreationStepProps> = ({
     },
     mode: 'onChange'
   });
-
-  const togglePasswordVisibility = () => {
-    setPasswordVisible(!passwordVisible);
-  };
 
   const checkEmailExists = async (email: string) => {
     if (!email || !form.formState.dirtyFields.email) return;
@@ -125,77 +112,14 @@ const AccountCreationStep: React.FC<AccountCreationStepProps> = ({
       
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-lg">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-                    <Input 
-                      type="email" 
-                      className="pl-10" 
-                      placeholder="your@email.com"
-                      {...field}
-                      onBlur={(e) => {
-                        field.onBlur();
-                        checkEmailExists(e.target.value);
-                      }}
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <EmailField form={form} onBlur={checkEmailExists} />
+          <PasswordField form={form} />
           
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-                    <Input 
-                      type={passwordVisible ? "text" : "password"} 
-                      className="pl-10 pr-10"
-                      placeholder="Create a secure password"
-                      {...field}
-                    />
-                    <button 
-                      type="button"
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
-                      onClick={togglePasswordVisibility}
-                      tabIndex={-1}
-                    >
-                      {passwordVisible ? 
-                        <EyeOff className="h-5 w-5" /> : 
-                        <Eye className="h-5 w-5" />
-                      }
-                    </button>
-                  </div>
-                </FormControl>
-                <FormDescription>
-                  Must be at least 8 characters with a number or special character.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+          <FormButtons 
+            isValid={form.formState.isValid}
+            loading={isSubmitting || checkingEmail}
+            submitLabel={checkingEmail ? 'Checking...' : 'Continue'}
           />
-          
-          <div className="pt-4">
-            <Button 
-              type="submit"
-              className="w-full button-glow bg-primary hover:bg-primary/90 text-white rounded-xl h-12"
-              disabled={isSubmitting || checkingEmail || !form.formState.isValid}
-            >
-              {checkingEmail ? 'Checking...' : 'Continue'} <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
         </form>
       </Form>
     </div>
