@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -46,11 +46,7 @@ const Auth = () => {
   const { user, signIn, signUp, loading } = useAuth();
   const [activeTab, setActiveTab] = useState<string>("login");
   
-  // If already logged in, redirect to dashboard
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
-  
+  // Define forms outside any conditional rendering
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -68,6 +64,11 @@ const Auth = () => {
       location: "",
     },
   });
+  
+  // If already logged in, render the Navigate component instead of returning early
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
   
   const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
     await signIn(values.email, values.password);
