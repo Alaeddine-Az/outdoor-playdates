@@ -5,6 +5,7 @@ import { toast } from '@/components/ui/use-toast';
 import { useOnboardingForm } from '@/hooks/useOnboardingForm';
 import { useOnboardingNavigation } from '@/hooks/useOnboardingNavigation';
 import { submitOnboardingData } from '@/utils/onboardingSubmit';
+import { supabase } from '@/integrations/supabase/client';
 import type { ChildInfo } from '@/components/onboarding/ChildProfileStep';
 
 interface OnboardingContextType {
@@ -103,15 +104,13 @@ export const OnboardingProvider: React.FC<{
     console.log("⏳ Submission in progress...");
 
     try {
-      
-      import { supabase } from '@/integrations/supabase/client'; // at the top if not already
-
       // 🔍 Debug Supabase Auth session
       const session = await supabase.auth.getSession();
       console.log("🧠 Supabase session:", session);
 
       const user = session.data.session?.user;
       console.log("👤 Supabase user:", user);
+      
       // Submit data to backend
       const result = await submitOnboardingData({
         email: form.email,
