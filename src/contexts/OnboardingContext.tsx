@@ -81,10 +81,10 @@ export const OnboardingProvider: React.FC<{
   const validateZipCode = async (zip: string): Promise<boolean> => {
     if (!zip) return false;
 
-  // Normalize ZIP (remove spaces for consistent API formatting)
+    // Normalize ZIP (remove spaces for consistent API formatting)
     const trimmedZip = zip.trim().toUpperCase();
 
-  // 🇨🇦 Check Canadian format
+    // 🇨🇦 Check Canadian format
     const canadianPostalCodeRegex = /^[A-Za-z]\d[A-Za-z][ ]?\d[A-Za-z]\d$/;
     const isCanadian = canadianPostalCodeRegex.test(trimmedZip);
 
@@ -94,8 +94,8 @@ export const OnboardingProvider: React.FC<{
     }
 
     try {
-    // Optional: Validate against external API (e.g., Geoapify, PositionStack) if you want
-    // For now, just accept valid Canadian format
+      // Optional: Validate against external API (e.g., Geoapify, PositionStack) if you want
+      // For now, just accept valid Canadian format
       setIsValidZipCode(true);
       return true;
     } catch (error) {
@@ -148,15 +148,16 @@ export const OnboardingProvider: React.FC<{
       const signupData = {
         email,
         parent_name: parentName,
-        location: zipCode, // Using zipCode instead of location
+        location: zipCode,
         referrer: referrer || null,
         interests,
         children: childrenData,
+        status: 'pending', // Set initial status as per our new schema
       };
 
       console.log("Saving signup data:", signupData);
 
-      // Save to early_signups - skip the auth.signUp since we're not creating full users yet
+      // Save to early_signups with upsert to handle the unique email constraint
       const { error: signupError } = await supabase
         .from('early_signups')
         .upsert(signupData, {
@@ -172,6 +173,12 @@ export const OnboardingProvider: React.FC<{
         });
         return;
       }
+
+      // Success message
+      toast({
+        title: 'Signup Successful',
+        description: 'Thank you for signing up! We\'ll be in touch soon.',
+      });
 
       // Always redirect to thank you page
       if (onComplete) {
