@@ -10,7 +10,6 @@ import {
   FormMessage 
 } from '@/components/ui/form';
 import { UseFormReturn } from 'react-hook-form';
-import { z } from 'zod';
 
 interface EmailFieldProps {
   form: UseFormReturn<any>;
