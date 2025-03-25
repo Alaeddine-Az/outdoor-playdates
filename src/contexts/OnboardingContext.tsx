@@ -57,6 +57,10 @@ export const OnboardingProvider: React.FC<{
   const navigate = useNavigate();
 
   const handleCompleteSetup = async () => {
+    // ✅ Force ZIP code validation before checking required fields
+    const zipIsValid = await form.validateZipCode(form.zipCode);
+    form.setIsValidZipCode(zipIsValid);
+
     if (!form.validateRequiredFields()) {
       toast({
         title: 'Missing Information',
@@ -83,13 +87,11 @@ export const OnboardingProvider: React.FC<{
         throw new Error(result.error);
       }
 
-      // Success message
       toast({
         title: 'Signup Successful',
         description: 'Thank you for signing up! We\'ll be in touch soon.',
       });
 
-      // Always redirect to thank you page
       if (onComplete) {
         onComplete(form.email);
       } else {
