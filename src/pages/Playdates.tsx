@@ -1,12 +1,14 @@
+
 import React from 'react';
 import AppLayout from '@/components/AppLayout';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, MapPin, Users, PlusCircle, Filter, ChevronRight } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { usePlaydates } from '@/hooks/usePlaydates';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
+import PlaydateList from '@/components/playdates/PlaydateList';
+import PlaydateSidebar from '@/components/playdates/PlaydateSidebar';
 
 const Playdates = () => {
   const navigate = useNavigate();
@@ -33,7 +35,10 @@ const Playdates = () => {
               Schedule, manage, and find fun playdates for your children
             </p>
           </div>
-          <Button className="button-glow bg-primary hover:bg-primary/90 text-white rounded-xl" onClick={() => navigate('/create-playdate')}>
+          <Button 
+            className="button-glow bg-primary hover:bg-primary/90 text-white rounded-xl" 
+            onClick={() => navigate('/create-playdate')}
+          >
             <PlusCircle className="h-4 w-4 mr-2" />
             Create New Playdate
           </Button>
@@ -42,345 +47,42 @@ const Playdates = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Main content area */}
           <div className="md:col-span-2 space-y-6">
-            <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-medium">Upcoming Playdates</h2>
-                <Button variant="outline" size="sm">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filter
-                </Button>
-              </div>
-              
-              {loading ? (
-                <div className="space-y-4">
-                  <Skeleton className="h-24 w-full rounded-lg" />
-                  <Skeleton className="h-24 w-full rounded-lg" />
-                  <Skeleton className="h-24 w-full rounded-lg" />
-                </div>
-              ) : error ? (
-                <div className="p-8 text-center">
-                  <h3 className="text-lg font-medium mb-2">Error loading playdates</h3>
-                  <p className="text-muted-foreground">{error}</p>
-                </div>
-              ) : allPlaydates.length === 0 ? (
-                <div className="p-8 text-center">
-                  <h3 className="text-lg font-medium mb-2">No upcoming playdates</h3>
-                  <p className="text-muted-foreground mb-4">
-                    There are no upcoming playdates in your area.
-                  </p>
-                  <Button onClick={() => navigate('/create-playdate')} className="button-glow bg-primary hover:bg-primary/90 text-white">
-                    <PlusCircle className="h-4 w-4 mr-2" />
-                    Create the first playdate
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {allPlaydates.map((playdate) => (
-                    <PlaydateItem 
-                      key={playdate.id}
-                      title={playdate.title}
-                      date={playdate.date}
-                      time={playdate.time}
-                      location={playdate.location}
-                      attendees={playdate.attendees}
-                      status={playdate.status}
-                      onClick={() => navigate(`/playdate/${playdate.id}`)}
-                    />
-                  ))}
-                </div>
-              )}
-              
-              {allPlaydates.length > 0 && (
-                <div className="mt-6">
-                  <Button variant="ghost" className="text-muted-foreground w-full">
-                    View All Playdates
-                    <ChevronRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </section>
+            <PlaydateList
+              title="Upcoming Playdates"
+              playdates={allPlaydates}
+              loading={loading}
+              error={error}
+              emptyTitle="No upcoming playdates"
+              emptyMessage="There are no upcoming playdates in your area."
+              showCreateButton={true}
+            />
             
-            <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-medium">My Scheduled Playdates</h2>
-                <Button variant="outline" size="sm">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filter
-                </Button>
-              </div>
-              
-              {loading ? (
-                <div className="space-y-4">
-                  <Skeleton className="h-24 w-full rounded-lg" />
-                  <Skeleton className="h-24 w-full rounded-lg" />
-                </div>
-              ) : myPlaydates.length === 0 ? (
-                <div className="p-8 text-center">
-                  <h3 className="text-lg font-medium mb-2">No scheduled playdates</h3>
-                  <p className="text-muted-foreground mb-4">
-                    You haven't created any playdates yet.
-                  </p>
-                  <Button onClick={() => navigate('/create-playdate')} className="button-glow bg-primary hover:bg-primary/90 text-white">
-                    <PlusCircle className="h-4 w-4 mr-2" />
-                    Create your first playdate
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {myPlaydates.map((playdate) => (
-                    <PlaydateItem 
-                      key={playdate.id}
-                      title={playdate.title}
-                      date={playdate.date}
-                      time={playdate.time}
-                      location={playdate.location}
-                      attendees={playdate.attendees}
-                      status={playdate.status}
-                      onClick={() => navigate(`/playdate/${playdate.id}`)}
-                    />
-                  ))}
-                </div>
-              )}
-              
-              {myPlaydates.length > 0 && (
-                <div className="mt-6">
-                  <Button variant="ghost" className="text-muted-foreground w-full">
-                    View All My Playdates
-                    <ChevronRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </section>
+            <PlaydateList
+              title="My Scheduled Playdates"
+              playdates={myPlaydates}
+              loading={loading}
+              error={error}
+              emptyTitle="No scheduled playdates"
+              emptyMessage="You haven't created any playdates yet."
+              showCreateButton={true}
+            />
             
-            <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-medium">Past Playdates</h2>
-                <Button variant="outline" size="sm">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filter
-                </Button>
-              </div>
-              
-              {loading ? (
-                <div className="space-y-4">
-                  <Skeleton className="h-24 w-full rounded-lg" />
-                  <Skeleton className="h-24 w-full rounded-lg" />
-                </div>
-              ) : pastPlaydates.length === 0 ? (
-                <div className="p-8 text-center">
-                  <h3 className="text-lg font-medium mb-2">No past playdates</h3>
-                  <p className="text-muted-foreground">
-                    You haven't attended any playdates yet.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {pastPlaydates.map((playdate) => (
-                    <PlaydateItem 
-                      key={playdate.id}
-                      title={playdate.title}
-                      date={playdate.date}
-                      time={playdate.time}
-                      location={playdate.location}
-                      attendees={playdate.attendees}
-                      status="completed"
-                      onClick={() => navigate(`/playdate/${playdate.id}`)}
-                    />
-                  ))}
-                </div>
-              )}
-            </section>
+            <PlaydateList
+              title="Past Playdates"
+              playdates={pastPlaydates}
+              loading={loading}
+              error={error}
+              emptyTitle="No past playdates"
+              emptyMessage="You haven't attended any playdates yet."
+              showCreateButton={false}
+            />
           </div>
           
           {/* Sidebar content */}
-          <div className="space-y-6">
-            <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
-              <h2 className="text-lg font-medium mb-4">Suggested Playdates</h2>
-              
-              <div className="space-y-3">
-                <SuggestedPlaydateCard 
-                  title="Family Board Game Day"
-                  date="June 22, 2025"
-                  location="Calgary Central Library"
-                  numFamilies={6}
-                />
-                
-                <SuggestedPlaydateCard 
-                  title="Community Playground Meet"
-                  date="June 25, 2025"
-                  location="North Glenmore Park"
-                  numFamilies={8}
-                />
-                
-                <SuggestedPlaydateCard 
-                  title="Arts & Crafts Session"
-                  date="June 29, 2025"
-                  location="Wildflower Arts Centre"
-                  numFamilies={4}
-                />
-              </div>
-            </section>
-            
-            <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
-              <h2 className="text-lg font-medium mb-4">Playdate Groups</h2>
-              
-              <div className="space-y-3">
-                <PlaydateGroupCard 
-                  id="1"
-                  name="Calgary STEM Parents"
-                  members={12}
-                  lastActive="2 days ago"
-                />
-                
-                <PlaydateGroupCard 
-                  id="2"
-                  name="NW Calgary Outdoor Play"
-                  members={23}
-                  lastActive="5 hours ago"
-                />
-                
-                <PlaydateGroupCard 
-                  id="3"
-                  name="Indoor Winter Activities"
-                  members={18}
-                  lastActive="1 day ago"
-                />
-              </div>
-              
-              <div className="mt-4">
-                <Button variant="outline" className="w-full">
-                  Explore All Groups
-                </Button>
-              </div>
-            </section>
-          </div>
+          <PlaydateSidebar />
         </div>
       </div>
     </AppLayout>
-  );
-};
-
-interface PlaydateItemProps {
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  attendees: number;
-  status: 'pending' | 'confirmed' | 'completed';
-  onClick: () => void;
-}
-
-const PlaydateItem = ({ title, date, time, location, attendees, status, onClick }: PlaydateItemProps) => {
-  const statusColors = {
-    pending: 'text-muted-foreground',
-    confirmed: 'text-primary',
-    completed: 'text-secondary'
-  };
-  
-  const statusLabels = {
-    pending: 'Pending',
-    confirmed: 'Confirmed',
-    completed: 'Completed'
-  };
-  
-  return (
-    <div 
-      className="flex items-start p-4 rounded-lg border border-muted bg-muted/10 hover:bg-muted/30 transition-colors cursor-pointer"
-      onClick={onClick}
-    >
-      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex flex-col items-center justify-center text-primary">
-        <Calendar className="h-6 w-6" />
-      </div>
-      <div className="ml-4 flex-grow">
-        <div className="flex justify-between">
-          <h3 className="font-medium">{title}</h3>
-          <div className="flex items-center space-x-1">
-            <div className={`w-2 h-2 rounded-full bg-${status === 'pending' ? 'muted-foreground' : (status === 'confirmed' ? 'primary' : 'secondary')}`}></div>
-            <span className={`text-xs capitalize ${statusColors[status]}`}>{statusLabels[status]}</span>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-3 mt-2 text-sm text-muted-foreground">
-          <div className="flex items-center">
-            <Clock className="h-4 w-4 mr-1" /> 
-            {date}, {time}
-          </div>
-          <div className="flex items-center">
-            <MapPin className="h-4 w-4 mr-1" /> 
-            {location}
-          </div>
-          <div className="flex items-center">
-            <Users className="h-4 w-4 mr-1" /> 
-            {attendees} {attendees === 1 ? 'family' : 'families'}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-interface SuggestedPlaydateCardProps {
-  title: string;
-  date: string;
-  location: string;
-  numFamilies: number;
-}
-
-const SuggestedPlaydateCard = ({ title, date, location, numFamilies }: SuggestedPlaydateCardProps) => {
-  return (
-    <div className="p-3 rounded-lg border border-muted hover:border-primary/20 transition-colors">
-      <h4 className="font-medium text-sm">{title}</h4>
-      <div className="flex items-center text-xs text-muted-foreground mt-1">
-        <Calendar className="h-3 w-3 mr-1" /> 
-        <span>{date}</span>
-      </div>
-      <div className="flex items-center text-xs text-muted-foreground mt-1">
-        <MapPin className="h-3 w-3 mr-1" /> 
-        <span>{location}</span>
-      </div>
-      <div className="flex justify-between items-center mt-2">
-        <span className="text-xs text-muted-foreground">
-          <Users className="h-3 w-3 inline mr-1" />
-          {numFamilies} families interested
-        </span>
-        <Button variant="outline" size="sm" className="h-7 text-xs">
-          Join
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-interface PlaydateGroupCardProps {
-  id: string;
-  name: string;
-  members: number;
-  lastActive: string;
-}
-
-const PlaydateGroupCard = ({ id, name, members, lastActive }: PlaydateGroupCardProps) => {
-  const navigate = useNavigate();
-  
-  return (
-    <div className="p-3 rounded-lg border border-muted hover:border-primary/20 transition-colors">
-      <h4 className="font-medium text-sm">{name}</h4>
-      <div className="flex justify-between items-center mt-1">
-        <span className="text-xs text-muted-foreground">
-          <Users className="h-3 w-3 inline mr-1" />
-          {members} members
-        </span>
-        <span className="text-xs text-muted-foreground">
-          Active {lastActive}
-        </span>
-      </div>
-      <Button 
-        variant="outline" 
-        size="sm" 
-        className="w-full mt-2 h-7 text-xs"
-        onClick={() => navigate(`/group/${id}`)}
-      >
-        View Group
-      </Button>
-    </div>
   );
 };
 
