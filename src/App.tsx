@@ -28,6 +28,7 @@ import FAQ from './pages/FAQ';
 import Terms from './pages/Terms';
 import Contact from './pages/Contact';
 import AdminDashboard from './pages/AdminDashboard';
+import CreatePlaydate from './pages/CreatePlaydate';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -181,12 +182,20 @@ function App() {
               }
             />
             
-            {/* Legacy Routes */}
+            {/* Playdate Routes */}
             <Route
               path="/playdates"
               element={
                 <ProtectedRoute>
                   <Playdates />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/create-playdate"
+              element={
+                <ProtectedRoute>
+                  <CreatePlaydate />
                 </ProtectedRoute>
               }
             />
