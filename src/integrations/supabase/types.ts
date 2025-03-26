@@ -109,61 +109,40 @@ export type Database = {
       }
       early_signups: {
         Row: {
-          child_age: string | null
-          child_name: string | null
-          children: Json[] | null
-          converted_at: string | null
-          converted_user_id: string | null
+          children: Json[]
           created_at: string | null
           email: string
           id: string
-          interests: string[] | null
-          invited_at: string | null
-          location: string | null
+          interests: string[]
+          location: string
           parent_name: string
-          password: string
           phone: string | null
           referrer: string | null
-          status: string
-          updated_at: string | null
+          status: string | null
         }
         Insert: {
-          child_age?: string | null
-          child_name?: string | null
-          children?: Json[] | null
-          converted_at?: string | null
-          converted_user_id?: string | null
+          children: Json[]
           created_at?: string | null
           email: string
           id?: string
-          interests?: string[] | null
-          invited_at?: string | null
-          location?: string | null
+          interests: string[]
+          location: string
           parent_name: string
-          password?: string
           phone?: string | null
           referrer?: string | null
-          status?: string
-          updated_at?: string | null
+          status?: string | null
         }
         Update: {
-          child_age?: string | null
-          child_name?: string | null
-          children?: Json[] | null
-          converted_at?: string | null
-          converted_user_id?: string | null
+          children?: Json[]
           created_at?: string | null
           email?: string
           id?: string
-          interests?: string[] | null
-          invited_at?: string | null
-          location?: string | null
+          interests?: string[]
+          location?: string
           parent_name?: string
-          password?: string
           phone?: string | null
           referrer?: string | null
-          status?: string
-          updated_at?: string | null
+          status?: string | null
         }
         Relationships: []
       }
@@ -342,6 +321,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      old_early_signups: {
+        Row: {
+          children: Json[]
+          created_at: string | null
+          email: string
+          id: string
+          interests: string[]
+          location: string
+          parent_name: string
+          phone: string | null
+          referrer: string | null
+          status: string | null
+        }
+        Insert: {
+          children: Json[]
+          created_at?: string | null
+          email: string
+          id?: string
+          interests: string[]
+          location: string
+          parent_name: string
+          phone?: string | null
+          referrer?: string | null
+          status?: string | null
+        }
+        Update: {
+          children?: Json[]
+          created_at?: string | null
+          email?: string
+          id?: string
+          interests?: string[]
+          location?: string
+          parent_name?: string
+          phone?: string | null
+          referrer?: string | null
+          status?: string | null
+        }
+        Relationships: []
       }
       playdate_participants: {
         Row: {
@@ -669,28 +687,6 @@ export type Database = {
           max_families: number
           created_at: string
           updated_at: string
-        }[]
-      }
-      get_pending_early_signups: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          child_age: string | null
-          child_name: string | null
-          children: Json[] | null
-          converted_at: string | null
-          converted_user_id: string | null
-          created_at: string | null
-          email: string
-          id: string
-          interests: string[] | null
-          invited_at: string | null
-          location: string | null
-          parent_name: string
-          password: string
-          phone: string | null
-          referrer: string | null
-          status: string
-          updated_at: string | null
         }[]
       }
       get_user_connections: {

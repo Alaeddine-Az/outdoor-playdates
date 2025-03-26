@@ -98,7 +98,6 @@ export async function submitOnboardingData(
     const { error: signupError } = await supabase
       .from('early_signups')
       .insert(signupData);
-      });
 
     if (signupError) {
       console.error('❌ Supabase Error:', signupError);
