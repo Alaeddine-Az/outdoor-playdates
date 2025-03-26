@@ -51,7 +51,7 @@ export function useAdminDashboard() {
         // Cast the data to ensure type compatibility
         const typedData = (data || []).map(signup => ({
           ...signup,
-          invited_at: null, // Initialize with null since it might not exist in old records
+          invited_at: signup.invited_at || null, // Initialize with null since it might not exist in old records
           status: (signup.status || 'pending') as 'pending' | 'approved' | 'rejected' | 'converted'
         })) as EarlySignup[];
         

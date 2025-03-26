@@ -110,39 +110,51 @@ export type Database = {
       early_signups: {
         Row: {
           children: Json[]
+          converted_at: string | null
+          converted_user_id: string | null
           created_at: string | null
           email: string
           id: string
           interests: string[]
+          invited_at: string | null
           location: string
           parent_name: string
           phone: string | null
           referrer: string | null
           status: string | null
+          updated_at: string | null
         }
         Insert: {
           children: Json[]
+          converted_at?: string | null
+          converted_user_id?: string | null
           created_at?: string | null
           email: string
           id?: string
           interests: string[]
+          invited_at?: string | null
           location: string
           parent_name: string
           phone?: string | null
           referrer?: string | null
           status?: string | null
+          updated_at?: string | null
         }
         Update: {
           children?: Json[]
+          converted_at?: string | null
+          converted_user_id?: string | null
           created_at?: string | null
           email?: string
           id?: string
           interests?: string[]
+          invited_at?: string | null
           location?: string
           parent_name?: string
           phone?: string | null
           referrer?: string | null
           status?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
