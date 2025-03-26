@@ -78,7 +78,8 @@ export async function submitOnboardingData(
     }
 
     // Convert childProfiles to JSON format for Supabase
-    const childrenData = data.childProfiles.map(child => child as Json);
+    // Fix the type conversion by using 'as unknown as Json'
+    const childrenData = data.childProfiles.map(child => child as unknown as Json);
 
     // Prepare data for early_signups table with clean formatting
     const signupData = {
@@ -88,7 +89,7 @@ export async function submitOnboardingData(
       location: data.zipCode,
       referrer: data.referrer || null,
       interests: data.interests,
-      children: childrenData, // ✅ Now safely jsonb[]
+      children: childrenData,
       status: 'pending',
     };
 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -29,11 +28,12 @@ export function useAdminSignups() {
 
       if (error) throw error;
       
-      // Cast the data to ensure type compatibility
+      // Cast the data to ensure type compatibility with EarlySignup
       const typedData = (data || []).map(signup => ({
         ...signup,
-        status: signup.status as 'pending' | 'approved' | 'rejected' | 'converted'
-      }));
+        invited_at: signup.invited_at || null,
+        status: (signup.status || 'pending') as 'pending' | 'approved' | 'rejected' | 'converted'
+      })) as EarlySignup[];
       
       setSignups(typedData);
     } catch (error) {

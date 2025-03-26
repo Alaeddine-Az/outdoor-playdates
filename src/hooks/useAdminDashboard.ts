@@ -40,14 +40,18 @@ export function useAdminDashboard() {
 
       setLoading(true);
       try {
-        // Fetch pending signups
-        const { data, error } = await supabase.rpc('get_pending_early_signups');
+        // Fetch pending signups directly from the table instead of using RPC
+        const { data, error } = await supabase
+          .from('early_signups')
+          .select('*')
+          .eq('status', 'pending');
 
         if (error) throw error;
         
         // Cast the data to ensure type compatibility
         const typedData = (data || []).map(signup => ({
           ...signup,
+          invited_at: signup.invited_at || null,
           status: signup.status as 'pending' | 'approved' | 'rejected' | 'converted'
         }));
         

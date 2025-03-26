@@ -11,8 +11,6 @@ export interface EarlySignup {
   status: 'pending' | 'approved' | 'rejected' | 'converted';
   created_at: string | null;
   invited_at: string | null;
-  child_age?: string | null;
-  child_name?: string | null;
   converted_at?: string | null;
   converted_user_id?: string | null;
   referrer?: string | null;
