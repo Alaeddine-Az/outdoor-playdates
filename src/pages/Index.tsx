@@ -31,11 +31,11 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
       <Header />
       <Hero />
       <HowItWorks id="how-it-works" />
-      <div className="space-y-12 md:space-y-16">
+      <div className="space-y-4 md:space-y-6">
         <PlaymateFinderPreview />
         <PlaydateSchedulerPreview />
         <CommunityPreview />
@@ -50,7 +50,7 @@ const Index = () => {
           <div className="flex flex-col md:flex-row justify-between gap-8">
             <div className="max-w-xs">
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                   <span className="text-white font-bold text-sm">GP</span>
                 </div>
                 <span className="font-bold text-lg">GoPlayNow</span>
@@ -109,7 +109,7 @@ const Index = () => {
       {/* Scroll to top button */}
       <button
         className={cn(
-          "fixed bottom-6 right-6 w-10 h-10 z-[9999] rounded-full bg-primary text-white shadow-button flex items-center justify-center transition-all duration-300 transform",
+          "fixed bottom-6 right-6 w-12 h-12 z-[9999] rounded-full bg-primary text-white shadow-button flex items-center justify-center transition-all duration-300 transform hover:bg-primary/90 hover:scale-110",
           showScrollTop ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10 pointer-events-none"
         )}
         onClick={scrollToTop}
