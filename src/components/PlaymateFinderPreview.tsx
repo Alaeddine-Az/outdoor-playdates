@@ -119,14 +119,6 @@ const PlaymateFinderPreview = () => {
                   interests={['STEM Activities', 'Outdoor Games']}
                   verified={true}
                 />
-                <PlaymateCard
-                  parentName="Thomas W."
-                  parentInitial="TW"
-                  children={[{ name: 'Noah', age: 6 }]}
-                  location="1.5 miles away"
-                  interests={['Sports', 'Nature Explorers']}
-                  verified={true}
-                />
               </div>
 
               <div className="mt-6 flex justify-center">
