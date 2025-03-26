@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -92,6 +91,8 @@ const PlaydateCreationForm = () => {
         .select();
       
       if (error) throw error;
+      
+      console.log("Created playdate:", data);
       
       toast({
         title: "Playdate created!",

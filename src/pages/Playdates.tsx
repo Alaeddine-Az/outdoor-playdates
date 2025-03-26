@@ -1,13 +1,28 @@
-
 import React from 'react';
 import AppLayout from '@/components/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, MapPin, Users, PlusCircle, Filter, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { usePlaydates } from '@/hooks/usePlaydates';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/components/ui/use-toast';
 
 const Playdates = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { allPlaydates, myPlaydates, pastPlaydates, loading, error } = usePlaydates();
   
+  if (!user) {
+    toast({
+      title: "Authentication required",
+      description: "You need to sign in to view playdates",
+      variant: "destructive"
+    });
+    navigate('/auth');
+    return null;
+  }
+
   return (
     <AppLayout>
       <div className="animate-fade-in">
@@ -36,45 +51,53 @@ const Playdates = () => {
                 </Button>
               </div>
               
-              <div className="space-y-4">
-                {/* Playdate items */}
-                <PlaydateItem 
-                  title="Park Adventure"
-                  date="June 15, 2025"
-                  time="3:00 PM - 5:00 PM"
-                  location="Prince's Island Park"
-                  attendees={3}
-                  status="confirmed"
-                  onClick={() => navigate('/playdate/1')}
-                />
-                
-                <PlaydateItem 
-                  title="STEM Play Session"
-                  date="June 18, 2025"
-                  time="10:00 AM - 12:00 PM"
-                  location="Calgary Science Centre"
-                  attendees={5}
-                  status="confirmed"
-                  onClick={() => navigate('/playdate/2')}
-                />
-                
-                <PlaydateItem 
-                  title="Nature Scavenger Hunt"
-                  date="June 21, 2025"
-                  time="2:00 PM - 4:00 PM"
-                  location="Fish Creek Provincial Park"
-                  attendees={4}
-                  status="pending"
-                  onClick={() => navigate('/playdate/3')}
-                />
-              </div>
+              {loading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-24 w-full rounded-lg" />
+                  <Skeleton className="h-24 w-full rounded-lg" />
+                  <Skeleton className="h-24 w-full rounded-lg" />
+                </div>
+              ) : error ? (
+                <div className="p-8 text-center">
+                  <h3 className="text-lg font-medium mb-2">Error loading playdates</h3>
+                  <p className="text-muted-foreground">{error}</p>
+                </div>
+              ) : allPlaydates.length === 0 ? (
+                <div className="p-8 text-center">
+                  <h3 className="text-lg font-medium mb-2">No upcoming playdates</h3>
+                  <p className="text-muted-foreground mb-4">
+                    There are no upcoming playdates in your area.
+                  </p>
+                  <Button onClick={() => navigate('/create-playdate')} className="button-glow bg-primary hover:bg-primary/90 text-white">
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Create the first playdate
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {allPlaydates.map((playdate) => (
+                    <PlaydateItem 
+                      key={playdate.id}
+                      title={playdate.title}
+                      date={playdate.date}
+                      time={playdate.time}
+                      location={playdate.location}
+                      attendees={playdate.attendees}
+                      status={playdate.status}
+                      onClick={() => navigate(`/playdate/${playdate.id}`)}
+                    />
+                  ))}
+                </div>
+              )}
               
-              <div className="mt-6">
-                <Button variant="ghost" className="text-muted-foreground w-full">
-                  View All Playdates
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
+              {allPlaydates.length > 0 && (
+                <div className="mt-6">
+                  <Button variant="ghost" className="text-muted-foreground w-full">
+                    View All Playdates
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </section>
             
             <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
@@ -86,34 +109,47 @@ const Playdates = () => {
                 </Button>
               </div>
               
-              <div className="space-y-4">
-                <PlaydateItem 
-                  title="Soccer in the Park"
-                  date="June 17, 2025"
-                  time="4:00 PM - 6:00 PM"
-                  location="Edworthy Park"
-                  attendees={6}
-                  status="confirmed"
-                  onClick={() => navigate('/playdate/6')}
-                />
-                
-                <PlaydateItem 
-                  title="Art Class Meetup"
-                  date="June 19, 2025"
-                  time="1:00 PM - 3:00 PM"
-                  location="Wildflower Arts Centre"
-                  attendees={8}
-                  status="confirmed"
-                  onClick={() => navigate('/playdate/7')}
-                />
-              </div>
+              {loading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-24 w-full rounded-lg" />
+                  <Skeleton className="h-24 w-full rounded-lg" />
+                </div>
+              ) : myPlaydates.length === 0 ? (
+                <div className="p-8 text-center">
+                  <h3 className="text-lg font-medium mb-2">No scheduled playdates</h3>
+                  <p className="text-muted-foreground mb-4">
+                    You haven't created any playdates yet.
+                  </p>
+                  <Button onClick={() => navigate('/create-playdate')} className="button-glow bg-primary hover:bg-primary/90 text-white">
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Create your first playdate
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {myPlaydates.map((playdate) => (
+                    <PlaydateItem 
+                      key={playdate.id}
+                      title={playdate.title}
+                      date={playdate.date}
+                      time={playdate.time}
+                      location={playdate.location}
+                      attendees={playdate.attendees}
+                      status={playdate.status}
+                      onClick={() => navigate(`/playdate/${playdate.id}`)}
+                    />
+                  ))}
+                </div>
+              )}
               
-              <div className="mt-6">
-                <Button variant="ghost" className="text-muted-foreground w-full">
-                  View All My Playdates
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
+              {myPlaydates.length > 0 && (
+                <div className="mt-6">
+                  <Button variant="ghost" className="text-muted-foreground w-full">
+                    View All My Playdates
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </section>
             
             <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
@@ -125,27 +161,34 @@ const Playdates = () => {
                 </Button>
               </div>
               
-              <div className="space-y-4">
-                <PlaydateItem 
-                  title="Swimming Playdate"
-                  date="June 8, 2025"
-                  time="1:00 PM - 3:00 PM"
-                  location="Southland Leisure Centre"
-                  attendees={3}
-                  status="completed"
-                  onClick={() => navigate('/playdate/4')}
-                />
-                
-                <PlaydateItem 
-                  title="Bike Ride Adventure"
-                  date="June 5, 2025"
-                  time="4:00 PM - 5:30 PM"
-                  location="Bowness Park"
-                  attendees={2}
-                  status="completed"
-                  onClick={() => navigate('/playdate/5')}
-                />
-              </div>
+              {loading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-24 w-full rounded-lg" />
+                  <Skeleton className="h-24 w-full rounded-lg" />
+                </div>
+              ) : pastPlaydates.length === 0 ? (
+                <div className="p-8 text-center">
+                  <h3 className="text-lg font-medium mb-2">No past playdates</h3>
+                  <p className="text-muted-foreground">
+                    You haven't attended any playdates yet.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {pastPlaydates.map((playdate) => (
+                    <PlaydateItem 
+                      key={playdate.id}
+                      title={playdate.title}
+                      date={playdate.date}
+                      time={playdate.time}
+                      location={playdate.location}
+                      attendees={playdate.attendees}
+                      status="completed"
+                      onClick={() => navigate(`/playdate/${playdate.id}`)}
+                    />
+                  ))}
+                </div>
+              )}
             </section>
           </div>
           
@@ -252,7 +295,7 @@ const PlaydateItem = ({ title, date, time, location, attendees, status, onClick 
         <div className="flex justify-between">
           <h3 className="font-medium">{title}</h3>
           <div className="flex items-center space-x-1">
-            <div className={`w-2 h-2 rounded-full bg-${statusColors[status]}`}></div>
+            <div className={`w-2 h-2 rounded-full bg-${status === 'pending' ? 'muted-foreground' : (status === 'confirmed' ? 'primary' : 'secondary')}`}></div>
             <span className={`text-xs capitalize ${statusColors[status]}`}>{statusLabels[status]}</span>
           </div>
         </div>
@@ -267,7 +310,7 @@ const PlaydateItem = ({ title, date, time, location, attendees, status, onClick 
           </div>
           <div className="flex items-center">
             <Users className="h-4 w-4 mr-1" /> 
-            {attendees} families
+            {attendees} {attendees === 1 ? 'family' : 'families'}
           </div>
         </div>
       </div>
