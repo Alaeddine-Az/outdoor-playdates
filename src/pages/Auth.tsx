@@ -154,7 +154,7 @@ const Auth = () => {
                   
                   <div className="mt-4 text-center">
                     <Link to="/" className="text-primary hover:underline">
-                      Go to Homepage
+                      Back
                     </Link>
                   </div>
                 </form>
