@@ -35,12 +35,14 @@ const Index = () => {
       <Header />
       <Hero />
       <HowItWorks id="how-it-works" />
-      <PlaymateFinderPreview />
-      <PlaydateSchedulerPreview />
-      <CommunityPreview />
-      <TestimonialsCarousel />
-      <FeatureSection id="features" />
-      <OnboardingFlow id="onboarding" />
+      <div className="space-y-12 md:space-y-16">
+        <PlaymateFinderPreview />
+        <PlaydateSchedulerPreview />
+        <CommunityPreview />
+        <TestimonialsCarousel />
+        <FeatureSection id="features" />
+        <OnboardingFlow id="onboarding" />
+      </div>
 
       {/* Footer */}
       <footer className="bg-muted/30 py-12 border-t border-muted">

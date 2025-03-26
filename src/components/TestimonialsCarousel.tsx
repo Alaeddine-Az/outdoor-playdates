@@ -14,7 +14,7 @@ const TestimonialsCarousel = () => {
   return (
     <section 
       ref={ref as React.RefObject<HTMLDivElement>}
-      className="py-24 px-6 relative overflow-hidden"
+      className="py-16 px-6 relative overflow-hidden"
     >
       <div id="TestimonialsCarousel" className="absolute inset-0 overflow-hidden">
         <div className="absolute top-[30%] right-[10%] w-[25%] h-[25%] rounded-full bg-primary/5 filter blur-3xl"></div>
@@ -22,13 +22,13 @@ const TestimonialsCarousel = () => {
       </div>
 
       <div className="container mx-auto relative z-10">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="inline-block rounded-full bg-muted px-4 py-1.5 mb-4">
             <span className="text-sm font-medium text-foreground/80">
               Parents Love GoPlayNow
             </span>
           </div>
-          <h2 className="font-bold tracking-tight mb-4">
+          <h2 className="text-3xl font-bold tracking-tight mb-4">
             What Families Are <span className="text-primary">Saying</span>
           </h2>
           <p className="text-xl text-muted-foreground">
@@ -42,7 +42,7 @@ const TestimonialsCarousel = () => {
         )}>
           <Carousel
             opts={{
-              align: "start",
+              align: "center",
               loop: true,
             }}
             className="w-full"
@@ -85,9 +85,9 @@ const TestimonialsCarousel = () => {
                 />
               </CarouselItem>
             </CarouselContent>
-            <div className="flex justify-center mt-8">
-              <CarouselPrevious className="relative static lg:absolute transform-none ml-0 mr-2" />
-              <CarouselNext className="relative static lg:absolute transform-none mr-0 ml-2" />
+            <div className="flex justify-center mt-6">
+              <CarouselPrevious className="relative static transform-none mx-2" />
+              <CarouselNext className="relative static transform-none mx-2" />
             </div>
           </Carousel>
         </div>
@@ -114,7 +114,7 @@ const TestimonialCard = ({ quote, author, role, rating, imageSrc }: TestimonialC
       </div>
       <div className="relative mb-4">
         <Quote className="absolute top-0 left-0 h-6 w-6 text-primary/20 -translate-x-2 -translate-y-2" />
-        <p className="text-foreground">{quote}</p>
+        <p className="text-foreground text-left">{quote}</p>
       </div>
     </div>
     <div className="flex items-center mt-4 pt-4 border-t border-muted">
@@ -125,7 +125,7 @@ const TestimonialCard = ({ quote, author, role, rating, imageSrc }: TestimonialC
           className="w-full h-full object-cover"
         />
       </div>
-      <div>
+      <div className="text-left">
         <h4 className="font-medium">{author}</h4>
         <p className="text-sm text-muted-foreground">{role}</p>
       </div>
