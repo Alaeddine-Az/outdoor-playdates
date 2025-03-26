@@ -130,7 +130,7 @@ const About = () => {
                 Ready to connect your children with meaningful outdoor play experiences?
               </p>
               <Button asChild size="lg">
-                <Link to="/#onboarding">Get Started Today</Link>
+                <Link to="/#onboarding">Request an Invitation to Join</Link>
               </Button>
             </div>
           </div>
