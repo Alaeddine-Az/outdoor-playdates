@@ -61,7 +61,7 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({
   
   const validateZipCode = async (zipCode: string): Promise<boolean> => {
     // Simple validation for US zip code format (5 digits, or 5+4)
-    const zipRegex = /^\d{5}(-\d{4})?$/;
+    const postalCodeRegex = /^[A-Za-z]\d[A-Za-z][ ]?\d[A-Za-z]\d$/;
     return Promise.resolve(zipRegex.test(zipCode));
   };
   
