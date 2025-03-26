@@ -18,7 +18,7 @@ interface OnboardingContextType {
   setZipCode: (zipCode: string) => void;
   isValidZipCode: boolean;
   setIsValidZipCode: (isValid: boolean) => void;
-  validateZipCode: (zipCode: string) => boolean;
+  validateZipCode: (zipCode: string) => Promise<boolean>;
   referrer: string;
   setReferrer: (referrer: string) => void;
   childProfiles: ChildInfo[];
@@ -47,7 +47,7 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({
   const [zipCode, setZipCode] = useState('');
   const [isValidZipCode, setIsValidZipCode] = useState(true);
   const [referrer, setReferrer] = useState('');
-  const [childProfiles, setChildProfiles] = useState<ChildInfo[]>([{ id: '1', name: '', age: '' }]);
+  const [childProfiles, setChildProfiles] = useState<ChildInfo[]>([{ name: '', age: '' }]);
   const [interests, setInterests] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -59,10 +59,10 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({
     setStep(prev => prev - 1);
   };
   
-  const validateZipCode = (zipCode: string): boolean => {
+  const validateZipCode = async (zipCode: string): Promise<boolean> => {
     // Simple validation for US zip code format (5 digits, or 5+4)
     const zipRegex = /^\d{5}(-\d{4})?$/;
-    return zipRegex.test(zipCode);
+    return Promise.resolve(zipRegex.test(zipCode));
   };
   
   const handleCompleteSetup = async () => {

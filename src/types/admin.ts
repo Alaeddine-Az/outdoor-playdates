@@ -17,4 +17,5 @@ export interface EarlySignup {
   converted_user_id?: string | null;
   referrer?: string | null;
   updated_at?: string | null;
+  phone?: string | null;
 }
