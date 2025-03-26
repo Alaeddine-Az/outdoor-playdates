@@ -54,7 +54,7 @@ const TestimonialsCarousel = () => {
                   author="Jessica T."
                   role="Mother of two"
                   rating={5}
-                  imageSrc="https://images.unsplash.com/photo-1559830772-73d4bee960fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80"
+                  imageSrc="https://img.freepik.com/free-photo/portrait-beautiful-young-woman-standing-grey-wall_231208-10760.jpg?ga=GA1.1.927601997.1731108421&semt=ais_hybrid"
                 />
               </CarouselItem>
               <CarouselItem className="md:basis-1/2 lg:basis-1/3">
@@ -63,7 +63,7 @@ const TestimonialsCarousel = () => {
                   author="Michael R."
                   role="Father of three"
                   rating={5}
-                  imageSrc="https://images.unsplash.com/photo-1624221736632-8478792915dd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80"
+                  imageSrc="https://img.freepik.com/free-photo/young-father-spending-time-with-his-adorable-daughter_23-2148989019.jpg?ga=GA1.1.927601997.1731108421&semt=ais_hybrid"
                 />
               </CarouselItem>
               <CarouselItem className="md:basis-1/2 lg:basis-1/3">
@@ -72,7 +72,7 @@ const TestimonialsCarousel = () => {
                   author="Samantha K."
                   role="Mother of one"
                   rating={5}
-                  imageSrc="https://images.unsplash.com/photo-1623855244183-52fd8d3ce2b7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80"
+                  imageSrc="https://img.freepik.com/free-photo/plus-size-t-shirt-white-basic-women-rsquo-s-casual-wear-outdoor-shoot_53876-101203.jpg?ga=GA1.1.927601997.1731108421&semt=ais_hybrid"
                 />
               </CarouselItem>
               <CarouselItem className="md:basis-1/2 lg:basis-1/3">
@@ -81,7 +81,7 @@ const TestimonialsCarousel = () => {
                   author="David L."
                   role="Father of two"
                   rating={5}
-                  imageSrc="https://images.unsplash.com/photo-1551836022-4c4c79ecde51?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80"
+                  imageSrc="https://img.freepik.com/free-photo/smiling-businessman-with-phone-downtown_23-2147689110.jpg?ga=GA1.1.927601997.1731108421&semt=ais_hybrid"
                 />
               </CarouselItem>
             </CarouselContent>

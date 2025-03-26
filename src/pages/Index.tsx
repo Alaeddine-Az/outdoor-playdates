@@ -6,7 +6,7 @@ import FeatureSection from '@/components/FeatureSection';
 import HowItWorks from '@/components/HowItWorks';
 import PlaymateFinderPreview from '@/components/PlaymateFinderPreview';
 import PlaydateSchedulerPreview from '@/components/PlaydateSchedulerPreview';
-import GamifiedChallengePreview from '@/components/GamifiedChallengePreview';
+//import GamifiedChallengePreview from '@/components/GamifiedChallengePreview';
 import CommunityPreview from '@/components/CommunityPreview';
 import TestimonialsCarousel from '@/components/TestimonialsCarousel';
 import OnboardingFlow from '@/components/OnboardingFlow';
@@ -35,12 +35,11 @@ const Index = () => {
       <Header />
       <Hero />
       <HowItWorks id="how-it-works" />
-      <FeatureSection id="features" />
       <PlaymateFinderPreview />
       <PlaydateSchedulerPreview />
-      <GamifiedChallengePreview />
       <CommunityPreview />
       <TestimonialsCarousel />
+      <FeatureSection id="features" />
       <OnboardingFlow id="onboarding" />
 
       {/* Footer */}
