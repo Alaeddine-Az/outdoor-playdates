@@ -122,6 +122,7 @@ export type Database = {
           location: string | null
           parent_name: string
           password: string
+          phone: string | null
           referrer: string | null
           status: string
           updated_at: string | null
@@ -140,6 +141,7 @@ export type Database = {
           location?: string | null
           parent_name: string
           password?: string
+          phone?: string | null
           referrer?: string | null
           status?: string
           updated_at?: string | null
@@ -158,6 +160,7 @@ export type Database = {
           location?: string | null
           parent_name?: string
           password?: string
+          phone?: string | null
           referrer?: string | null
           status?: string
           updated_at?: string | null
@@ -684,6 +687,7 @@ export type Database = {
           location: string | null
           parent_name: string
           password: string
+          phone: string | null
           referrer: string | null
           status: string
           updated_at: string | null
