@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { cn } from '@/lib/utils';
@@ -23,67 +22,11 @@ const CommunityPreview = () => {
 
       <div className="container mx-auto relative z-10">
         <div className="flex flex-col lg:flex-row items-center gap-16">
-          <div className={cn(
-            "w-full max-w-xl",
-            isIntersecting ? "animate-slide-in-left" : "opacity-0"
-          )}>
-            <div className="bg-white rounded-2xl shadow-soft border border-muted p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-medium">Parent Communities</h3>
-                <Button variant="outline" size="sm">
-                  <Users className="h-4 w-4 mr-2" /> 
-                  Join Group
-                </Button>
-              </div>
-              
-              <div className="space-y-4">
-                <CommunityCard 
-                  name="STEM Explorers"
-                  members={42}
-                  description="Connect with parents who encourage scientific discovery and learning through play."
-                  active={true}
-                />
-                
-                <CommunityCard 
-                  name="Nature Adventurers"
-                  members={37}
-                  description="For families who love hiking, exploring parks, and outdoor nature activities."
-                  active={false}
-                />
-                
-                <CommunityCard 
-                  name="Creative Arts Club"
-                  members={28}
-                  description="Share ideas for art projects, music activities, and creative expression."
-                  active={false}
-                />
-              </div>
-              
-              <div className="mt-8 p-4 rounded-xl bg-muted/50 border border-muted">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <Lock className="h-5 w-5 text-play-purple" />
-                  </div>
-                  <div className="ml-3">
-                    <h4 className="font-medium text-sm">Privacy Guaranteed</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      All community groups are private. Only verified parents can join, and your information is never shared outside the platform.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-6 text-center">
-                <Button variant="ghost" className="text-muted-foreground">
-                  View All Communities
-                </Button>
-              </div>
-            </div>
-          </div>
           
+          {/* Text on the left */}
           <div className={cn(
             "max-w-xl",
-            isIntersecting ? "animate-fade-in" : "opacity-0"
+            isIntersecting ? "animate-slide-in-left" : "opacity-0"
           )}>
             <div className="inline-block rounded-full bg-play-purple/10 px-4 py-1.5 mb-4">
               <span className="text-sm font-medium text-play-purple">
@@ -118,6 +61,63 @@ const CommunityPreview = () => {
               >
                 Join Our Community
               </Button>
+            </div>
+          </div>
+
+          {/* Box on the right */}
+          <div className={cn(
+            "w-full max-w-xl",
+            isIntersecting ? "animate-slide-in-right" : "opacity-0"
+          )}>
+            <div className="bg-white rounded-2xl shadow-soft border border-muted p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-medium">Parent Communities</h3>
+                <Button variant="outline" size="sm">
+                  <Users className="h-4 w-4 mr-2" /> 
+                  Join Group
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                <CommunityCard 
+                  name="STEM Explorers"
+                  members={42}
+                  description="Connect with parents who encourage scientific discovery and learning through play."
+                  active={true}
+                />
+                <CommunityCard 
+                  name="Nature Adventurers"
+                  members={37}
+                  description="For families who love hiking, exploring parks, and outdoor nature activities."
+                  active={false}
+                />
+                <CommunityCard 
+                  name="Creative Arts Club"
+                  members={28}
+                  description="Share ideas for art projects, music activities, and creative expression."
+                  active={false}
+                />
+              </div>
+              
+              <div className="mt-8 p-4 rounded-xl bg-muted/50 border border-muted">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <Lock className="h-5 w-5 text-play-purple" />
+                  </div>
+                  <div className="ml-3">
+                    <h4 className="font-medium text-sm">Privacy Guaranteed</h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      All community groups are private. Only verified parents can join, and your information is never shared outside the platform.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 text-center">
+                <Button variant="ghost" className="text-muted-foreground">
+                  View All Communities
+                </Button>
+              </div>
             </div>
           </div>
         </div>
