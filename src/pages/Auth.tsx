@@ -25,7 +25,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Mail, Lock, User, MapPin } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -151,6 +151,12 @@ const Auth = () => {
                   >
                     {loading ? "Signing in..." : "Sign In"}
                   </Button>
+                  
+                  <div className="mt-4 text-center">
+                    <Link to="/dashboard" className="text-primary hover:underline">
+                      Go to Dashboard
+                    </Link>
+                  </div>
                 </form>
               </Form>
             </TabsContent>
@@ -254,6 +260,12 @@ const Auth = () => {
                   >
                     {loading ? "Creating Account..." : "Create Account"}
                   </Button>
+                  
+                  <div className="mt-4 text-center">
+                    <Link to="/dashboard" className="text-primary hover:underline">
+                      Go to Dashboard
+                    </Link>
+                  </div>
                 </form>
               </Form>
             </TabsContent>

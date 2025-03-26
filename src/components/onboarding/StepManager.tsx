@@ -12,7 +12,7 @@ const StepManager: React.FC = () => {
   const { 
     step,
     email, setEmail,
-    password, setPassword,
+    phone, setPhone,
     parentName, setParentName,
     zipCode, setZipCode,
     isValidZipCode, setIsValidZipCode, validateZipCode,
@@ -27,7 +27,7 @@ const StepManager: React.FC = () => {
   return (
     <div className="p-4 md:p-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <h3 className="text-xl md:text-2xl font-medium">Create Your Account</h3>
+        <h3 className="text-xl md:text-2xl font-medium">Join GoPlayNow</h3>
         <div className="w-full md:w-auto">
           <ProgressIndicator currentStep={step} totalSteps={4} />
         </div>
@@ -42,8 +42,8 @@ const StepManager: React.FC = () => {
           <AccountCreationStep 
             email={email}
             setEmail={setEmail}
-            password={password}
-            setPassword={setPassword}
+            phone={phone}
+            setPhone={setPhone}
             nextStep={nextStep}
             isSubmitting={isSubmitting}
           />

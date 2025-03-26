@@ -1,45 +1,43 @@
 
 import React from 'react';
-import { Mail } from 'lucide-react';
+import { Phone } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { 
   FormControl,
   FormField,
   FormItem,
   FormLabel, 
-  FormMessage 
+  FormMessage,
+  FormDescription
 } from '@/components/ui/form';
 import { UseFormReturn } from 'react-hook-form';
 
-interface EmailFieldProps {
+interface PhoneFieldProps {
   form: UseFormReturn<any>;
-  onBlur?: (email: string) => void;
 }
 
-export const EmailField: React.FC<EmailFieldProps> = ({ form, onBlur }) => {
+export const PhoneField: React.FC<PhoneFieldProps> = ({ form }) => {
   return (
     <FormField
       control={form.control}
-      name="email"
+      name="phone"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Email</FormLabel>
+          <FormLabel>Phone Number</FormLabel>
           <FormControl>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
               <Input 
-                type="email" 
+                type="tel" 
                 className="pl-10"
-                placeholder="your@email.com"
+                placeholder="(123) 456-7890"
                 {...field}
-                onBlur={() => {
-                  if (onBlur && field.value) {
-                    onBlur(field.value);
-                  }
-                }}
               />
             </div>
           </FormControl>
+          <FormDescription>
+            We'll send you an invitation when your account is ready
+          </FormDescription>
           <FormMessage />
         </FormItem>
       )}

@@ -5,7 +5,7 @@ import type { ChildInfo } from '@/components/onboarding/ChildProfileStep';
 
 export interface OnboardingSubmitData {
   email: string;
-  password: string;
+  phone?: string;
   parentName: string;
   zipCode: string;
   referrer: string;
@@ -20,6 +20,7 @@ export async function submitOnboardingData(
     // Enhanced debugging: Log all data with clear structure
     console.log("📝 SUBMITTING ONBOARDING DATA:", {
       email: data.email,
+      phone: data.phone || 'None provided',
       parentName: data.parentName,
       zipCode: data.zipCode,
       referrer: data.referrer || 'None provided',
@@ -34,11 +35,11 @@ export async function submitOnboardingData(
     });
 
     // Comprehensive validation checks
-    if (!data.email || !data.password) {
-      console.error("❌ Missing credentials");
+    if (!data.email) {
+      console.error("❌ Missing email");
       return {
         success: false,
-        error: 'Email and password are required.'
+        error: 'Email is required.'
       };
     }
 
@@ -82,7 +83,7 @@ export async function submitOnboardingData(
     // Prepare data for early_signups table with clean formatting
     const signupData = {
       email: data.email,
-      password: data.password, // Storing password securely for future use
+      phone: data.phone || null,
       parent_name: data.parentName,
       location: data.zipCode,
       referrer: data.referrer || null,

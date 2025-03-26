@@ -7,31 +7,28 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Form } from '@/components/ui/form';
 import { EmailField } from './account/EmailField';
-import { PasswordField } from './account/PasswordField';
+import { PhoneField } from './account/PhoneField';
 import { FormButtons } from './FormButtons';
 
 interface AccountCreationStepProps {
   email: string;
   setEmail: (email: string) => void;
-  password: string;
-  setPassword?: (password: string) => void;
+  phone: string;
+  setPhone: (phone: string) => void;
   nextStep: () => void;
   isSubmitting: boolean;
 }
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters").regex(
-    /^(?=.*[0-9!@#$%^&*])/,
-    "Password must contain at least one number or special character"
-  )
+  phone: z.string().min(10, "Please enter a valid phone number").optional()
 });
 
 const AccountCreationStep: React.FC<AccountCreationStepProps> = ({
   email,
   setEmail,
-  password,
-  setPassword = () => {},
+  phone,
+  setPhone,
   nextStep,
   isSubmitting
 }) => {
@@ -41,7 +38,7 @@ const AccountCreationStep: React.FC<AccountCreationStepProps> = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email,
-      password
+      phone
     },
     mode: 'onChange'
   });
@@ -91,7 +88,7 @@ const AccountCreationStep: React.FC<AccountCreationStepProps> = ({
       }
     
       setEmail(data.email);
-      setPassword(data.password);
+      setPhone(data.phone || '');
       nextStep();
     } catch (error) {
       console.error('Error during email check:', error);
@@ -105,20 +102,20 @@ const AccountCreationStep: React.FC<AccountCreationStepProps> = ({
 
   return (
     <div>
-      <h4 className="text-xl font-medium mb-4">Create your account</h4>
+      <h4 className="text-xl font-medium mb-4">Request an invitation</h4>
       <p className="text-muted-foreground mb-6">
-        Your email will be verified to ensure the safety of our community.
+        Fill out the form to join our community of parents. We'll send you an invitation when your account is ready.
       </p>
       
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-lg">
           <EmailField form={form} onBlur={checkEmailExists} />
-          <PasswordField form={form} />
+          <PhoneField form={form} />
           
           <FormButtons 
             isValid={form.formState.isValid}
             loading={isSubmitting || checkingEmail}
-            submitLabel={checkingEmail ? 'Checking...' : 'Continue'}
+            submitLabel={checkingEmail ? 'Checking...' : 'Get an invitation now. It\'s free!'}
           />
         </form>
       </Form>

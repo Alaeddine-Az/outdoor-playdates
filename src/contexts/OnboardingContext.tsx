@@ -1,156 +1,146 @@
 
-import React, { createContext, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from '@/components/ui/use-toast';
-import { useOnboardingForm } from '@/hooks/useOnboardingForm';
-import { useOnboardingNavigation } from '@/hooks/useOnboardingNavigation';
+import React, { createContext, useContext, useState } from 'react';
 import { submitOnboardingData } from '@/utils/onboardingSubmit';
 import type { ChildInfo } from '@/components/onboarding/ChildProfileStep';
+import { toast } from '@/components/ui/use-toast';
 
 interface OnboardingContextType {
-  // Form state
+  step: number;
+  nextStep: () => void;
+  prevStep: () => void;
   email: string;
   setEmail: (email: string) => void;
-  password: string;
-  setPassword: (password: string) => void;
+  phone: string;
+  setPhone: (phone: string) => void;
   parentName: string;
   setParentName: (name: string) => void;
   zipCode: string;
   setZipCode: (zipCode: string) => void;
+  isValidZipCode: boolean;
+  setIsValidZipCode: (isValid: boolean) => void;
+  validateZipCode: (zipCode: string) => boolean;
   referrer: string;
   setReferrer: (referrer: string) => void;
   childProfiles: ChildInfo[];
-  setChildProfiles: React.Dispatch<React.SetStateAction<ChildInfo[]>>;
+  setChildProfiles: (children: ChildInfo[]) => void;
   interests: string[];
-  setInterests: React.Dispatch<React.SetStateAction<string[]>>;
-  
-  // Navigation state
-  step: number;
-  nextStep: () => void;
-  prevStep: () => void;
-  
-  // Submission state
+  setInterests: (interests: string[]) => void;
   isSubmitting: boolean;
-  setIsSubmitting: (value: boolean) => void;
-  isValidZipCode: boolean;
-  setIsValidZipCode: (value: boolean) => void;
-  validateZipCode: (zipCode: string) => Promise<boolean>;
   handleCompleteSetup: () => Promise<void>;
 }
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
-export const useOnboarding = () => {
-  const context = useContext(OnboardingContext);
-  if (!context) {
-    throw new Error('useOnboarding must be used within an OnboardingProvider');
-  }
-  return context;
-};
-
-export const OnboardingProvider: React.FC<{
+interface OnboardingProviderProps {
   children: React.ReactNode;
   onComplete?: (email: string) => void;
-}> = ({ children, onComplete }) => {
-  const form = useOnboardingForm();
-  const navigation = useOnboardingNavigation();
-  const navigate = useNavigate();
+}
 
+export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({
+  children,
+  onComplete = () => {}
+}) => {
+  const [step, setStep] = useState(1);
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [parentName, setParentName] = useState('');
+  const [zipCode, setZipCode] = useState('');
+  const [isValidZipCode, setIsValidZipCode] = useState(true);
+  const [referrer, setReferrer] = useState('');
+  const [childProfiles, setChildProfiles] = useState<ChildInfo[]>([{ id: '1', name: '', age: '' }]);
+  const [interests, setInterests] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const nextStep = () => {
+    setStep(prev => prev + 1);
+  };
+  
+  const prevStep = () => {
+    setStep(prev => prev - 1);
+  };
+  
+  const validateZipCode = (zipCode: string): boolean => {
+    // Simple validation for US zip code format (5 digits, or 5+4)
+    const zipRegex = /^\d{5}(-\d{4})?$/;
+    return zipRegex.test(zipCode);
+  };
+  
   const handleCompleteSetup = async () => {
-    console.log("🚀 Starting onboarding submission process");
+    setIsSubmitting(true);
     
-    // Validate ZIP code first
-    console.log("🧪 Validating postal code:", form.zipCode);
-    const zipIsValid = await form.validateZipCode(form.zipCode);
-    form.setIsValidZipCode(zipIsValid);
-    
-    if (!zipIsValid) {
-      console.error("❌ Invalid postal code");
-      toast({
-        title: 'Invalid Postal Code',
-        description: 'Please enter a valid Canadian postal code.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Debug log all form fields 
-    console.log("📋 Form state before submission:", {
-      email: form.email,
-      passwordSet: form.password.length > 0,
-      parentName: form.parentName,
-      zipCode: form.zipCode,
-      zipCodeValid: form.isValidZipCode,
-      childrenCount: form.childProfiles.length,
-      children: form.childProfiles,
-      interestsCount: form.interests.length,
-      interests: form.interests
-    });
-
-    // Comprehensive validation
-    if (!form.validateRequiredFields()) {
-      console.error("❌ Form validation failed");
-      toast({
-        title: 'Missing Information',
-        description: 'Please complete all required fields before submitting.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Set submission state
-    navigation.setIsSubmitting(true);
-    console.log("⏳ Submission in progress...");
-
     try {
-      // Submit data to backend without creating auth account
       const result = await submitOnboardingData({
-        email: form.email,
-        password: form.password,
-        parentName: form.parentName,
-        zipCode: form.zipCode,
-        referrer: form.referrer,
-        childProfiles: form.childProfiles,
-        interests: form.interests
+        email,
+        phone,
+        parentName,
+        zipCode,
+        referrer,
+        childProfiles,
+        interests
       });
-
-      if (!result.success) {
-        throw new Error(result.error || "Unknown error occurred");
+      
+      if (result.success) {
+        toast({
+          title: "Registration submitted!",
+          description: "Thank you for your interest. We'll contact you soon with an invitation!",
+        });
+        
+        onComplete(email);
+      } else {
+        toast({
+          title: "Submission Error",
+          description: result.error || "There was an error submitting your information. Please try again.",
+          variant: "destructive",
+        });
       }
-
-      console.log("✅ Submission successful for:", form.email);
-      
-      // Show success message
+    } catch (error) {
+      console.error('Error in handleCompleteSetup:', error);
       toast({
-        title: 'Registration Request Submitted',
-        description: 'Thank you for signing up! Your request is pending admin approval. We\'ll notify you when your account is approved.',
-      });
-
-      // Navigate to thank you page
-      navigate('/thank-you', { state: { email: form.email, pendingApproval: true } });
-      
-    } catch (err: any) {
-      console.error("❌ Submission error:", err);
-      toast({
-        title: 'Registration Failed',
-        description: err.message || 'There was an error creating your account. Please try again.',
-        variant: 'destructive',
+        title: "Unexpected Error",
+        description: "There was an unexpected error. Please try again later.",
+        variant: "destructive",
       });
     } finally {
-      navigation.setIsSubmitting(false);
-      console.log("🏁 Submission process complete");
+      setIsSubmitting(false);
     }
   };
-
-  const value: OnboardingContextType = {
-    ...form,
-    ...navigation,
-    handleCompleteSetup
-  };
-
+  
   return (
-    <OnboardingContext.Provider value={value}>
+    <OnboardingContext.Provider 
+      value={{
+        step,
+        nextStep,
+        prevStep,
+        email,
+        setEmail,
+        phone,
+        setPhone,
+        parentName,
+        setParentName,
+        zipCode,
+        setZipCode,
+        isValidZipCode,
+        setIsValidZipCode,
+        validateZipCode,
+        referrer,
+        setReferrer,
+        childProfiles,
+        setChildProfiles,
+        interests,
+        setInterests,
+        isSubmitting,
+        handleCompleteSetup
+      }}
+    >
       {children}
     </OnboardingContext.Provider>
   );
+};
+
+export const useOnboarding = () => {
+  const context = useContext(OnboardingContext);
+  if (context === undefined) {
+    throw new Error('useOnboarding must be used within an OnboardingProvider');
+  }
+  return context;
 };
