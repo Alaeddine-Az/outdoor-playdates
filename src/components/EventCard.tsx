@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CalendarIcon, Clock, MapPin, Users } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 
 interface EventCardProps {
@@ -23,11 +23,20 @@ export default function EventCard({
   isJoined, 
   className 
 }: EventCardProps) {
+  const navigate = useNavigate();
   const formattedDate = format(new Date(event.start_time), 'EEE, MMM d, yyyy');
   const formattedTime = `${format(new Date(event.start_time), 'h:mm a')} - ${format(new Date(event.end_time), 'h:mm a')}`;
   
+  const handleHostProfileClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (hostProfile) {
+      navigate(`/parent/${hostProfile.id}`);
+    }
+  };
+  
   return (
-    <Card className={`overflow-hidden hover:shadow-md transition-shadow ${className}`}>
+    <Card className={`overflow-hidden hover:shadow-md transition-shadow ${className}`} onClick={() => navigate(`/event/${event.id}`)}>
       <CardContent className="p-5">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-shrink-0 flex flex-col items-center justify-center sm:w-1/4">
@@ -59,11 +68,18 @@ export default function EventCard({
             
             {hostProfile && (
               <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage src={hostProfile.avatar_url} alt={hostProfile.parent_name} />
-                  <AvatarFallback className="text-xs">{hostProfile.parent_name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <span className="text-sm">Hosted by {hostProfile.parent_name}</span>
+                <div onClick={handleHostProfileClick} className="cursor-pointer">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={hostProfile.avatar_url} alt={hostProfile.parent_name} />
+                    <AvatarFallback className="text-xs">{hostProfile.parent_name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                </div>
+                <span 
+                  className="text-sm hover:text-primary hover:underline cursor-pointer"
+                  onClick={handleHostProfileClick}
+                >
+                  Hosted by {hostProfile.parent_name}
+                </span>
               </div>
             )}
             

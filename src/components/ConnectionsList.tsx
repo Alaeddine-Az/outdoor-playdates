@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MessageCircle, UserCheck, UserX } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface ConnectionsListProps {
@@ -22,6 +22,7 @@ export default function ConnectionsList({
   type 
 }: ConnectionsListProps) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   
   if (connections.length === 0) {
     return (
@@ -32,6 +33,10 @@ export default function ConnectionsList({
       </div>
     );
   }
+
+  const handleUserClick = (userId: string) => {
+    navigate(`/parent/${userId}`);
+  };
 
   return (
     <div className="grid gap-4">
@@ -48,7 +53,10 @@ export default function ConnectionsList({
           <Card key={connection.id} className="overflow-hidden">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div 
+                  className="flex items-center gap-3 cursor-pointer" 
+                  onClick={() => handleUserClick(profile.id)}
+                >
                   <Avatar>
                     <AvatarImage src={profile.avatar_url} alt={profile.parent_name} />
                     <AvatarFallback className="bg-primary/10 text-primary">
@@ -56,9 +64,9 @@ export default function ConnectionsList({
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <Link to={`/parent/${profile.id}`} className="font-medium hover:text-primary transition-colors">
+                    <span className="font-medium hover:text-primary transition-colors">
                       {profile.parent_name}
-                    </Link>
+                    </span>
                     {profile.city && (
                       <p className="text-sm text-muted-foreground">{profile.city}</p>
                     )}

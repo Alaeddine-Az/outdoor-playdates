@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -99,6 +100,7 @@ const PlaydateCreationForm = () => {
         description: "Your playdate has been successfully created.",
       });
       
+      // Redirect to playdates page
       navigate('/playdates');
     } catch (error: any) {
       console.error('Error creating playdate:', error);
