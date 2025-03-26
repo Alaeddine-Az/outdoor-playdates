@@ -40,7 +40,12 @@ const UserMenu = ({ onSignOut }: UserMenuProps) => {
           <Trophy className="mr-2 h-4 w-4" /> Achievements
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onSignOut}>
+        <DropdownMenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            onSignOut();
+          }}
+        >
           <LogOut className="mr-2 h-4 w-4" /> Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>
