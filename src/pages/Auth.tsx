@@ -67,7 +67,7 @@ const Auth = () => {
   
   // If already logged in, render the Navigate component instead of returning early
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/" replace />;
   }
   
   const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
@@ -153,8 +153,8 @@ const Auth = () => {
                   </Button>
                   
                   <div className="mt-4 text-center">
-                    <Link to="/dashboard" className="text-primary hover:underline">
-                      Go to Dashboard
+                    <Link to="/" className="text-primary hover:underline">
+                      Go to Homepage
                     </Link>
                   </div>
                 </form>
