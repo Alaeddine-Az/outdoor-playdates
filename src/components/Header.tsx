@@ -93,16 +93,16 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Mobile menu overlay - always present but only visible when isMenuOpen is true */}
-      <div 
-        className={`fixed inset-0 z-30 bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${
-          isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-        aria-hidden="true"
-        onClick={() => setIsMenuOpen(false)}
-      />
+      {/* Mobile menu overlay - rendered conditionally with z-index */}
+      {isMenuOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm md:hidden"
+          aria-hidden="true"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
 
-      {/* Mobile menu container - always rendered but positioned off-screen when closed */}
+      {/* Mobile menu container */}
       <MobileMenu
         isOpen={isMenuOpen}
         user={user}

@@ -15,9 +15,9 @@ interface MobileMenuProps {
 const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenuProps) => {
   return (
     <div
-      className={`md:hidden fixed inset-y-0 right-0 z-50 w-[80%] max-w-sm pt-16 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
+      className={`fixed inset-y-0 right-0 z-50 w-[80%] max-w-sm pt-16 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : 'translate-x-full'
-      }`}
+      } md:hidden`}
       data-mobile-menu
       aria-hidden={!isOpen}
     >
