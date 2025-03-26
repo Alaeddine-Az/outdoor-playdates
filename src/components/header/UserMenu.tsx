@@ -13,12 +13,18 @@ import {
 import { User, LogOut, Calendar, Trophy } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface UserMenuProps {
-  onSignOut: () => Promise<void>;
-}
-
-const UserMenu = ({ onSignOut }: UserMenuProps) => {
+const UserMenu = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
+  
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
   
   return (
     <DropdownMenu>
@@ -40,7 +46,12 @@ const UserMenu = ({ onSignOut }: UserMenuProps) => {
           <Trophy className="mr-2 h-4 w-4" /> Achievements
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onSignOut}>
+        <DropdownMenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            handleSignOut();
+          }}
+        >
           <LogOut className="mr-2 h-4 w-4" /> Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>

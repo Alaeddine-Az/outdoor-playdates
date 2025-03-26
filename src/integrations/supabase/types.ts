@@ -80,36 +80,158 @@ export type Database = {
           },
         ]
       }
+      connections: {
+        Row: {
+          created_at: string
+          id: string
+          recipient_id: string
+          requester_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recipient_id: string
+          requester_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recipient_id?: string
+          requester_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       early_signups: {
         Row: {
-          child_age: string | null
-          child_name: string | null
+          children: Json[]
+          converted_at: string | null
+          converted_user_id: string | null
           created_at: string | null
           email: string
           id: string
-          interests: string[] | null
-          location: string | null
+          interests: string[]
+          invited_at: string | null
+          location: string
           parent_name: string
+          phone: string | null
+          referrer: string | null
+          status: string | null
+          updated_at: string | null
         }
         Insert: {
-          child_age?: string | null
-          child_name?: string | null
+          children: Json[]
+          converted_at?: string | null
+          converted_user_id?: string | null
           created_at?: string | null
           email: string
           id?: string
-          interests?: string[] | null
-          location?: string | null
+          interests: string[]
+          invited_at?: string | null
+          location: string
           parent_name: string
+          phone?: string | null
+          referrer?: string | null
+          status?: string | null
+          updated_at?: string | null
         }
         Update: {
-          child_age?: string | null
-          child_name?: string | null
+          children?: Json[]
+          converted_at?: string | null
+          converted_user_id?: string | null
           created_at?: string | null
           email?: string
           id?: string
-          interests?: string[] | null
-          location?: string | null
+          interests?: string[]
+          invited_at?: string | null
+          location?: string
           parent_name?: string
+          phone?: string | null
+          referrer?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      event_participants: {
+        Row: {
+          children_ids: string[]
+          event_id: string
+          id: string
+          joined_at: string
+          parent_id: string
+        }
+        Insert: {
+          children_ids: string[]
+          event_id: string
+          id?: string
+          joined_at?: string
+          parent_id: string
+        }
+        Update: {
+          children_ids?: string[]
+          event_id?: string
+          id?: string
+          joined_at?: string
+          parent_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_participants_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          address: string
+          city: string
+          created_at: string
+          description: string | null
+          end_time: string
+          host_id: string
+          id: string
+          location: string
+          max_families: number | null
+          start_time: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          city: string
+          created_at?: string
+          description?: string | null
+          end_time: string
+          host_id: string
+          id?: string
+          location: string
+          max_families?: number | null
+          start_time: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          created_at?: string
+          description?: string | null
+          end_time?: string
+          host_id?: string
+          id?: string
+          location?: string
+          max_families?: number | null
+          start_time?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -211,6 +333,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      old_early_signups: {
+        Row: {
+          children: Json[]
+          created_at: string | null
+          email: string
+          id: string
+          interests: string[]
+          location: string
+          parent_name: string
+          phone: string | null
+          referrer: string | null
+          status: string | null
+        }
+        Insert: {
+          children: Json[]
+          created_at?: string | null
+          email: string
+          id?: string
+          interests: string[]
+          location: string
+          parent_name: string
+          phone?: string | null
+          referrer?: string | null
+          status?: string | null
+        }
+        Update: {
+          children?: Json[]
+          created_at?: string | null
+          email?: string
+          id?: string
+          interests?: string[]
+          location?: string
+          parent_name?: string
+          phone?: string | null
+          referrer?: string | null
+          status?: string | null
+        }
+        Relationships: []
       }
       playdate_participants: {
         Row: {
@@ -331,11 +492,92 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      check_connection_exists: {
+        Args: {
+          user1_id: string
+          user2_id: string
+        }
+        Returns: {
+          id: string
+          requester_id: string
+          recipient_id: string
+          status: string
+          created_at: string
+        }[]
+      }
+      check_connection_status: {
+        Args: {
+          user1_id: string
+          user2_id: string
+        }
+        Returns: string
+      }
+      create_connection: {
+        Args: {
+          req_id: string
+          rec_id: string
+        }
+        Returns: {
+          id: string
+          requester_id: string
+          recipient_id: string
+          status: string
+          created_at: string
+        }[]
+      }
+      create_event: {
+        Args: {
+          p_title: string
+          p_description: string
+          p_location: string
+          p_city: string
+          p_address: string
+          p_start_time: string
+          p_end_time: string
+          p_host_id: string
+          p_max_families: number
+        }
+        Returns: {
+          id: string
+          title: string
+          description: string
+          location: string
+          city: string
+          address: string
+          start_time: string
+          end_time: string
+          host_id: string
+          max_families: number
+          created_at: string
+          updated_at: string
+        }[]
+      }
       find_potential_matches: {
         Args: {
           child_id: string
@@ -350,9 +592,193 @@ export type Database = {
           common_interests: number
         }[]
       }
+      get_all_events: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          title: string
+          description: string
+          location: string
+          city: string
+          address: string
+          start_time: string
+          end_time: string
+          host_id: string
+          max_families: number
+          created_at: string
+          updated_at: string
+        }[]
+      }
+      get_conversation: {
+        Args: {
+          user1_id: string
+          user2_id: string
+        }
+        Returns: {
+          id: string
+          sender_id: string
+          recipient_id: string
+          content: string
+          created_at: string
+          read: boolean
+        }[]
+      }
+      get_event_by_id: {
+        Args: {
+          p_event_id: string
+        }
+        Returns: {
+          id: string
+          title: string
+          description: string
+          location: string
+          city: string
+          address: string
+          start_time: string
+          end_time: string
+          host_id: string
+          max_families: number
+          created_at: string
+          updated_at: string
+        }[]
+      }
+      get_event_participant_counts: {
+        Args: {
+          p_event_ids: string[]
+        }
+        Returns: {
+          event_id: string
+          participant_count: number
+        }[]
+      }
+      get_event_participants: {
+        Args: {
+          p_event_id: string
+        }
+        Returns: {
+          id: string
+          event_id: string
+          parent_id: string
+          children_ids: string[]
+          joined_at: string
+        }[]
+      }
+      get_hosted_events: {
+        Args: {
+          host_user_id: string
+        }
+        Returns: {
+          id: string
+          title: string
+          description: string
+          location: string
+          city: string
+          address: string
+          start_time: string
+          end_time: string
+          host_id: string
+          max_families: number
+          created_at: string
+          updated_at: string
+        }[]
+      }
+      get_joined_events: {
+        Args: {
+          participant_user_id: string
+        }
+        Returns: {
+          id: string
+          title: string
+          description: string
+          location: string
+          city: string
+          address: string
+          start_time: string
+          end_time: string
+          host_id: string
+          max_families: number
+          created_at: string
+          updated_at: string
+        }[]
+      }
+      get_user_connections: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          id: string
+          requester_id: string
+          recipient_id: string
+          status: string
+          created_at: string
+          updated_at: string
+        }[]
+      }
+      is_admin: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
+      join_event: {
+        Args: {
+          p_event_id: string
+          p_user_id: string
+          p_children_ids: string[]
+        }
+        Returns: {
+          id: string
+          event_id: string
+          parent_id: string
+          children_ids: string[]
+          joined_at: string
+        }[]
+      }
+      leave_event: {
+        Args: {
+          p_event_id: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      mark_messages_as_read: {
+        Args: {
+          msg_ids: string[]
+        }
+        Returns: boolean
+      }
+      send_message: {
+        Args: {
+          sender_user_id: string
+          recipient_user_id: string
+          msg_content: string
+        }
+        Returns: {
+          id: string
+          sender_id: string
+          recipient_id: string
+          content: string
+          created_at: string
+          read: boolean
+        }[]
+      }
+      update_connection_status: {
+        Args: {
+          conn_id: string
+          user_id: string
+          new_status: string
+        }
+        Returns: {
+          id: string
+          requester_id: string
+          recipient_id: string
+          status: string
+          created_at: string
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never

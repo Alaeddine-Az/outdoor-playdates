@@ -2,9 +2,19 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { PlusCircle, MinusCircle } from 'lucide-react';
+import { PlusCircle, MinusCircle, ChevronRight } from 'lucide-react';
+import { 
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { z } from 'zod';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 export interface ChildInfo {
   name: string;
@@ -14,61 +24,77 @@ export interface ChildInfo {
 interface ChildProfileStepProps {
   children: ChildInfo[];
   onChange: (children: ChildInfo[]) => void;
-  onNext: () => void;
-  onBack: () => void;
+  nextStep: () => void;
+  prevStep: () => void;
+  isSubmitting: boolean;
 }
+
+const childSchema = z.object({
+  name: z.string()
+    .min(2, "Name must be at least 2 characters")
+    .max(30, "Name cannot exceed 30 characters")
+    .regex(/^[A-Za-z\s]+$/, "Only letters and spaces are allowed"),
+  age: z.string()
+    .refine((val) => !isNaN(Number(val)), "Age must be a number")
+    .refine((val) => Number(val) >= 1 && Number(val) <= 17, "Age must be between 1 and 17")
+});
+
+const formSchema = z.object({
+  children: z.array(childSchema).min(1, "Please add at least one child")
+});
 
 const ChildProfileStep: React.FC<ChildProfileStepProps> = ({
   children,
   onChange,
-  onNext,
-  onBack
+  nextStep,
+  prevStep,
+  isSubmitting
 }) => {
-  const updateChild = (index: number, field: keyof ChildInfo, value: string) => {
-    const updatedChildren = [...children];
-    updatedChildren[index] = {
-      ...updatedChildren[index],
-      [field]: value
-    };
-    onChange(updatedChildren);
-  };
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      children: children.length > 0 ? children : [{ name: "", age: "" }]
+    },
+    mode: 'onChange'
+  });
 
-  const removeChild = (index: number) => {
-    const updatedChildren = children.filter((_, i) => i !== index);
-    onChange(updatedChildren);
-  };
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "children"
+  });
 
-  const addChild = () => {
-    onChange([...children, { name: "", age: "" }]);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onNext();
+  const handleSubmit = (data: z.infer<typeof formSchema>) => {
+    // Ensure all children have required properties
+    const validChildren: ChildInfo[] = data.children.map(child => ({
+      name: child.name,
+      age: child.age
+    }));
+    
+    onChange(validChildren);
+    nextStep();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold tracking-tight">Tell us about your children</h2>
-        <p className="text-muted-foreground">
-          This information helps us find appropriate playdates for your children.
-        </p>
-      </div>
+    <div>
+      <h4 className="text-xl font-medium mb-4">Child Profiles</h4>
+      <p className="text-muted-foreground mb-6">
+        Tell us about your children so we can find appropriate playdates.
+      </p>
 
-      <div className="space-y-4">
-        {children.map((child, index) => (
-          <Card key={index} className="overflow-hidden">
-            <CardContent className="p-0">
-              <div className="p-6 bg-muted/50">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          {fields.map((field, index) => (
+            <Card key={field.id} className="overflow-hidden">
+              <CardContent className="p-6 bg-muted/20">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="font-medium">Child {index + 1}</h3>
-                  {index > 0 && (
+                  {fields.length > 1 && (
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
-                      onClick={() => removeChild(index)}
+                      onClick={() => remove(index)}
+                      disabled={isSubmitting}
                     >
                       <MinusCircle className="h-5 w-5 text-destructive" />
                     </Button>
@@ -76,52 +102,76 @@ const ChildProfileStep: React.FC<ChildProfileStepProps> = ({
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor={`child-name-${index}`}>Name</Label>
-                    <Input
-                      id={`child-name-${index}`}
-                      value={child.name}
-                      onChange={(e) => updateChild(index, 'name', e.target.value)}
-                      placeholder="Child's name"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`child-age-${index}`}>Age</Label>
-                    <Input
-                      id={`child-age-${index}`}
-                      value={child.age}
-                      onChange={(e) => updateChild(index, 'age', e.target.value)}
-                      placeholder="Age"
-                      required
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name={`children.${index}.name`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Child's name"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name={`children.${index}.age`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Age</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Age"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))}
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={addChild}
-          className="w-full flex items-center justify-center gap-2"
-        >
-          <PlusCircle className="h-4 w-4" />
-          Add another child
-        </Button>
-      </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => append({ name: "", age: "" })}
+            className="w-full flex items-center justify-center gap-2 h-12"
+            disabled={isSubmitting}
+          >
+            <PlusCircle className="h-4 w-4" />
+            Add another child
+          </Button>
 
-      <div className="flex justify-between pt-4">
-        <Button type="button" variant="outline" onClick={onBack}>
-          Back
-        </Button>
-        <Button type="submit">
-          Continue
-        </Button>
-      </div>
-    </form>
+          <div className="pt-4 flex space-x-3">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={prevStep}
+              className="flex-1 h-12"
+              disabled={isSubmitting}
+            >
+              Back
+            </Button>
+            <Button 
+              type="submit" 
+              className="flex-1 button-glow bg-primary hover:bg-primary/90 text-white h-12"
+              disabled={isSubmitting || !form.formState.isValid}
+            >
+              Continue <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 };
 

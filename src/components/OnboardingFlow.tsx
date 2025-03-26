@@ -1,203 +1,23 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
-import { cn } from '@/lib/utils';
-import { Users } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { OnboardingProvider } from '@/contexts/OnboardingContext';
+import OnboardingContainer from './onboarding/OnboardingContainer';
+import StepManager from './onboarding/StepManager';
 
-// Import components
-import ProgressIndicator from './onboarding/ProgressIndicator';
-import AccountCreationStep from './onboarding/AccountCreationStep';
-import ParentProfileStep from './onboarding/ParentProfileStep';
-import ChildProfileStep, { ChildInfo } from './onboarding/ChildProfileStep';
-import InterestsStep from './onboarding/InterestsStep';
-
-const OnboardingFlow = ({ id }: { id?: string }) => {
+const OnboardingFlow: React.FC<{ id?: string }> = ({ id }) => {
   const navigate = useNavigate();
-  const { ref, isIntersecting } = useIntersectionObserver({
-    threshold: 0.1,
-    triggerOnce: true
-  });
   
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [step, setStep] = useState(1);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [parentName, setParentName] = useState('');
-  const [location, setLocation] = useState('');
-  const [children, setChildren] = useState<ChildInfo[]>([{ name: '', age: '' }]);
-  const [interests, setInterests] = useState<string[]>([]);
-  
-  const nextStep = () => {
-    setStep(step + 1);
-  };
-  
-  const prevStep = () => {
-    setStep(step - 1);
-  };
-
-  const handleCompleteSetup = async () => {
-    setIsSubmitting(true);
-
-    try {
-      // First attempt to sign up the user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      // Special handling for when the user is already registered
-      if (authError?.message?.includes('already registered')) {
-        console.log('User already registered, proceeding with early signup data');
-        // Continue with saving early signup data
-      } else if (authError) {
-        // For any other auth errors, throw to be caught
-        throw authError;
-      }
-
-      // Always try to save custom info in early_signups, even if there was an auth "already registered" error
-      const { error: signupError } = await supabase
-        .from('early_signups')
-        .upsert({
-          email,
-          parent_name: parentName,
-          location,
-          interests,
-          children,
-        }, {
-          onConflict: 'email'
-        });
-
-      // If there's an error with the early_signups table but the auth worked,
-      // we'll log the error but still redirect the user to thank you page
-      if (signupError) {
-        console.error('Error saving early signup data:', signupError);
-        toast({
-          title: 'Partial Success',
-          description: 'Your account was created, but there was an issue saving some of your information.',
-          variant: 'default',
-        });
-      }
-
-      // Always redirect to thank you page
-      navigate('/thank-you', { state: { email } });
-
-    } catch (err: any) {
-      console.error('Signup error:', err);
-      toast({
-        title: 'Signup Error',
-        description: err.message || 'There was an error creating your account. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleComplete = (email: string) => {
+    navigate('/thank-you', { state: { email } });
   };
   
   return (
-    <section 
-      id={id}
-      ref={ref as React.RefObject<HTMLDivElement>}
-      className="py-24 px-6 relative overflow-hidden bg-muted/30"
-    >
-      <div className="container mx-auto relative z-10 max-w-6xl">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-block rounded-full bg-primary/10 px-4 py-1.5 mb-4">
-            <span className="text-sm font-medium text-primary">
-              Quick & Easy Setup
-            </span>
-          </div>
-          <h2 className="font-bold tracking-tight mb-4">
-            Join GoPlayNow in <span className="text-primary">Under 2 Minutes</span>
-          </h2>
-          <p className="text-xl text-muted-foreground">
-            Create your profile, connect with trusted families, and start scheduling safe, fun playdates for your kids.
-          </p>
-        </div>
-        
-        <div className={cn(
-          "max-w-4xl mx-auto bg-white rounded-2xl shadow-soft border border-muted overflow-hidden",
-          isIntersecting ? "animate-scale-up" : "opacity-0"
-        )}>
-          <div className="p-8">
-            <div className="flex justify-between items-center mb-8">
-              <h3 className="text-2xl font-medium">Create Your Account</h3>
-              <ProgressIndicator currentStep={step} totalSteps={4} />
-            </div>
-            
-            <div className="relative overflow-hidden">
-              {/* Step 1: Account Creation */}
-              <div className={cn(
-                "transition-all duration-500 ease-in-out",
-                step === 1 ? "opacity-100 translate-x-0" : "opacity-0 absolute top-0 left-0 right-0 translate-x-[-100%]"
-              )}>
-                <AccountCreationStep 
-                  email={email}
-                  setEmail={setEmail}
-                  password={password}
-                  setPassword={setPassword}
-                  nextStep={nextStep}
-                />
-              </div>
-              
-              {/* Steps 2-4 rendering logic */}
-              
-              {/* Step 2: Parent Profile */}
-              <div className={cn(
-                "transition-all duration-500 ease-in-out",
-                step === 2 ? "opacity-100 translate-x-0" : "opacity-0 absolute top-0 left-0 right-0 translate-x-[100%]"
-              )}>
-                <ParentProfileStep 
-                  parentName={parentName}
-                  setParentName={setParentName}
-                  location={location}
-                  setLocation={setLocation}
-                  nextStep={nextStep}
-                  prevStep={prevStep}
-                />
-              </div>
-              
-              {/* Step 3: Child Profile */}
-              <div className={cn(
-                "transition-all duration-500 ease-in-out",
-                step === 3 ? "opacity-100 translate-x-0" : "opacity-0 absolute top-0 left-0 right-0 translate-x-[100%]"
-              )}>
-                <ChildProfileStep 
-                  children={children}
-                  onChange={setChildren}
-                  onNext={nextStep}
-                  onBack={prevStep}
-                />
-              </div>
-              
-              {/* Step 4: Interests */}
-              <div className={cn(
-                "transition-all duration-500 ease-in-out",
-                step === 4 ? "opacity-100 translate-x-0" : "opacity-0 absolute top-0 left-0 right-0 translate-x-[100%]"
-              )}>
-                <InterestsStep 
-                  interests={interests}
-                  setInterests={setInterests}
-                  handleCompleteSetup={handleCompleteSetup}
-                  prevStep={prevStep}
-                  isSubmitting={isSubmitting}
-                  email={email}
-                  parentName={parentName}
-                />
-              </div>
-            </div>
-          </div>
-          
-          <div className="p-4 bg-muted/30 border-t border-muted flex items-center justify-center">
-            <Users className="h-5 w-5 text-primary mr-2" />
-            <span className="text-sm text-muted-foreground">
-              Join other parents using GoPlayNow for safe outdoor activities
-            </span>
-          </div>
-        </div>
-      </div>
-    </section>
+    <OnboardingProvider onComplete={handleComplete}>
+      <OnboardingContainer id={id}>
+        <StepManager />
+      </OnboardingContainer>
+    </OnboardingProvider>
   );
 };
 

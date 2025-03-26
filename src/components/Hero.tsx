@@ -38,7 +38,7 @@ const samplePlaydates = [{
   },
   children: "Sophia (5) and Jackson (6)"
 }, {
-  title: "Kids Soccer Meetup",
+  title: "Sandy Hands & Big Plans",
   location: "Shouldice Athletic Park",
   time: "Sunday, 3PM",
   image: "https://plus.unsplash.com/premium_photo-1661567408466-27899e8a4a2f?q=80&w=2942&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
@@ -48,7 +48,7 @@ const samplePlaydates = [{
   },
   children: "Lucas (8) and Mia (7)"
 }, {
-  title: "Creative Art Class",
+  title: "Dig, Build, and Dream",
   location: "Fish Creek Provincial Park",
   time: "Monday, 4PM",
   image: "https://images.unsplash.com/photo-1599376672737-bd66af54c8f5?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
@@ -68,7 +68,7 @@ const samplePlaydates = [{
   },
   children: "Harper (5) and Mason (7)"
 }, {
-  title: "Story Time in the Park",
+  title: "Creative Art Class",
   location: "Riley Park",
   time: "Wednesday, 3PM",
   image: "https://plus.unsplash.com/premium_photo-1686920246064-f0b125432fbe?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
@@ -154,7 +154,7 @@ const Hero = () => {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="rounded-xl" 
+                className="rounded-xl hover:bg-primary hover:text-white" 
                 onClick={scrollToFeatures}
               >
                 Learn More

@@ -93,11 +93,14 @@ const PlaydateCreationForm = () => {
       
       if (error) throw error;
       
+      console.log("Created playdate:", data);
+      
       toast({
         title: "Playdate created!",
         description: "Your playdate has been successfully created.",
       });
       
+      // Redirect to playdates page
       navigate('/playdates');
     } catch (error: any) {
       console.error('Error creating playdate:', error);

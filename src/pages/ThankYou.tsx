@@ -1,41 +1,81 @@
 
 import React from 'react';
-import { useLocation, Navigate } from 'react-router-dom';
-import { CheckCircle } from 'lucide-react';
+import { useLocation, Link } from 'react-router-dom';
+import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { CheckCircle2 } from 'lucide-react';
+
+interface LocationState {
+  email?: string;
+  pendingApproval?: boolean;
+}
 
 const ThankYou = () => {
   const location = useLocation();
-  const email = location.state?.email;
-  
-  // If no email in state, redirect to home
-  if (!email) {
-    return <Navigate to="/" replace />;
-  }
-  
+  const state = location.state as LocationState || {};
+  const { email, pendingApproval } = state;
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-soft border border-muted p-8 text-center">
-        <div className="mb-6 flex justify-center">
-          <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center">
-            <CheckCircle className="h-8 w-8 text-primary" />
+    <>
+      <Header />
+      <main className="container max-w-5xl py-12 px-4">
+        <div className="text-center space-y-6 max-w-2xl mx-auto">
+          <div className="flex justify-center">
+            <CheckCircle2 className="w-20 h-20 text-primary" />
+          </div>
+          
+          <h1 className="text-3xl md:text-4xl font-bold">Thank You!</h1>
+          
+          {pendingApproval ? (
+            <>
+              <p className="text-xl">
+                Your registration request has been submitted and is now pending admin approval.
+              </p>
+              <div className="bg-muted p-6 rounded-lg text-left">
+                <h2 className="font-semibold text-lg mb-2">What happens next?</h2>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>Our admin team will review your profile.</li>
+                  <li>You'll receive an email when your account is approved.</li>
+                  <li>Once approved, you can sign in with the email and password you provided.</li>
+                </ul>
+              </div>
+              {email && (
+                <p className="text-muted-foreground">
+                  We'll send a confirmation to: <span className="font-medium">{email}</span>
+                </p>
+              )}
+            </>
+          ) : (
+            <>
+              <p className="text-xl">
+                Your registration is complete. We're excited to have you join our community!
+              </p>
+              <div className="bg-muted p-6 rounded-lg text-left">
+                <h2 className="font-semibold text-lg mb-2">What happens next?</h2>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>You can now sign in to your account.</li>
+                  <li>Complete your profile and add your children's information.</li>
+                  <li>Explore playdates and connect with other families.</li>
+                </ul>
+              </div>
+              {email && (
+                <p className="text-muted-foreground">
+                  We've sent a confirmation to: <span className="font-medium">{email}</span>
+                </p>
+              )}
+            </>
+          )}
+          
+          <div className="pt-4">
+            <Link to="/">
+              <Button size="lg">
+                Return to Home
+              </Button>
+            </Link>
           </div>
         </div>
-        
-        <h1 className="text-2xl font-bold mb-2">Thank You for Your Interest!</h1>
-        
-        <p className="text-muted-foreground mb-6">
-          We're thrilled to have you on board.
-          We'll reach out to <span className="font-medium text-foreground">{email}</span> as 
-          soon as GoPlayNow is available in your area.
-        </p>
-        
-        <Button asChild className="w-full">
-          <Link to="/">Return to Homepage</Link>
-        </Button>
-      </div>
-    </div>
+      </main>
+    </>
   );
 };
 

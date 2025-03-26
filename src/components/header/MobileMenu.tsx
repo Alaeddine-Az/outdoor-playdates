@@ -113,7 +113,10 @@ const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenu
                 <span>Contact</span>
               </Link>
               
-              <div className="px-4 mt-4">
+              <div className="px-4 mt-4 space-y-3">
+                <Link to="/auth" className="w-full">
+                  <Button variant="outline" className="w-full">Sign In</Button>
+                </Link>
                 <Button 
                   onClick={() => scrollToSection('onboarding')}
                   className="w-full bg-primary hover:bg-primary/90 py-6 text-base"

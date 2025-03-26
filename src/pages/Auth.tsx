@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -25,7 +25,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Mail, Lock, User, MapPin } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -46,11 +46,7 @@ const Auth = () => {
   const { user, signIn, signUp, loading } = useAuth();
   const [activeTab, setActiveTab] = useState<string>("login");
   
-  // If already logged in, redirect to dashboard
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
-  
+  // Define forms outside any conditional rendering
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -68,6 +64,11 @@ const Auth = () => {
       location: "",
     },
   });
+  
+  // If already logged in, render the Navigate component instead of returning early
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
   
   const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
     await signIn(values.email, values.password);
@@ -150,6 +151,12 @@ const Auth = () => {
                   >
                     {loading ? "Signing in..." : "Sign In"}
                   </Button>
+                  
+                  <div className="mt-4 text-center">
+                    <Link to="/" className="text-primary hover:underline">
+                      Go to Homepage
+                    </Link>
+                  </div>
                 </form>
               </Form>
             </TabsContent>
@@ -253,6 +260,12 @@ const Auth = () => {
                   >
                     {loading ? "Creating Account..." : "Create Account"}
                   </Button>
+                  
+                  <div className="mt-4 text-center">
+                    <Link to="/dashboard" className="text-primary hover:underline">
+                      Go to Dashboard
+                    </Link>
+                  </div>
                 </form>
               </Form>
             </TabsContent>

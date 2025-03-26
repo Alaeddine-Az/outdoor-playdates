@@ -7,22 +7,28 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 // Import pages
 import Index from './pages/Index';
 import Dashboard from './pages/Dashboard';
+import UserProfile from './pages/UserProfile';
+import ChildProfile from './pages/ChildProfile';
+import Connections from './pages/Connections';
+import Messages from './pages/Messages';
+import Events from './pages/Events';
+import CreateEvent from './pages/CreateEvent';
+import EventDetail from './pages/EventDetail';
 import Playdates from './pages/Playdates';
 import Challenges from './pages/Challenges';
 import Achievements from './pages/Achievements';
-import Connections from './pages/Connections';
-import ParentProfile from './pages/ParentProfile';
 import PlaydateDetail from './pages/PlaydateDetail';
 import GroupDetail from './pages/GroupDetail';
 import NotFound from './pages/NotFound';
 import ThankYou from './pages/ThankYou';
 import Auth from './pages/Auth';
-import CreatePlaydate from './pages/CreatePlaydate';
 import AddChild from './pages/AddChild';
 import About from './pages/About';
 import FAQ from './pages/FAQ';
 import Terms from './pages/Terms';
 import Contact from './pages/Contact';
+import AdminDashboard from './pages/AdminDashboard';
+import CreatePlaydate from './pages/CreatePlaydate';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -43,6 +49,26 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Admin route component
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading, isAdmin } = useAuth();
+  
+  if (loading) {
+    // Show loading spinner or placeholder
+    return <div className="h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  if (!isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -58,6 +84,16 @@ function App() {
             <Route path="/terms" element={<Terms />} />
             <Route path="/contact" element={<Contact />} />
             
+            {/* Admin routes */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
+              }
+            />
+            
             {/* Protected routes */}
             <Route
               path="/dashboard"
@@ -67,6 +103,86 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            
+            {/* Profile Routes */}
+            <Route
+              path="/parent/:id"
+              element={
+                <ProtectedRoute>
+                  <UserProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/parent-profile"
+              element={
+                <ProtectedRoute>
+                  <UserProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/child/:id"
+              element={
+                <ProtectedRoute>
+                  <ChildProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/add-child"
+              element={
+                <ProtectedRoute>
+                  <AddChild />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Connection Routes */}
+            <Route
+              path="/connections"
+              element={
+                <ProtectedRoute>
+                  <Connections />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/messages/:id"
+              element={
+                <ProtectedRoute>
+                  <Messages />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Event Routes */}
+            <Route
+              path="/events"
+              element={
+                <ProtectedRoute>
+                  <Events />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/create-event"
+              element={
+                <ProtectedRoute>
+                  <CreateEvent />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/event/:id"
+              element={
+                <ProtectedRoute>
+                  <EventDetail />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Playdate Routes */}
             <Route
               path="/playdates"
               element={
@@ -104,30 +220,6 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Achievements />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/connections"
-              element={
-                <ProtectedRoute>
-                  <Connections />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/parent-profile"
-              element={
-                <ProtectedRoute>
-                  <ParentProfile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/add-child"
-              element={
-                <ProtectedRoute>
-                  <AddChild />
                 </ProtectedRoute>
               }
             />
