@@ -115,7 +115,7 @@ const AccountCreationStep: React.FC<AccountCreationStepProps> = ({
           <FormButtons 
             isValid={form.formState.isValid}
             loading={isSubmitting || checkingEmail}
-            submitLabel={checkingEmail ? 'Checking...' : 'Get an invitation now. It\'s free!'}
+            submitLabel={checkingEmail ? 'Checking...' : 'Request an Invitation to Join. It\'s free!'}
           />
         </form>
       </Form>
