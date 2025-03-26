@@ -78,7 +78,7 @@ export async function submitOnboardingData(
     }
 
     // Convert childProfiles to JSON format for Supabase
-    const childrenData = data.childProfiles as unknown as Json[];
+    const childrenData = data.childProfiles.map(child => child as Json);
 
     // Prepare data for early_signups table with clean formatting
     const signupData = {
@@ -88,11 +88,11 @@ export async function submitOnboardingData(
       location: data.zipCode,
       referrer: data.referrer || null,
       interests: data.interests,
-      children: childrenData,
+      children: childrenData, // ✅ Now safely jsonb[]
       status: 'pending',
     };
 
-    console.log("🔄 Saving to Supabase:", signupData);
+    console.log("📦 Final payload:", JSON.stringify(signupData, null, 2));
 
     // Save to early_signups table without creating an auth account
     const { error: signupError } = await supabase
