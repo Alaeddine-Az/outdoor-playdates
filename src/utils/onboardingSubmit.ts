@@ -97,8 +97,7 @@ export async function submitOnboardingData(
     // Save to early_signups table without creating an auth account
     const { error: signupError } = await supabase
       .from('early_signups')
-      .upsert(signupData, {
-        onConflict: 'email'
+      .insert(signupData);
       });
 
     if (signupError) {
