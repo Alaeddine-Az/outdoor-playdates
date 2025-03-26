@@ -4,12 +4,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
-export const useProfile = () => {
+export const useProfile = (profileId?: string) => {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [children, setChildren] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCurrentUser, setIsCurrentUser] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -19,12 +20,18 @@ export const useProfile = () => {
       }
 
       try {
-        console.log("Fetching profile for user ID:", user.id);
+        // Determine which user ID to use for profile lookup
+        const targetUserId = profileId || user.id;
+        
+        // Check if this is the current user's profile
+        setIsCurrentUser(targetUserId === user.id);
+
+        console.log("Fetching profile for user ID:", targetUserId);
         
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', user.id)
+          .eq('id', targetUserId)
           .single();
 
         if (profileError) {
@@ -40,7 +47,7 @@ export const useProfile = () => {
         const { data: childrenData, error: childrenError } = await supabase
           .from('children')
           .select('*')
-          .eq('parent_id', user.id);
+          .eq('parent_id', targetUserId);
 
         if (childrenError) {
           console.error('Error loading children:', childrenError);
@@ -59,7 +66,7 @@ export const useProfile = () => {
     };
 
     fetchProfile();
-  }, [user]);
+  }, [user, profileId]);
 
-  return { profile, children, loading, error };
+  return { profile, children, loading, error, isCurrentUser };
 };

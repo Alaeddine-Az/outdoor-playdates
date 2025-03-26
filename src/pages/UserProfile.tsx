@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 const UserProfile = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const { profile, children, loading, isCurrentUser } = useProfile(id);
+  const { profile, children, loading, error, isCurrentUser } = useProfile(id);
   const [activeTab, setActiveTab] = useState('children');
   
   if (loading) {
@@ -28,13 +28,13 @@ const UserProfile = () => {
     );
   }
 
-  if (!profile) {
+  if (error || !profile) {
     return (
       <AppLayout>
         <div className="p-8 text-center">
           <h1 className="text-2xl font-bold mb-4">Profile Not Found</h1>
           <p className="text-muted-foreground">
-            The requested profile could not be found.
+            {error || "The requested profile could not be found."}
           </p>
         </div>
       </AppLayout>
