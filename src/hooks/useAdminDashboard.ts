@@ -12,22 +12,41 @@ export function useAdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [pendingSignups, setPendingSignups] = useState<EarlySignup[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [adminCheckComplete, setAdminCheckComplete] = useState(false);
 
   useEffect(() => {
     const checkAdmin = async () => {
-      if (!user) return;
+      if (!user) {
+        setAdminCheckComplete(true);
+        setLoading(false);
+        return;
+      }
 
       try {
+        console.log("Checking admin status for user:", user.id);
         // Check if user is admin
-        if (user.email === 'admin') {
+        if (user.email === 'admin@example.com') {
+          console.log("Admin email detected");
           setIsAdmin(true);
+          setAdminCheckComplete(true);
         } else {
           const { data, error } = await supabase.rpc('is_admin', { user_id: user.id });
-          if (error) throw error;
+          if (error) {
+            console.error('Error checking admin status:', error);
+            throw error;
+          }
+          console.log("Admin check response:", data);
           setIsAdmin(!!data);
+          setAdminCheckComplete(true);
         }
       } catch (error) {
         console.error('Error checking admin status:', error);
+        setAdminCheckComplete(true);
+        toast({
+          title: 'Error checking permissions',
+          description: 'Failed to verify your admin status.',
+          variant: 'destructive',
+        });
       }
     };
 
@@ -36,10 +55,11 @@ export function useAdminDashboard() {
 
   useEffect(() => {
     const fetchPendingSignups = async () => {
-      if (!isAdmin) return;
+      if (!isAdmin || !adminCheckComplete) return;
 
       setLoading(true);
       try {
+        console.log("Fetching pending signups");
         // Fetch pending signups directly from the table instead of using RPC
         const { data, error } = await supabase
           .from('early_signups')
@@ -47,6 +67,8 @@ export function useAdminDashboard() {
           .eq('status', 'pending');
 
         if (error) throw error;
+        
+        console.log("Pending signups data:", data);
         
         // Cast the data to ensure type compatibility
         const typedData = (data || []).map(signup => ({
@@ -68,10 +90,12 @@ export function useAdminDashboard() {
       }
     };
 
-    if (isAdmin) {
+    if (isAdmin && adminCheckComplete) {
       fetchPendingSignups();
+    } else if (adminCheckComplete) {
+      setLoading(false);
     }
-  }, [isAdmin]);
+  }, [isAdmin, adminCheckComplete]);
 
   const handleApprove = async (signupId: string) => {
     const result = await approvePendingSignup(signupId);
@@ -95,6 +119,7 @@ export function useAdminDashboard() {
     user,
     loading,
     isAdmin,
+    adminCheckComplete,
     pendingSignups,
     handleApprove,
     handleReject

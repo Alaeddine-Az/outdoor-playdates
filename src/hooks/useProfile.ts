@@ -2,164 +2,64 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { ParentProfile, ChildProfile } from '@/types';
 import { toast } from '@/components/ui/use-toast';
 
-export function useProfile(profileId?: string) {
+export const useProfile = () => {
   const { user } = useAuth();
+  const [profile, setProfile] = useState(null);
+  const [children, setChildren] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<ParentProfile | null>(null);
-  const [children, setChildren] = useState<ChildProfile[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const isCurrentUser = !profileId || profileId === user?.id;
-  const targetId = profileId || user?.id;
-
   useEffect(() => {
-    if (!targetId) {
-      setLoading(false);
-      return;
-    }
+    const fetchProfile = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
-    async function loadProfile() {
-      setLoading(true);
-      setError(null);
-      
       try {
-        // Fetch parent profile
+        console.log("Fetching profile for user ID:", user.id);
+        
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', targetId)
+          .eq('id', user.id)
           .single();
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error('Error loading profile:', profileError);
+          setError("Failed to load profile data");
+          throw profileError;
+        }
+
+        console.log("Profile data fetched:", profileData);
         setProfile(profileData);
 
         // Fetch children
         const { data: childrenData, error: childrenError } = await supabase
           .from('children')
           .select('*')
-          .eq('parent_id', targetId);
+          .eq('parent_id', user.id);
 
-        if (childrenError) throw childrenError;
+        if (childrenError) {
+          console.error('Error loading children:', childrenError);
+          throw childrenError;
+        }
+
+        console.log("Children data fetched:", childrenData);
         setChildren(childrenData || []);
-      } catch (e: any) {
-        console.error('Error loading profile:', e);
-        setError(e.message);
-        toast({
-          title: 'Error loading profile',
-          description: e.message,
-          variant: 'destructive',
-        });
+      } catch (error) {
+        console.error('Error in profile hook:', error);
+        setError("Failed to load user data");
+        // Don't show toast here as we're handling the error in the component
       } finally {
         setLoading(false);
       }
-    }
+    };
 
-    loadProfile();
-  }, [targetId]);
+    fetchProfile();
+  }, [user]);
 
-  const updateProfile = async (updates: Partial<ParentProfile>) => {
-    if (!user) return { success: false, error: 'Not authenticated' };
-
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      setProfile(prev => prev ? { ...prev, ...updates } : null);
-      toast({
-        title: 'Profile updated',
-        description: 'Your profile has been successfully updated.',
-      });
-      return { success: true };
-    } catch (e: any) {
-      console.error('Error updating profile:', e);
-      toast({
-        title: 'Error updating profile',
-        description: e.message,
-        variant: 'destructive',
-      });
-      return { success: false, error: e.message };
-    }
-  };
-
-  const addChild = async (childData: Omit<ChildProfile, 'id' | 'parent_id' | 'created_at' | 'updated_at'>) => {
-    if (!user) return { success: false, error: 'Not authenticated' };
-
-    try {
-      const { data, error } = await supabase
-        .from('children')
-        .insert([{ ...childData, parent_id: user.id }])
-        .select();
-
-      if (error) throw error;
-
-      if (data) {
-        setChildren(prev => [...prev, data[0]]);
-        toast({
-          title: 'Child added',
-          description: `${childData.name} has been successfully added to your profile.`,
-        });
-      }
-      
-      return { success: true, data };
-    } catch (e: any) {
-      console.error('Error adding child:', e);
-      toast({
-        title: 'Error adding child',
-        description: e.message,
-        variant: 'destructive',
-      });
-      return { success: false, error: e.message };
-    }
-  };
-
-  const updateChild = async (childId: string, updates: Partial<ChildProfile>) => {
-    if (!user) return { success: false, error: 'Not authenticated' };
-
-    try {
-      const { error } = await supabase
-        .from('children')
-        .update(updates)
-        .eq('id', childId)
-        .eq('parent_id', user.id);
-
-      if (error) throw error;
-
-      setChildren(prev => 
-        prev.map(child => child.id === childId ? { ...child, ...updates } : child)
-      );
-      
-      toast({
-        title: 'Child updated',
-        description: 'Child profile has been successfully updated.',
-      });
-      
-      return { success: true };
-    } catch (e: any) {
-      console.error('Error updating child:', e);
-      toast({
-        title: 'Error updating child',
-        description: e.message,
-        variant: 'destructive',
-      });
-      return { success: false, error: e.message };
-    }
-  };
-
-  return {
-    profile,
-    children,
-    loading,
-    error,
-    isCurrentUser,
-    updateProfile,
-    addChild,
-    updateChild
-  };
-}
+  return { profile, children, loading, error };
+};
