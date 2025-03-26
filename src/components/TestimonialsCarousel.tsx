@@ -28,7 +28,7 @@ const TestimonialsCarousel = () => {
               Parents Love GoPlayNow
             </span>
           </div>
-          <h2 className="font-bold tracking-tight mb-4">
+          <h2 className="text-3xl font-bold tracking-tight mb-4">
             What Families Are <span className="text-primary">Saying</span>
           </h2>
           <p className="text-xl text-muted-foreground">
@@ -42,7 +42,7 @@ const TestimonialsCarousel = () => {
         )}>
           <Carousel
             opts={{
-              align: "start",
+              align: "center",
               loop: true,
             }}
             className="w-full"
@@ -86,8 +86,8 @@ const TestimonialsCarousel = () => {
               </CarouselItem>
             </CarouselContent>
             <div className="flex justify-center mt-8">
-              <CarouselPrevious className="relative static lg:absolute transform-none ml-0 mr-2" />
-              <CarouselNext className="relative static lg:absolute transform-none mr-0 ml-2" />
+              <CarouselPrevious className="relative static transform-none ml-0 mr-2" />
+              <CarouselNext className="relative static transform-none mr-0 ml-2" />
             </div>
           </Carousel>
         </div>
@@ -105,7 +105,7 @@ interface TestimonialCardProps {
 }
 
 const TestimonialCard = ({ quote, author, role, rating, imageSrc }: TestimonialCardProps) => (
-  <div className="glass-card p-6 h-full flex flex-col">
+  <div className="glass-card p-6 h-full flex flex-col mx-auto">
     <div className="flex-grow">
       <div className="flex mb-4 text-yellow-400">
         {[...Array(rating)].map((_, i) => (

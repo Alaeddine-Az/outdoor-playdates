@@ -71,14 +71,14 @@ const FeatureSection = ({ id }: { id?: string }) => {
         </div>
         
         <div className={cn(
-          "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8",
+          "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mx-auto",
           isIntersecting ? "animate-fade-in" : "opacity-0"
         )}>
           {features.map((feature, index) => (
             <div 
               key={index} 
               className={cn(
-                "bg-white rounded-xl p-6 border border-muted shadow-soft",
+                "bg-white rounded-xl p-6 border border-muted shadow-soft text-center mx-auto",
                 isIntersecting ? `animate-slide-up delay-${(index % 3) * 100}` : "opacity-0"
               )}
             >
