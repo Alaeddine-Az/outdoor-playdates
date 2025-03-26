@@ -69,7 +69,6 @@ const Header = () => {
           <DesktopNav 
             user={user} 
             scrollToSection={scrollToSection} 
-            handleSignOut={handleSignOut} 
           />
           <button
             className="block md:hidden"
