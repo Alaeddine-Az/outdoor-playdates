@@ -36,6 +36,18 @@ const Header = () => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
+  // Effect to disable body scrolling when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -81,7 +93,16 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Mobile menu - conditionally rendered based on isMenuOpen */}
+      {/* Mobile menu overlay - always present but only visible when isMenuOpen is true */}
+      <div 
+        className={`fixed inset-0 z-30 bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${
+          isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        aria-hidden="true"
+        onClick={() => setIsMenuOpen(false)}
+      />
+
+      {/* Mobile menu container - always rendered but positioned off-screen when closed */}
       <MobileMenu
         isOpen={isMenuOpen}
         user={user}
