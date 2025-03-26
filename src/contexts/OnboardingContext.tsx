@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from 'react';
 import { submitOnboardingData } from '@/utils/onboardingSubmit';
 import type { ChildInfo } from '@/components/onboarding/ChildProfileStep';
@@ -50,24 +49,21 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({
   const [childProfiles, setChildProfiles] = useState<ChildInfo[]>([{ name: '', age: '' }]);
   const [interests, setInterests] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const nextStep = () => {
-    setStep(prev => prev + 1);
-  };
-  
-  const prevStep = () => {
-    setStep(prev => prev - 1);
-  };
-  
-  const validateZipCode = async (zipCode: string): Promise<boolean> => {
-    // Simple validation for US zip code format (5 digits, or 5+4)
+
+  const nextStep = () => setStep(prev => prev + 1);
+  const prevStep = () => setStep(prev => prev - 1);
+
+  const validateZipCode = async (zip: string): Promise<boolean> => {
+    const trimmed = zip.trim().toUpperCase();
     const postalCodeRegex = /^[A-Za-z]\d[A-Za-z][ ]?\d[A-Za-z]\d$/;
-    return Promise.resolve(zipRegex.test(zipCode));
+    const isValid = postalCodeRegex.test(trimmed);
+    setIsValidZipCode(isValid);
+    return isValid;
   };
-  
+
   const handleCompleteSetup = async () => {
     setIsSubmitting(true);
-    
+
     try {
       const result = await submitOnboardingData({
         email,
@@ -78,13 +74,12 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({
         childProfiles,
         interests
       });
-      
+
       if (result.success) {
         toast({
           title: "Registration submitted!",
           description: "Thank you for your interest. We'll contact you soon with an invitation!",
         });
-        
         onComplete(email);
       } else {
         toast({
@@ -104,9 +99,9 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({
       setIsSubmitting(false);
     }
   };
-  
+
   return (
-    <OnboardingContext.Provider 
+    <OnboardingContext.Provider
       value={{
         step,
         nextStep,
