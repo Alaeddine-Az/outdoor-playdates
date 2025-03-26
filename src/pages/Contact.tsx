@@ -175,8 +175,8 @@ const Contact = () => {
                       </div>
                       <div className="ml-4">
                         <h3 className="text-lg font-medium">Office</h3>
-                        <p className="text-muted-foreground">123 Innovation Drive</p>
-                        <p className="text-muted-foreground">Calgary, AB T2P 1K3</p>
+                        <p className="text-muted-foreground">Platform Innovation Centre</p>
+                        <p className="text-muted-foreground">Calgary, AB T2G 2K7</p>
                       </div>
                     </div>
                   </div>
