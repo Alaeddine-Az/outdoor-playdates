@@ -33,8 +33,8 @@ import CreatePlaydate from './pages/CreatePlaydate';
 // Create a client
 const queryClient = new QueryClient();
 
-// Protected route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+// Protected route component that uses useAuth
+function ProtectedRouteContent({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   
   if (loading) {
@@ -53,10 +53,15 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   return <>{children}</>;
+}
+
+// Wrapper that ensures ProtectedRouteContent is only used within AuthProvider
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  return children;
 };
 
 // Admin route component
-const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+function AdminRouteContent({ children }: { children: React.ReactNode }) {
   const { user, loading, isAdmin } = useAuth();
   
   if (loading) {
@@ -73,6 +78,11 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   return <>{children}</>;
+}
+
+// Wrapper that ensures AdminRouteContent is only used within AuthProvider
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  return children;
 };
 
 function App() {
@@ -95,7 +105,9 @@ function App() {
               path="/admin"
               element={
                 <AdminRoute>
-                  <AdminDashboard />
+                  <AdminRouteContent>
+                    <AdminDashboard />
+                  </AdminRouteContent>
                 </AdminRoute>
               }
             />
@@ -105,7 +117,9 @@ function App() {
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <ProtectedRouteContent>
+                    <Dashboard />
+                  </ProtectedRouteContent>
                 </ProtectedRoute>
               }
             />
@@ -115,7 +129,9 @@ function App() {
               path="/parent/:id"
               element={
                 <ProtectedRoute>
-                  <UserProfile />
+                  <ProtectedRouteContent>
+                    <UserProfile />
+                  </ProtectedRouteContent>
                 </ProtectedRoute>
               }
             />
@@ -123,7 +139,9 @@ function App() {
               path="/parent-profile"
               element={
                 <ProtectedRoute>
-                  <UserProfile />
+                  <ProtectedRouteContent>
+                    <UserProfile />
+                  </ProtectedRouteContent>
                 </ProtectedRoute>
               }
             />
@@ -131,7 +149,9 @@ function App() {
               path="/child/:id"
               element={
                 <ProtectedRoute>
-                  <ChildProfile />
+                  <ProtectedRouteContent>
+                    <ChildProfile />
+                  </ProtectedRouteContent>
                 </ProtectedRoute>
               }
             />
@@ -139,7 +159,9 @@ function App() {
               path="/add-child"
               element={
                 <ProtectedRoute>
-                  <AddChild />
+                  <ProtectedRouteContent>
+                    <AddChild />
+                  </ProtectedRouteContent>
                 </ProtectedRoute>
               }
             />
@@ -149,7 +171,9 @@ function App() {
               path="/connections"
               element={
                 <ProtectedRoute>
-                  <Connections />
+                  <ProtectedRouteContent>
+                    <Connections />
+                  </ProtectedRouteContent>
                 </ProtectedRoute>
               }
             />
@@ -157,7 +181,9 @@ function App() {
               path="/messages/:id"
               element={
                 <ProtectedRoute>
-                  <Messages />
+                  <ProtectedRouteContent>
+                    <Messages />
+                  </ProtectedRouteContent>
                 </ProtectedRoute>
               }
             />
@@ -167,7 +193,9 @@ function App() {
               path="/events"
               element={
                 <ProtectedRoute>
-                  <Events />
+                  <ProtectedRouteContent>
+                    <Events />
+                  </ProtectedRouteContent>
                 </ProtectedRoute>
               }
             />
@@ -175,7 +203,9 @@ function App() {
               path="/create-event"
               element={
                 <ProtectedRoute>
-                  <CreateEvent />
+                  <ProtectedRouteContent>
+                    <CreateEvent />
+                  </ProtectedRouteContent>
                 </ProtectedRoute>
               }
             />
@@ -183,7 +213,9 @@ function App() {
               path="/event/:id"
               element={
                 <ProtectedRoute>
-                  <EventDetail />
+                  <ProtectedRouteContent>
+                    <EventDetail />
+                  </ProtectedRouteContent>
                 </ProtectedRoute>
               }
             />
@@ -193,7 +225,9 @@ function App() {
               path="/playdates"
               element={
                 <ProtectedRoute>
-                  <Playdates />
+                  <ProtectedRouteContent>
+                    <Playdates />
+                  </ProtectedRouteContent>
                 </ProtectedRoute>
               }
             />
@@ -201,7 +235,9 @@ function App() {
               path="/create-playdate"
               element={
                 <ProtectedRoute>
-                  <CreatePlaydate />
+                  <ProtectedRouteContent>
+                    <CreatePlaydate />
+                  </ProtectedRouteContent>
                 </ProtectedRoute>
               }
             />
@@ -209,7 +245,9 @@ function App() {
               path="/playdate/:id"
               element={
                 <ProtectedRoute>
-                  <PlaydateDetail />
+                  <ProtectedRouteContent>
+                    <PlaydateDetail />
+                  </ProtectedRouteContent>
                 </ProtectedRoute>
               }
             />
@@ -217,7 +255,9 @@ function App() {
               path="/challenges"
               element={
                 <ProtectedRoute>
-                  <Challenges />
+                  <ProtectedRouteContent>
+                    <Challenges />
+                  </ProtectedRouteContent>
                 </ProtectedRoute>
               }
             />
@@ -225,7 +265,9 @@ function App() {
               path="/achievements"
               element={
                 <ProtectedRoute>
-                  <Achievements />
+                  <ProtectedRouteContent>
+                    <Achievements />
+                  </ProtectedRouteContent>
                 </ProtectedRoute>
               }
             />
@@ -233,7 +275,9 @@ function App() {
               path="/group/:id"
               element={
                 <ProtectedRoute>
-                  <GroupDetail />
+                  <ProtectedRouteContent>
+                    <GroupDetail />
+                  </ProtectedRouteContent>
                 </ProtectedRoute>
               }
             />
