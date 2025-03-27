@@ -25,10 +25,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('Auth provider initialized, setting up auth state listener');
+    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event);
+        console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -56,31 +58,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      // Check if user is admin
-      if (session?.user) {
-        if (session.user.email === 'admin@admin.com') {
-          setIsAdmin(true);
-        } else {
-          try {
-            const { data, error } = await supabase.rpc('is_admin', { user_id: session.user.id });
-            if (!error) {
-              setIsAdmin(!!data);
+    const checkExistingSession = async () => {
+      try {
+        console.log('Checking for existing session');
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Existing session check result:', session?.user?.id);
+        
+        if (session) {
+          setSession(session);
+          setUser(session.user);
+          
+          // Check if user is admin
+          if (session.user.email === 'admin@admin.com') {
+            setIsAdmin(true);
+          } else {
+            try {
+              const { data, error } = await supabase.rpc('is_admin', { user_id: session.user.id });
+              if (!error) {
+                setIsAdmin(!!data);
+              }
+            } catch (err) {
+              console.error('Error checking admin status:', err);
+              setIsAdmin(false);
             }
-          } catch (err) {
-            console.error('Error checking admin status:', err);
-            setIsAdmin(false);
           }
         }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
-    });
+    };
+    
+    checkExistingSession();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('Cleaning up auth subscription');
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, metadata: any) => {

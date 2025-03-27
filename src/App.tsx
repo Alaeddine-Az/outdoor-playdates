@@ -39,10 +39,16 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   if (loading) {
     // Show loading spinner or placeholder
-    return <div className="h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="h-screen flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+        <p className="text-muted-foreground">Loading your account...</p>
+      </div>
+    );
   }
   
   if (!user) {
+    console.log("No user found, redirecting to auth page");
     return <Navigate to="/auth" replace />;
   }
   
