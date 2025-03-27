@@ -25,9 +25,6 @@ const DesktopNav = ({ user, scrollToSection }: DesktopNavProps) => {
             <Link to="/playdates" className="text-sm font-medium transition-colors hover:text-primary">
               Playdates
             </Link>
-            <Link to="/challenges" className="text-sm font-medium transition-colors hover:text-primary">
-              Challenges
-            </Link>
             <Link to="/connections" className="text-sm font-medium transition-colors hover:text-primary">
               Connections
             </Link>

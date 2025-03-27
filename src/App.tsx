@@ -15,8 +15,6 @@ import Events from './pages/Events';
 import CreateEvent from './pages/CreateEvent';
 import EventDetail from './pages/EventDetail';
 import Playdates from './pages/Playdates';
-import Challenges from './pages/Challenges';
-import Achievements from './pages/Achievements';
 import PlaydateDetail from './pages/PlaydateDetail';
 import GroupDetail from './pages/GroupDetail';
 import NotFound from './pages/NotFound';
@@ -247,26 +245,6 @@ function App() {
                 <ProtectedRoute>
                   <ProtectedRouteContent>
                     <PlaydateDetail />
-                  </ProtectedRouteContent>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/challenges"
-              element={
-                <ProtectedRoute>
-                  <ProtectedRouteContent>
-                    <Challenges />
-                  </ProtectedRouteContent>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/achievements"
-              element={
-                <ProtectedRoute>
-                  <ProtectedRouteContent>
-                    <Achievements />
                   </ProtectedRouteContent>
                 </ProtectedRoute>
               }

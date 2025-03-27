@@ -1,10 +1,10 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, 
   Calendar, 
   Users, 
-  Trophy, 
   Bell, 
   Settings, 
   LogOut, 
@@ -79,12 +79,6 @@ const AppLayout = ({ children }: AppLayoutProps) => {
               icon={<Users className="h-5 w-5" />} 
               label="Connections" 
               active={location.pathname.includes('/connections') || location.pathname.includes('/parent/')} 
-            />
-            <SidebarLink 
-              to="/achievements" 
-              icon={<Trophy className="h-5 w-5" />} 
-              label="Achievements" 
-              active={location.pathname.includes('/achievements')} 
             />
             <SidebarLink 
               to="/notifications" 

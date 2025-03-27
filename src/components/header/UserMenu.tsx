@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Calendar, Trophy } from 'lucide-react';
+import { User, LogOut, Calendar } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 
@@ -51,9 +51,6 @@ const UserMenu = () => {
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate('/playdates')}>
           <Calendar className="mr-2 h-4 w-4" /> My Playdates
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate('/achievements')}>
-          <Trophy className="mr-2 h-4 w-4" /> Achievements
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>

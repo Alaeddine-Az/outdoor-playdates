@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
 import { Button } from "@/components/ui/button";
-import { Calendar, Trophy, User as UserIcon, LogOut, Users } from 'lucide-react';
+import { Calendar, User as UserIcon, LogOut, Users } from 'lucide-react';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -49,13 +49,6 @@ const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenu
                 <span>Playdates</span>
               </Link>
               <Link 
-                to="/challenges" 
-                className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors"
-              >
-                <Trophy className="w-5 h-5 mr-3" />
-                <span>Challenges</span>
-              </Link>
-              <Link 
                 to="/connections" 
                 className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors"
               >
@@ -68,13 +61,6 @@ const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenu
               >
                 <UserIcon className="w-5 h-5 mr-3" />
                 <span>Profile</span>
-              </Link>
-              <Link 
-                to="/achievements" 
-                className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors"
-              >
-                <Trophy className="w-5 h-5 mr-3" />
-                <span>Achievements</span>
               </Link>
               
               <div className="mt-auto border-t pt-2">
