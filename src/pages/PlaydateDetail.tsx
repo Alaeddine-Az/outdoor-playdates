@@ -108,7 +108,7 @@ const PlaydateDetailPage = () => {
           
           // Now enrich the participant data with parent information
           const enrichedParticipants: EnrichedParticipant[] = participantsData.map(participant => {
-            // If participant has no parent_id, get it from the child-parent map
+            // Try to get parent_id from the participant itself or from the child-parent map
             const parentId = participant.parent_id || childToParentMap[participant.child_id];
             
             if (!parentId) {
@@ -268,7 +268,7 @@ const PlaydateDetailPage = () => {
         
         // Now enrich the participant data with parent information
         const enrichedParticipants: EnrichedParticipant[] = updatedParticipantsData.map(participant => {
-          // If participant has no parent_id, try to get it from the child-parent map
+          // Try to get parent_id from the participant or from the child-parent map
           const parentId = participant.parent_id || childToParentMap[participant.child_id];
           return {
             ...participant,
@@ -339,7 +339,7 @@ const PlaydateDetailPage = () => {
         
         // Now enrich the participant data with parent information
         const enrichedParticipants: EnrichedParticipant[] = updatedParticipantsData.map(participant => {
-          // If participant has no parent_id, try to get it from the child-parent map
+          // Try to get parent_id from the participant or from the child-parent map
           const parentId = participant.parent_id || childToParentMap[participant.child_id];
           return {
             ...participant,
