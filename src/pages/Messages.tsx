@@ -13,129 +13,38 @@ import { toast } from '@/components/ui/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { ParentProfile } from '@/types';
-import MessageBox from '@/components/MessageBox';
+import { useMessages } from '@/hooks/useMessages';
 
 const MessagesPage = () => {
   const { id: recipientId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [recipient, setRecipient] = useState<ParentProfile | null>(null);
-  const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  useEffect(() => {
-    if (!user || !recipientId) return;
-    
-    const fetchRecipient = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', recipientId)
-          .single();
-        
-        if (error) throw error;
-        setRecipient(data);
-      } catch (error: any) {
-        console.error('Error fetching recipient:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load contact information",
-          variant: "destructive"
-        });
-      }
-    };
-    
-    const fetchMessages = async () => {
-      try {
-        const { data, error } = await supabase
-          .rpc('get_conversation', {
-            user1_id: user.id,
-            user2_id: recipientId
-          });
-        
-        if (error) throw error;
-        setMessages(data || []);
-        
-        // Mark all messages as read
-        if (data && data.length > 0) {
-          const unreadMsgIds = data
-            .filter(m => m.recipient_id === user.id && !m.read)
-            .map(m => m.id);
-          
-          if (unreadMsgIds.length > 0) {
-            await supabase.rpc('mark_messages_as_read', {
-              msg_ids: unreadMsgIds
-            });
-          }
-        }
-      } catch (error: any) {
-        console.error('Error fetching messages:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load messages",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchRecipient();
-    fetchMessages();
-    
-    // Subscribe to new messages
-    const channel = supabase
-      .channel('messages')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-        filter: `recipient_id=eq.${user.id}`,
-      }, (payload) => {
-        // Only append if it's from this conversation
-        if (payload.new.sender_id === recipientId) {
-          setMessages(prev => [...prev, payload.new]);
-          
-          // Mark as read immediately
-          supabase.rpc('mark_messages_as_read', {
-            msg_ids: [payload.new.id]
-          });
-        }
-      })
-      .subscribe();
-    
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user, recipientId]);
+  const { loading, messages, otherProfile, sendMessage, error } = useMessages(recipientId);
   
   // Scroll to bottom whenever messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
   
-  const sendMessage = async () => {
+  const handleSendMessage = async () => {
     if (!user || !recipientId || !newMessage.trim()) return;
     
     try {
       setSending(true);
+      const result = await sendMessage(newMessage);
       
-      const { data, error } = await supabase
-        .rpc('send_message', {
-          sender_user_id: user.id,
-          recipient_user_id: recipientId,
-          msg_content: newMessage.trim()
-        });
-      
-      if (error) throw error;
-      
-      if (data) {
-        setMessages([...messages, data[0]]);
+      if (result.success) {
         setNewMessage('');
+      } else {
+        toast({
+          title: "Failed to send",
+          description: result.error,
+          variant: "destructive"
+        });
       }
     } catch (error: any) {
       console.error('Error sending message:', error);
@@ -154,6 +63,36 @@ const MessagesPage = () => {
     return null;
   }
   
+  if (error) {
+    return (
+      <AppLayout>
+        <div className="p-4 h-full flex flex-col">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/connections')}
+            className="mb-4 self-start"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back to Connections
+          </Button>
+          
+          <Card className="flex-grow">
+            <CardContent className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="text-xl font-semibold mb-2">Connection Required</div>
+                <p className="text-muted-foreground mb-4">
+                  You need to connect with this user before you can send messages.
+                </p>
+                <Button onClick={() => navigate('/connections')}>
+                  Go to Connections
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
+    );
+  }
+  
   return (
     <AppLayout>
       <div className="p-4 h-full flex flex-col">
@@ -167,18 +106,18 @@ const MessagesPage = () => {
         
         <div className="flex flex-col h-[calc(100vh-200px)]">
           {/* Header */}
-          {recipient && (
+          {otherProfile && (
             <div className="bg-white p-4 rounded-t-lg border border-muted flex items-center gap-3">
               <Avatar>
-                <AvatarImage src={recipient.avatar_url} alt={recipient.parent_name} />
+                <AvatarImage src={otherProfile.avatar_url} alt={otherProfile.parent_name} />
                 <AvatarFallback className="bg-primary/10 text-primary">
-                  {recipient.parent_name.charAt(0)}
+                  {otherProfile.parent_name.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <div className="font-medium">{recipient.parent_name}</div>
-                {recipient.city && (
-                  <div className="text-xs text-muted-foreground">{recipient.city}</div>
+                <div className="font-medium">{otherProfile.parent_name}</div>
+                {otherProfile.city && (
+                  <div className="text-xs text-muted-foreground">{otherProfile.city}</div>
                 )}
               </div>
               <Badge variant="outline" className="ml-auto">Connected</Badge>
@@ -196,23 +135,42 @@ const MessagesPage = () => {
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <div className="text-muted-foreground mb-2">No messages yet</div>
                   <p className="text-sm text-muted-foreground max-w-xs">
-                    Send a message to start the conversation with {recipient?.parent_name || 'this user'}
+                    Send a message to start the conversation with {otherProfile?.parent_name || 'this user'}
                   </p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {messages.map((message) => (
-                    <MessageBox
-                      key={message.id}
-                      message={{
-                        id: message.id,
-                        content: message.content,
-                        sender: message.sender_id === user.id ? 'me' : 'them',
-                        timestamp: message.created_at,
-                        read: message.read
-                      }}
-                      senderName={message.sender_id === user.id ? 'You' : recipient?.parent_name || 'User'}
-                    />
+                    <div 
+                      key={message.id} 
+                      className={`flex ${message.sender_id === user.id ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div className={`flex gap-2 max-w-[80%] ${message.sender_id === user.id ? 'flex-row-reverse' : 'flex-row'}`}>
+                        {message.sender_id !== user.id && (
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={otherProfile?.avatar_url} alt={otherProfile?.parent_name} />
+                            <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                              {otherProfile?.parent_name?.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                        
+                        <div className={`
+                          rounded-xl p-3 text-sm 
+                          ${message.sender_id === user.id 
+                            ? 'bg-primary text-primary-foreground' 
+                            : 'bg-muted'}
+                        `}>
+                          <div>{message.content}</div>
+                          <div className={`text-xs mt-1 ${message.sender_id === user.id ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                            {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
+                            {message.sender_id === user.id && message.read && (
+                              <span className="ml-1 text-primary-foreground/70">• Read</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   ))}
                   <div ref={messagesEndRef} />
                 </div>
@@ -230,12 +188,12 @@ const MessagesPage = () => {
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey && newMessage.trim()) {
                   e.preventDefault();
-                  sendMessage();
+                  handleSendMessage();
                 }
               }}
             />
             <Button 
-              onClick={sendMessage} 
+              onClick={handleSendMessage} 
               disabled={!newMessage.trim() || sending}
               className="button-glow bg-primary hover:bg-primary/90 text-white"
             >

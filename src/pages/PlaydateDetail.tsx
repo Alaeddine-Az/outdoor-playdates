@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import AppLayout from '@/components/AppLayout';
@@ -9,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, Clock, MapPin, Users, ArrowLeft, Check, Calendar as CalendarIcon } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-import { ParentProfile, ChildProfile } from '@/types';
+import { ParentProfile, ChildProfile, PlaydateParticipant } from '@/types';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -25,16 +24,6 @@ interface Playdate {
   end_time: string;
   max_participants: number | null;
   creator_id: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface PlaydateParticipant {
-  id: string;
-  playdate_id: string;
-  parent_id: string;
-  child_id: string;
-  status: string;
   created_at: string;
   updated_at: string;
 }
@@ -90,17 +79,29 @@ const PlaydateDetailPage = () => {
           .eq('playdate_id', id);
         
         if (participantsError) throw participantsError;
-        setParticipants(participantsData || []);
+        
+        // Convert to proper PlaydateParticipant type
+        const typedParticipants: PlaydateParticipant[] = (participantsData || []).map(p => ({
+          id: p.id,
+          playdate_id: p.playdate_id,
+          parent_id: p.parent_id || user.id, // Provide default for backward compatibility
+          child_id: p.child_id,
+          status: p.status,
+          created_at: p.created_at,
+          updated_at: p.updated_at
+        }));
+        
+        setParticipants(typedParticipants);
         
         // Check if user has already joined
-        const userJoined = participantsData?.some(p => 
+        const userJoined = typedParticipants.some(p => 
           p.parent_id === user.id && p.status !== 'cancelled'
         );
         setHasJoined(userJoined || false);
         
         // Get participant profiles
-        if (participantsData && participantsData.length > 0) {
-          const parentIds = [...new Set(participantsData.map(p => p.parent_id))];
+        if (typedParticipants && typedParticipants.length > 0) {
+          const parentIds = [...new Set(typedParticipants.map(p => p.parent_id))];
           
           const { data: profiles, error: profilesError } = await supabase
             .from('profiles')
@@ -204,12 +205,25 @@ const PlaydateDetailPage = () => {
       setIsOpen(false);
       
       // Refresh participants
-      const { data: updatedParticipants } = await supabase
+      const { data: updatedParticipantsData } = await supabase
         .from('playdate_participants')
         .select('*')
         .eq('playdate_id', playdate.id);
       
-      setParticipants(updatedParticipants || []);
+      if (updatedParticipantsData) {
+        // Convert to proper PlaydateParticipant type
+        const typedParticipants: PlaydateParticipant[] = updatedParticipantsData.map(p => ({
+          id: p.id,
+          playdate_id: p.playdate_id,
+          parent_id: p.parent_id || user.id, // Provide default for backward compatibility
+          child_id: p.child_id,
+          status: p.status,
+          created_at: p.created_at,
+          updated_at: p.updated_at
+        }));
+        
+        setParticipants(typedParticipants);
+      }
     } catch (error: any) {
       console.error('Error joining playdate:', error);
       toast({
@@ -245,12 +259,25 @@ const PlaydateDetailPage = () => {
       setHasJoined(false);
       
       // Refresh participants
-      const { data: updatedParticipants } = await supabase
+      const { data: updatedParticipantsData } = await supabase
         .from('playdate_participants')
         .select('*')
         .eq('playdate_id', playdate.id);
       
-      setParticipants(updatedParticipants || []);
+      if (updatedParticipantsData) {
+        // Convert to proper PlaydateParticipant type
+        const typedParticipants: PlaydateParticipant[] = updatedParticipantsData.map(p => ({
+          id: p.id,
+          playdate_id: p.playdate_id,
+          parent_id: p.parent_id || user.id, // Provide default for backward compatibility
+          child_id: p.child_id,
+          status: p.status,
+          created_at: p.created_at,
+          updated_at: p.updated_at
+        }));
+        
+        setParticipants(typedParticipants);
+      }
     } catch (error: any) {
       console.error('Error leaving playdate:', error);
       toast({
@@ -295,12 +322,10 @@ const PlaydateDetailPage = () => {
   const startTime = format(new Date(playdate.start_time), 'h:mm a');
   const endTime = format(new Date(playdate.end_time), 'h:mm a');
   
-  // Count unique families and children
   const uniqueFamilies = [...new Set(participants.map(p => p.parent_id))];
   const numFamilies = uniqueFamilies.length;
   const numChildren = participants.length;
   
-  // Is user the creator?
   const isCreator = user?.id === playdate.creator_id;
   
   return (
@@ -473,7 +498,6 @@ const PlaydateDetailPage = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
-            {/* Description */}
             <Card className="mb-6">
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold mb-4">About This Playdate</h2>
@@ -487,7 +511,6 @@ const PlaydateDetailPage = () => {
               </CardContent>
             </Card>
             
-            {/* Location */}
             <Card>
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold mb-4">Location</h2>
@@ -500,7 +523,6 @@ const PlaydateDetailPage = () => {
             </Card>
           </div>
           
-          {/* Participants */}
           <div>
             <Card>
               <CardContent className="p-6">
@@ -517,7 +539,6 @@ const PlaydateDetailPage = () => {
                       const profile = participantProfiles[parentId];
                       if (!profile) return null;
                       
-                      // Find children for this parent
                       const childrenParticipating = participants
                         .filter(p => p.parent_id === parentId)
                         .map(p => p.child_id);

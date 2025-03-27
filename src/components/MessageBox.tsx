@@ -6,12 +6,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 
 interface MessageBoxProps {
   messages: Message[];
   otherProfile: ParentProfile | null;
-  onSendMessage: (content: string) => Promise<{ success: boolean, error?: string }>;
+  onSendMessage: (content: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 export default function MessageBox({ 
@@ -70,7 +70,7 @@ export default function MessageBox({
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={otherProfile?.avatar_url} alt={otherProfile?.parent_name} />
                       <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                        {otherProfile?.parent_name.charAt(0)}
+                        {otherProfile?.parent_name?.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                   )}
