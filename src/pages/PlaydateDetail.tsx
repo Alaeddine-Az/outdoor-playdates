@@ -80,91 +80,81 @@ const PlaydateDetailPage = () => {
         
         if (participantsError) throw participantsError;
         
-        // Process participants with missing parent_id
-        const processedParticipants: PlaydateParticipant[] = [];
-        const childToParentMap = new Map<string, string>();
-        
-        // First, get all children to find their parents
-        if (participantsData && participantsData.length > 0) {
+        if (participantsData) {
+          // First, get all children to find their parents
           const childIds = participantsData.map(p => p.child_id);
           
-          const { data: childrenData } = await supabase
-            .from('children')
-            .select('id, parent_id')
-            .in('id', childIds);
-            
-          if (childrenData) {
-            childrenData.forEach(child => {
-              childToParentMap.set(child.id, child.parent_id);
-            });
+          // Create a map to store child to parent relationships
+          const childToParentMap: Record<string, string> = {};
+          
+          if (childIds.length > 0) {
+            const { data: childrenData } = await supabase
+              .from('children')
+              .select('id, parent_id')
+              .in('id', childIds);
+              
+            if (childrenData) {
+              childrenData.forEach(child => {
+                childToParentMap[child.id] = child.parent_id;
+              });
+            }
           }
-        }
-        
-        // Now process participants with the parent information
-        if (participantsData) {
-          for (const participant of participantsData) {
-            const parentId = participant.parent_id || childToParentMap.get(participant.child_id) || null;
-            
-            processedParticipants.push({
+          
+          // Now enrich the participant data with parent information
+          const enrichedParticipants = participantsData.map(participant => {
+            // If participant has no parent_id, try to get it from the child-parent map
+            const parentId = participant.parent_id || childToParentMap[participant.child_id];
+            return {
               ...participant,
               parent_id: parentId
+            };
+          });
+          
+          setParticipants(enrichedParticipants);
+          
+          // Check if user has already joined
+          const userJoined = enrichedParticipants.some(p => 
+            p.parent_id === user.id && p.status !== 'cancelled'
+          );
+          setHasJoined(userJoined);
+          
+          // Collect unique parent IDs from the enriched participants
+          const parentIds = Array.from(new Set(
+            enrichedParticipants
+              .filter(p => p.parent_id)
+              .map(p => p.parent_id as string)
+          ));
+          
+          // Get participant profiles if we have parent IDs
+          if (parentIds.length > 0) {
+            const { data: profiles, error: profilesError } = await supabase
+              .from('profiles')
+              .select('*')
+              .in('id', parentIds);
+            
+            if (profilesError) throw profilesError;
+            
+            const profileMap: Record<string, ParentProfile> = {};
+            profiles?.forEach(profile => {
+              profileMap[profile.id] = profile as ParentProfile;
             });
-          }
-        }
-        
-        setParticipants(processedParticipants);
-        
-        // Check if user has already joined
-        const userJoined = processedParticipants.some(p => 
-          (p.parent_id === user.id) && p.status !== 'cancelled'
-        );
-        setHasJoined(userJoined);
-        
-        // Collect unique parent IDs
-        const parentIds: string[] = [];
-        const parentChildMap = new Map<string, string[]>();
-        
-        for (const participant of processedParticipants) {
-          if (participant.parent_id) {
-            if (!parentIds.includes(participant.parent_id)) {
-              parentIds.push(participant.parent_id);
-              parentChildMap.set(participant.parent_id, []);
+            setParticipantProfiles(profileMap);
+            
+            // Get children for each parent
+            const childMap: Record<string, ChildProfile[]> = {};
+            
+            for (const parentId of parentIds) {
+              const { data: children, error: childrenError } = await supabase
+                .from('children')
+                .select('*')
+                .eq('parent_id', parentId);
+              
+              if (childrenError) throw childrenError;
+              childMap[parentId] = children || [];
             }
             
-            // Associate this child with its parent
-            parentChildMap.get(participant.parent_id)?.push(participant.child_id);
+            setParticipantChildren(childMap);
           }
-        }
-        
-        // Get participant profiles
-        if (parentIds.length > 0) {
-          const { data: profiles, error: profilesError } = await supabase
-            .from('profiles')
-            .select('*')
-            .in('id', parentIds);
-          
-          if (profilesError) throw profilesError;
-          
-          const profileMap: Record<string, ParentProfile> = {};
-          profiles?.forEach(profile => {
-            profileMap[profile.id] = profile as ParentProfile;
-          });
-          setParticipantProfiles(profileMap);
-          
-          // Get children for each parent
-          const childMap: Record<string, ChildProfile[]> = {};
-          
-          for (const parentId of parentIds) {
-            const { data: children, error: childrenError } = await supabase
-              .from('children')
-              .select('*')
-              .eq('parent_id', parentId);
-            
-            if (childrenError) throw childrenError;
-            childMap[parentId] = children || [];
-          }
-          
-          setParticipantChildren(childMap);
         }
         
         // Get current user's children
@@ -246,9 +236,8 @@ const PlaydateDetailPage = () => {
         .eq('playdate_id', playdate.id);
       
       if (updatedParticipantsData) {
-        // Process participants with missing parent_id
-        const processedParticipants: PlaydateParticipant[] = [];
-        const childToParentMap = new Map<string, string>();
+        // Create a map to store child to parent relationships
+        const childToParentMap: Record<string, string> = {};
         
         // First, get all children to find their parents
         if (updatedParticipantsData.length > 0) {
@@ -261,22 +250,22 @@ const PlaydateDetailPage = () => {
             
           if (childrenData) {
             childrenData.forEach(child => {
-              childToParentMap.set(child.id, child.parent_id);
+              childToParentMap[child.id] = child.parent_id;
             });
           }
         }
         
-        // Now process participants with the parent information
-        for (const participant of updatedParticipantsData) {
-          const parentId = participant.parent_id || childToParentMap.get(participant.child_id) || null;
-          
-          processedParticipants.push({
+        // Now enrich the participant data with parent information
+        const enrichedParticipants = updatedParticipantsData.map(participant => {
+          // If participant has no parent_id, try to get it from the child-parent map
+          const parentId = participant.parent_id || childToParentMap[participant.child_id];
+          return {
             ...participant,
             parent_id: parentId
-          });
-        }
+          };
+        });
         
-        setParticipants(processedParticipants);
+        setParticipants(enrichedParticipants);
       }
     } catch (error: any) {
       console.error('Error joining playdate:', error);
@@ -318,9 +307,8 @@ const PlaydateDetailPage = () => {
         .eq('playdate_id', playdate.id);
       
       if (updatedParticipantsData) {
-        // Process participants with missing parent_id
-        const processedParticipants: PlaydateParticipant[] = [];
-        const childToParentMap = new Map<string, string>();
+        // Create a map to store child to parent relationships
+        const childToParentMap: Record<string, string> = {};
         
         // First, get all children to find their parents
         if (updatedParticipantsData.length > 0) {
@@ -333,22 +321,22 @@ const PlaydateDetailPage = () => {
             
           if (childrenData) {
             childrenData.forEach(child => {
-              childToParentMap.set(child.id, child.parent_id);
+              childToParentMap[child.id] = child.parent_id;
             });
           }
         }
         
-        // Now process participants with the parent information
-        for (const participant of updatedParticipantsData) {
-          const parentId = participant.parent_id || childToParentMap.get(participant.child_id) || null;
-          
-          processedParticipants.push({
+        // Now enrich the participant data with parent information
+        const enrichedParticipants = updatedParticipantsData.map(participant => {
+          // If participant has no parent_id, try to get it from the child-parent map
+          const parentId = participant.parent_id || childToParentMap[participant.child_id];
+          return {
             ...participant,
             parent_id: parentId
-          });
-        }
+          };
+        });
         
-        setParticipants(processedParticipants);
+        setParticipants(enrichedParticipants);
       }
     } catch (error: any) {
       console.error('Error leaving playdate:', error);
