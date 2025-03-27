@@ -1,3 +1,4 @@
+
 export interface ParentProfile {
   id: string;
   parent_name: string;
@@ -63,12 +64,11 @@ export interface EventParticipant {
   joined_at: string;
 }
 
-// Updated PlaydateParticipant interface to match the database schema
 export interface PlaydateParticipant {
   id: string;
   playdate_id: string;
   child_id: string;
-  parent_id?: string; // Make parent_id optional
+  parent_id?: string; // Making parent_id optional
   status: string;
   created_at: string;
   updated_at: string;
