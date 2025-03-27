@@ -68,7 +68,7 @@ export interface PlaydateParticipant {
   id: string;
   playdate_id: string;
   child_id: string;
-  parent_id?: string; // Making parent_id optional
+  parent_id?: string; // Adding parent_id as optional
   status: string;
   created_at: string;
   updated_at: string;
