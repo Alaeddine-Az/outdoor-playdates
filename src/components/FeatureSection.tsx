@@ -60,7 +60,7 @@ const FeatureSection = ({ id }: { id?: string }) => {
     <section 
       id={id}
       ref={ref as React.RefObject<HTMLDivElement>}
-      className="py-12 px-6 relative overflow-hidden"
+      className="py-10 px-6 relative overflow-hidden"
     >
       {/* Playful background elements */}
       <div className="absolute w-40 h-40 bg-play-blue/5 rounded-full top-20 left-10 blur-3xl"></div>
@@ -68,7 +68,7 @@ const FeatureSection = ({ id }: { id?: string }) => {
       <div className="absolute w-32 h-32 bg-play-orange/5 rounded-full top-1/2 right-1/3 blur-3xl"></div>
       
       <div className="container mx-auto relative z-10 max-w-6xl">
-        <div className="text-center max-w-3xl mx-auto mb-12">
+        <div className="text-center max-w-3xl mx-auto mb-10">
           <div className="relative inline-block">
             <h2 className="text-3xl font-bold tracking-tight mb-4 relative z-10">
               Why Parents Love <span className="text-primary relative">
@@ -90,7 +90,7 @@ const FeatureSection = ({ id }: { id?: string }) => {
         </div>
         
         <div className={cn(
-          "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
+          "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5",
           isIntersecting ? "animate-fade-in" : "opacity-0"
         )}>
           {features.map((feature, index) => (

@@ -35,7 +35,7 @@ const Index = () => {
       <Header />
       <Hero />
       <HowItWorks id="how-it-works" />
-      <div className="space-y-4 md:space-y-6">
+      <div className="space-y-2 md:space-y-4">
         <PlaymateFinderPreview />
         <PlaydateSchedulerPreview />
         <CommunityPreview />

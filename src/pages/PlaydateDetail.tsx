@@ -1,287 +1,565 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import AppLayout from '@/components/AppLayout';
-import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  Users, 
-  MessageCircle, 
-  Share2, 
-  Check,
-  X,
-  Info,
-  Star,
-  ArrowRight
-} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Calendar, Clock, MapPin, Users, ArrowLeft, Check, Calendar as CalendarIcon } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
+import { ParentProfile, ChildProfile } from '@/types';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
 
-const PlaydateDetail = () => {
-  const { id } = useParams();
+interface Playdate {
+  id: string;
+  title: string;
+  description: string | null;
+  location: string;
+  start_time: string;
+  end_time: string;
+  max_participants: number | null;
+  creator_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface PlaydateParticipant {
+  id: string;
+  playdate_id: string;
+  parent_id: string;
+  child_id: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+const PlaydateDetailPage = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   
-  // This would normally come from an API call using the ID
-  const playdateData = {
-    id: id,
-    title: "Park Adventure & Nature Scavenger Hunt",
-    date: "June 15, 2025",
-    time: "3:00 PM - 5:00 PM",
-    location: "Prince's Island Park",
-    address: "698 Eau Claire Ave SW, Calgary, AB",
-    description: "Join us for a fun afternoon at Prince's Island Park! We'll start with free play at the playground, followed by a guided nature scavenger hunt. Perfect for kids ages 4-8 who love being outdoors and exploring nature. Please bring water bottles and snacks. We'll meet by the main playground entrance.",
-    host: {
-      id: "host1",
-      name: "Sarah Johnson",
-      children: [
-        { name: "Ethan", age: 7 },
-        { name: "Noah", age: 5 }
-      ]
-    },
-    attendees: [
-      {
-        id: "parent1",
-        name: "Michael Brown",
-        children: [
-          { name: "Isabella", age: 6 }
-        ]
-      },
-      {
-        id: "parent2",
-        name: "Jennifer Davis",
-        children: [
-          { name: "Mason", age: 7 },
-          { name: "Olivia", age: 4 }
-        ]
+  const [playdate, setPlaydate] = useState<Playdate | null>(null);
+  const [creator, setCreator] = useState<ParentProfile | null>(null);
+  const [participants, setParticipants] = useState<PlaydateParticipant[]>([]);
+  const [participantProfiles, setParticipantProfiles] = useState<Record<string, ParentProfile>>({});
+  const [participantChildren, setParticipantChildren] = useState<Record<string, ChildProfile[]>>({});
+  const [userChildren, setUserChildren] = useState<ChildProfile[]>([]);
+  const [selectedChildren, setSelectedChildren] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState(true);
+  const [joining, setJoining] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [hasJoined, setHasJoined] = useState(false);
+  
+  useEffect(() => {
+    if (!id || !user) return;
+    
+    const fetchPlaydate = async () => {
+      try {
+        // Get playdate details
+        const { data: playdateData, error: playdateError } = await supabase
+          .from('playdates')
+          .select('*')
+          .eq('id', id)
+          .single();
+        
+        if (playdateError) throw playdateError;
+        setPlaydate(playdateData);
+        
+        // Get creator profile
+        if (playdateData) {
+          const { data: creatorData, error: creatorError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', playdateData.creator_id)
+            .single();
+          
+          if (creatorError) throw creatorError;
+          setCreator(creatorData);
+        }
+        
+        // Get participants
+        const { data: participantsData, error: participantsError } = await supabase
+          .from('playdate_participants')
+          .select('*')
+          .eq('playdate_id', id);
+        
+        if (participantsError) throw participantsError;
+        setParticipants(participantsData || []);
+        
+        // Check if user has already joined
+        const userJoined = participantsData?.some(p => 
+          p.parent_id === user.id && p.status !== 'cancelled'
+        );
+        setHasJoined(userJoined || false);
+        
+        // Get participant profiles
+        if (participantsData && participantsData.length > 0) {
+          const parentIds = [...new Set(participantsData.map(p => p.parent_id))];
+          
+          const { data: profiles, error: profilesError } = await supabase
+            .from('profiles')
+            .select('*')
+            .in('id', parentIds);
+          
+          if (profilesError) throw profilesError;
+          
+          const profileMap: Record<string, ParentProfile> = {};
+          profiles?.forEach(profile => {
+            profileMap[profile.id] = profile as ParentProfile;
+          });
+          setParticipantProfiles(profileMap);
+          
+          // Get participant children
+          const childMap: Record<string, ChildProfile[]> = {};
+          
+          for (const parentId of parentIds) {
+            const { data: children, error: childrenError } = await supabase
+              .from('children')
+              .select('*')
+              .eq('parent_id', parentId);
+            
+            if (childrenError) throw childrenError;
+            childMap[parentId] = children || [];
+          }
+          
+          setParticipantChildren(childMap);
+        }
+        
+        // Get current user's children
+        const { data: userChildrenData, error: userChildrenError } = await supabase
+          .from('children')
+          .select('*')
+          .eq('parent_id', user.id);
+        
+        if (userChildrenError) throw userChildrenError;
+        setUserChildren(userChildrenData || []);
+        
+        // Default all user's children as selected
+        const childSelections: Record<string, boolean> = {};
+        userChildrenData?.forEach(child => {
+          childSelections[child.id] = true;
+        });
+        setSelectedChildren(childSelections);
+      } catch (error: any) {
+        console.error('Error fetching playdate details:', error);
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
       }
-    ],
-    pendingAttendees: [
-      {
-        id: "parent3",
-        name: "Robert Wilson",
-        children: [
-          { name: "Sophia", age: 5 }
-        ]
+    };
+    
+    fetchPlaydate();
+  }, [id, user]);
+  
+  const joinPlaydate = async () => {
+    if (!user || !playdate) return;
+    
+    try {
+      setJoining(true);
+      
+      // Get selected children
+      const childrenToJoin = Object.entries(selectedChildren)
+        .filter(([_, isSelected]) => isSelected)
+        .map(([childId]) => childId);
+      
+      if (childrenToJoin.length === 0) {
+        toast({
+          title: "No children selected",
+          description: "Please select at least one child to join the playdate",
+          variant: "destructive"
+        });
+        return;
       }
-    ],
-    status: "confirmed",
-    ageRange: "4-8 years",
-    maxAttendees: 5,
-    tags: ["Outdoor", "Nature", "Physical Activity"]
+      
+      // Insert participants
+      for (const childId of childrenToJoin) {
+        const { error: participantError } = await supabase
+          .from('playdate_participants')
+          .insert({
+            playdate_id: playdate.id,
+            parent_id: user.id,
+            child_id: childId,
+            status: 'confirmed'
+          });
+        
+        if (participantError) throw participantError;
+      }
+      
+      toast({
+        title: "Joined playdate",
+        description: `You have successfully joined ${playdate.title}`,
+      });
+      
+      setHasJoined(true);
+      setIsOpen(false);
+      
+      // Refresh participants
+      const { data: updatedParticipants } = await supabase
+        .from('playdate_participants')
+        .select('*')
+        .eq('playdate_id', playdate.id);
+      
+      setParticipants(updatedParticipants || []);
+    } catch (error: any) {
+      console.error('Error joining playdate:', error);
+      toast({
+        title: "Error joining playdate",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setJoining(false);
+    }
   };
+  
+  const leavePlaydate = async () => {
+    if (!user || !playdate) return;
+    
+    try {
+      setJoining(true);
+      
+      // Delete participation records
+      const { error } = await supabase
+        .from('playdate_participants')
+        .delete()
+        .eq('playdate_id', playdate.id)
+        .eq('parent_id', user.id);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Left playdate",
+        description: `You have successfully left ${playdate.title}`,
+      });
+      
+      setHasJoined(false);
+      
+      // Refresh participants
+      const { data: updatedParticipants } = await supabase
+        .from('playdate_participants')
+        .select('*')
+        .eq('playdate_id', playdate.id);
+      
+      setParticipants(updatedParticipants || []);
+    } catch (error: any) {
+      console.error('Error leaving playdate:', error);
+      toast({
+        title: "Error leaving playdate",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setJoining(false);
+    }
+  };
+  
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="p-6 max-w-4xl mx-auto">
+          <div className="h-8 w-32 bg-muted animate-pulse rounded mb-4"></div>
+          <div className="h-64 w-full bg-muted animate-pulse rounded mb-6"></div>
+          <div className="h-32 w-full bg-muted animate-pulse rounded"></div>
+        </div>
+      </AppLayout>
+    );
+  }
+  
+  if (!playdate || !creator) {
+    return (
+      <AppLayout>
+        <div className="p-6 max-w-4xl mx-auto text-center">
+          <h1 className="text-2xl font-bold mb-4">Playdate Not Found</h1>
+          <p className="text-muted-foreground mb-6">
+            The playdate you're looking for could not be found or has been cancelled.
+          </p>
+          <Button onClick={() => navigate('/playdates')}>
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back to Playdates
+          </Button>
+        </div>
+      </AppLayout>
+    );
+  }
+  
+  const formattedDate = format(new Date(playdate.start_time), 'EEEE, MMMM d, yyyy');
+  const startTime = format(new Date(playdate.start_time), 'h:mm a');
+  const endTime = format(new Date(playdate.end_time), 'h:mm a');
+  
+  // Count unique families and children
+  const uniqueFamilies = [...new Set(participants.map(p => p.parent_id))];
+  const numFamilies = uniqueFamilies.length;
+  const numChildren = participants.length;
+  
+  // Is user the creator?
+  const isCreator = user?.id === playdate.creator_id;
   
   return (
     <AppLayout>
-      <div className="animate-fade-in">
-        <div className="flex justify-between items-start mb-6">
-          <button 
-            onClick={() => navigate(-1)} 
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            ← Back to Playdates
-          </button>
-          
-          <div className="flex space-x-2">
-            <Button variant="outline" size="sm">
-              <Share2 className="h-4 w-4 mr-2" /> Share
-            </Button>
+      <div className="p-6 max-w-4xl mx-auto animate-fade-in">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate('/playdates')}
+          className="mb-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Playdates
+        </Button>
+        
+        <div className="bg-white rounded-xl shadow-soft border border-muted overflow-hidden mb-6">
+          <div className="p-6">
+            <h1 className="text-2xl md:text-3xl font-bold mb-4">{playdate.title}</h1>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="flex items-center text-muted-foreground">
+                  <Calendar className="h-5 w-5 mr-2 text-primary" />
+                  <span>{formattedDate}</span>
+                </div>
+                
+                <div className="flex items-center text-muted-foreground">
+                  <Clock className="h-5 w-5 mr-2 text-primary" />
+                  <span>{startTime} - {endTime}</span>
+                </div>
+                
+                <div className="flex items-center text-muted-foreground">
+                  <MapPin className="h-5 w-5 mr-2 text-primary" />
+                  <span>{playdate.location}</span>
+                </div>
+                
+                <div className="flex items-center text-muted-foreground">
+                  <Users className="h-5 w-5 mr-2 text-primary" />
+                  <span>
+                    {numFamilies} {numFamilies === 1 ? 'family' : 'families'} joined,&nbsp;
+                    {numChildren} {numChildren === 1 ? 'child' : 'children'}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="flex flex-col md:items-end">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="mr-auto md:mr-0">
+                    <div className="text-sm text-muted-foreground">Hosted by</div>
+                    <Link 
+                      to={`/parent/${creator.id}`}
+                      className="font-medium hover:text-primary transition-colors flex items-center gap-2"
+                    >
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={creator.avatar_url} alt={creator.parent_name} />
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          {creator.parent_name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      {creator.parent_name}
+                    </Link>
+                  </div>
+                </div>
+                
+                <div className="mt-auto pt-4 space-y-2 w-full md:text-right">
+                  {isCreator ? (
+                    <Badge variant="outline">You're hosting this playdate</Badge>
+                  ) : hasJoined ? (
+                    <div className="space-y-2">
+                      <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
+                        <Check className="h-3 w-3 mr-1" /> You're attending
+                      </Badge>
+                      <div className="flex justify-between md:justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          onClick={leavePlaydate}
+                          className="text-sm"
+                        >
+                          Leave Playdate
+                        </Button>
+                        <Button 
+                          asChild
+                          className="text-sm button-glow bg-primary hover:bg-primary/90 text-white"
+                        >
+                          <a 
+                            href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(playdate.title)}&dates=${new Date(playdate.start_time).toISOString().replace(/-|:|\.\d\d\d/g, "")}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            <CalendarIcon className="h-4 w-4 mr-1" /> Add to Calendar
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="button-glow bg-primary hover:bg-primary/90 text-white">
+                          <Users className="h-4 w-4 mr-2" /> Join Playdate
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Join {playdate.title}</DialogTitle>
+                          <DialogDescription>
+                            Select which of your children will attend this playdate
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        {userChildren.length === 0 ? (
+                          <div className="py-4 text-center">
+                            <p className="text-muted-foreground mb-2">
+                              You need to add children to your profile first
+                            </p>
+                            <Button asChild className="mt-2">
+                              <Link to="/add-child">Add Child</Link>
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="py-4 space-y-4">
+                            {userChildren.map((child) => (
+                              <div key={child.id} className="flex items-start space-x-3">
+                                <Checkbox
+                                  id={child.id}
+                                  checked={!!selectedChildren[child.id]}
+                                  onCheckedChange={(checked) => {
+                                    setSelectedChildren({
+                                      ...selectedChildren,
+                                      [child.id]: !!checked
+                                    });
+                                  }}
+                                />
+                                <div className="space-y-1">
+                                  <Label
+                                    htmlFor={child.id}
+                                    className="text-base font-medium leading-none"
+                                  >
+                                    {child.name}
+                                  </Label>
+                                  <p className="text-sm text-muted-foreground">
+                                    {child.age} years old
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={joinPlaydate}
+                            disabled={joining || userChildren.length === 0 || Object.values(selectedChildren).every(selected => !selected)}
+                            className="button-glow bg-primary hover:bg-primary/90 text-white"
+                          >
+                            {joining ? 'Joining...' : 'Join Playdate'}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Main content */}
-          <div className="md:col-span-2 space-y-6">
-            <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
-              <div className="flex flex-col md:flex-row gap-6">
-                <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-primary/10 flex flex-col items-center justify-center text-primary">
-                  <span className="text-sm font-medium">JUN</span>
-                  <span className="font-bold">15</span>
+          <div className="md:col-span-2">
+            {/* Description */}
+            <Card className="mb-6">
+              <CardContent className="p-6">
+                <h2 className="text-xl font-semibold mb-4">About This Playdate</h2>
+                <div className="prose max-w-none">
+                  {playdate.description ? (
+                    <p>{playdate.description}</p>
+                  ) : (
+                    <p className="text-muted-foreground">No description provided.</p>
+                  )}
                 </div>
-                
-                <div className="flex-grow">
-                  <div className="flex items-start justify-between">
-                    <h1 className="text-2xl font-bold">{playdateData.title}</h1>
-                    <Badge variant="outline" className="ml-2 bg-primary/5 border-primary/20 text-primary">
-                      {playdateData.status === "confirmed" ? "Confirmed" : "Pending"}
-                    </Badge>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div className="flex items-center text-muted-foreground">
-                      <Calendar className="h-5 w-5 mr-2" />
-                      <span>{playdateData.date}</span>
-                    </div>
-                    <div className="flex items-center text-muted-foreground">
-                      <Clock className="h-5 w-5 mr-2" />
-                      <span>{playdateData.time}</span>
-                    </div>
-                    <div className="flex items-center text-muted-foreground">
-                      <MapPin className="h-5 w-5 mr-2" />
-                      <span>{playdateData.location}</span>
-                    </div>
-                    <div className="flex items-center text-muted-foreground">
-                      <Users className="h-5 w-5 mr-2" />
-                      <span>{playdateData.attendees.length + 1} families attending</span>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-5 pt-5 border-t border-muted">
-                    <h3 className="font-medium mb-2">Description</h3>
-                    <p className="text-muted-foreground whitespace-pre-line">{playdateData.description}</p>
-                  </div>
-                  
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {playdateData.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="rounded-full">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-6 pt-6 border-t border-muted flex flex-col sm:flex-row gap-3">
-                <Button className="button-glow bg-primary hover:bg-primary/90 text-white rounded-xl w-full sm:w-auto">
-                  <Check className="h-4 w-4 mr-2" /> RSVP as Attending
-                </Button>
-                <Button variant="outline" className="rounded-xl w-full sm:w-auto">
-                  <X className="h-4 w-4 mr-2" /> Decline
-                </Button>
-                <Button variant="ghost" className="text-muted-foreground w-full sm:w-auto">
-                  <Calendar className="h-4 w-4 mr-2" /> Add to Calendar
-                </Button>
-              </div>
-            </section>
+              </CardContent>
+            </Card>
             
-            <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
-              <h2 className="text-xl font-medium mb-4">Location</h2>
-              <div className="rounded-lg border border-muted overflow-hidden aspect-[16/9] bg-muted/30 flex items-center justify-center mb-4">
-                <div className="text-center p-6">
-                  <MapPin className="h-10 w-10 text-primary/50 mx-auto mb-2" />
-                  <p className="text-muted-foreground">Interactive map would display here</p>
-                  <p className="text-sm text-muted-foreground mt-1">{playdateData.address}</p>
+            {/* Location */}
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Location</h2>
+                <div className="bg-muted h-[200px] rounded-lg flex items-center justify-center mb-4">
+                  <MapPin className="h-6 w-6 text-muted-foreground mr-2" />
+                  <span className="text-muted-foreground">Map view not available</span>
                 </div>
-              </div>
-              <div className="flex justify-between">
-                <div>
-                  <h4 className="font-medium">{playdateData.location}</h4>
-                  <p className="text-sm text-muted-foreground">{playdateData.address}</p>
-                </div>
-                <Button variant="outline" size="sm">
-                  Get Directions
-                </Button>
-              </div>
-            </section>
-            
-            <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
-              <h2 className="text-xl font-medium mb-4">Attendees</h2>
-              
-              <div className="space-y-5">
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-3">HOST</h3>
-                  <AttendeeItem 
-                    id={playdateData.host.id}
-                    name={playdateData.host.name}
-                    children={playdateData.host.children}
-                    isHost={true}
-                  />
-                </div>
-                
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-3">ATTENDING ({playdateData.attendees.length})</h3>
-                  <div className="space-y-3">
-                    {playdateData.attendees.map((attendee) => (
-                      <AttendeeItem 
-                        key={attendee.id}
-                        id={attendee.id}
-                        name={attendee.name}
-                        children={attendee.children}
-                        isHost={false}
-                      />
-                    ))}
-                  </div>
-                </div>
-                
-                {playdateData.pendingAttendees.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-3">PENDING ({playdateData.pendingAttendees.length})</h3>
-                    <div className="space-y-3">
-                      {playdateData.pendingAttendees.map((attendee) => (
-                        <AttendeeItem 
-                          key={attendee.id}
-                          id={attendee.id}
-                          name={attendee.name}
-                          children={attendee.children}
-                          isHost={false}
-                          isPending={true}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
-            
-            <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-medium">Discussion</h2>
-              </div>
-              
-              <div className="p-4 rounded-lg border border-muted bg-muted/10 text-center">
-                <MessageCircle className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
-                <p className="text-muted-foreground">Join the playdate to participate in the discussion</p>
-                <Button className="mt-3">
-                  RSVP to Comment
-                </Button>
-              </div>
-            </section>
+                <p className="font-medium">{playdate.location}</p>
+              </CardContent>
+            </Card>
           </div>
           
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
-              <h2 className="text-lg font-medium mb-4">Playdate Details</h2>
-              <div className="space-y-4">
-                <DetailItem 
-                  icon={<Users className="h-5 w-5 text-primary" />}
-                  label="Age Range"
-                  value={playdateData.ageRange}
-                />
-                <DetailItem 
-                  icon={<Info className="h-5 w-5 text-primary" />}
-                  label="Max Attendees"
-                  value={`${playdateData.attendees.length + 1} of ${playdateData.maxAttendees}`}
-                />
-                <DetailItem 
-                  icon={<Star className="h-5 w-5 text-primary" />}
-                  label="Activity Type"
-                  value="Outdoor Play"
-                />
-              </div>
-            </section>
-            
-            <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
-              <h2 className="text-lg font-medium mb-4">Similar Playdates</h2>
-              <div className="space-y-3">
-                <SimilarPlaydateItem 
-                  title="Nature Walk & Bird Watching"
-                  date="June 22, 2025"
-                  location="Inglewood Bird Sanctuary"
-                  onClick={() => navigate('/playdate/10')}
-                />
-                <SimilarPlaydateItem 
-                  title="Community Park Meetup"
-                  date="June 18, 2025"
-                  location="North Glenmore Park"
-                  onClick={() => navigate('/playdate/11')}
-                />
-              </div>
-              <Button variant="ghost" className="w-full mt-3 text-muted-foreground">
-                View More Similar Playdates
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </section>
+          {/* Participants */}
+          <div>
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Participating Families</h2>
+                {participants.length === 0 ? (
+                  <div className="text-center py-6">
+                    <p className="text-muted-foreground">
+                      No families have joined yet. Be the first to join!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {uniqueFamilies.map(parentId => {
+                      const profile = participantProfiles[parentId];
+                      if (!profile) return null;
+                      
+                      // Find children for this parent
+                      const childrenParticipating = participants
+                        .filter(p => p.parent_id === parentId)
+                        .map(p => p.child_id);
+                      
+                      const children = participantChildren[parentId]
+                        ?.filter(c => childrenParticipating.includes(c.id)) || [];
+                      
+                      return (
+                        <div key={parentId} className="border rounded-lg p-3">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={profile.avatar_url} alt={profile.parent_name} />
+                              <AvatarFallback className="bg-primary/10 text-primary">
+                                {profile.parent_name.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <Link 
+                              to={`/parent/${profile.id}`}
+                              className="font-medium hover:text-primary transition-colors"
+                            >
+                              {profile.parent_name}
+                            </Link>
+                            {parentId === playdate.creator_id && (
+                              <Badge variant="outline" className="ml-auto">Host</Badge>
+                            )}
+                          </div>
+                          
+                          <div className="ml-10 text-sm text-muted-foreground">
+                            Children attending:
+                            <ul className="list-disc list-inside mt-1">
+                              {children.map(child => (
+                                <li key={child.id}>{child.name} ({child.age})</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
@@ -289,94 +567,4 @@ const PlaydateDetail = () => {
   );
 };
 
-interface AttendeeItemProps {
-  id: string;
-  name: string;
-  children: { name: string; age: number }[];
-  isHost?: boolean;
-  isPending?: boolean;
-}
-
-const AttendeeItem = ({ id, name, children, isHost = false, isPending = false }: AttendeeItemProps) => {
-  const navigate = useNavigate();
-  const initials = name.split(' ').map(n => n[0]).join('');
-  
-  return (
-    <div 
-      className="flex items-center p-3 rounded-lg border border-muted hover:bg-muted/10 transition-colors cursor-pointer"
-      onClick={() => navigate(`/parent/${id}`)}
-    >
-      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-        {initials}
-      </div>
-      <div className="ml-3 flex-grow">
-        <div className="flex items-center">
-          <h4 className="font-medium">{name}</h4>
-          {isHost && (
-            <Badge variant="outline" className="ml-2 text-xs">Host</Badge>
-          )}
-          {isPending && (
-            <Badge variant="outline" className="ml-2 text-xs text-muted-foreground">Pending</Badge>
-          )}
-        </div>
-        <div className="text-sm text-muted-foreground">
-          {children.map((child, index) => (
-            <span key={index}>
-              {child.name} ({child.age})
-              {index < children.length - 1 ? ', ' : ''}
-            </span>
-          ))}
-        </div>
-      </div>
-      <Button variant="ghost" size="sm" className="ml-2" onClick={(e) => { e.stopPropagation(); }}>
-        <MessageCircle className="h-4 w-4" />
-      </Button>
-    </div>
-  );
-};
-
-interface DetailItemProps {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}
-
-const DetailItem = ({ icon, label, value }: DetailItemProps) => (
-  <div className="flex items-center">
-    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mr-3">
-      {icon}
-    </div>
-    <div>
-      <div className="text-sm text-muted-foreground">{label}</div>
-      <div className="font-medium">{value}</div>
-    </div>
-  </div>
-);
-
-interface SimilarPlaydateItemProps {
-  title: string;
-  date: string;
-  location: string;
-  onClick: () => void;
-}
-
-const SimilarPlaydateItem = ({ title, date, location, onClick }: SimilarPlaydateItemProps) => (
-  <div 
-    className="p-3 rounded-lg border border-muted hover:bg-muted/10 transition-colors cursor-pointer"
-    onClick={onClick}
-  >
-    <h4 className="font-medium">{title}</h4>
-    <div className="flex flex-col text-sm text-muted-foreground mt-1">
-      <div className="flex items-center">
-        <Calendar className="h-3 w-3 mr-1" />
-        <span>{date}</span>
-      </div>
-      <div className="flex items-center mt-1">
-        <MapPin className="h-3 w-3 mr-1" />
-        <span>{location}</span>
-      </div>
-    </div>
-  </div>
-);
-
-export default PlaydateDetail;
+export default PlaydateDetailPage;
