@@ -64,11 +64,11 @@ export interface EventParticipant {
   joined_at: string;
 }
 
-// Adding PlaydateParticipant interface to match the database structure
+// Updated PlaydateParticipant interface to match the database schema
 export interface PlaydateParticipant {
   id: string;
   playdate_id: string;
-  parent_id: string;
+  parent_id?: string; // Made optional since it might not be present in some responses
   child_id: string;
   status: string;
   created_at: string;

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import AppLayout from '@/components/AppLayout';
@@ -80,11 +81,22 @@ const PlaydateDetailPage = () => {
         
         if (participantsError) throw participantsError;
         
-        // Convert to proper PlaydateParticipant type
+        // For participants data, we need to ensure it has the right structure
+        // and manage the potential missing parent_id
         const typedParticipants: PlaydateParticipant[] = (participantsData || []).map(p => ({
           id: p.id,
           playdate_id: p.playdate_id,
-          parent_id: p.parent_id || user.id, // Provide default for backward compatibility
+          // If parent_id is missing, we need to derive it
+          // This is a temporary solution until database is updated
+          parent_id: p.parent_id || (p.child_id ? (async () => {
+            // Look up the child to get the parent_id
+            const { data } = await supabase
+              .from('children')
+              .select('parent_id')
+              .eq('id', p.child_id)
+              .single();
+            return data?.parent_id;
+          })() : user.id),
           child_id: p.child_id,
           status: p.status,
           created_at: p.created_at,
@@ -95,14 +107,47 @@ const PlaydateDetailPage = () => {
         
         // Check if user has already joined
         const userJoined = typedParticipants.some(p => 
-          p.parent_id === user.id && p.status !== 'cancelled'
+          (p.parent_id === user.id || p.parent_id === undefined) && p.status !== 'cancelled'
         );
         setHasJoined(userJoined || false);
         
-        // Get participant profiles
-        if (typedParticipants && typedParticipants.length > 0) {
-          const parentIds = [...new Set(typedParticipants.map(p => p.parent_id))];
-          
+        // Get unique parent IDs
+        // For participants without parent_id, we need to look up in children
+        const parentChildMap = new Map<string, string[]>();
+        
+        // First, collect all child IDs
+        for (const participant of typedParticipants) {
+          if (participant.child_id) {
+            // Find the parent of this child if parent_id is missing
+            if (!participant.parent_id) {
+              const { data } = await supabase
+                .from('children')
+                .select('parent_id')
+                .eq('id', participant.child_id)
+                .single();
+              
+              if (data && data.parent_id) {
+                // Associate this child with its parent
+                if (!parentChildMap.has(data.parent_id)) {
+                  parentChildMap.set(data.parent_id, []);
+                }
+                parentChildMap.get(data.parent_id)?.push(participant.child_id);
+              }
+            } else {
+              // We have the parent_id, associate directly
+              if (!parentChildMap.has(participant.parent_id)) {
+                parentChildMap.set(participant.parent_id, []);
+              }
+              parentChildMap.get(participant.parent_id)?.push(participant.child_id);
+            }
+          }
+        }
+        
+        // Now we have a map of parent IDs to their child IDs
+        const parentIds = Array.from(parentChildMap.keys());
+        
+        // Get participant profiles if we have parent IDs
+        if (parentIds.length > 0) {
           const { data: profiles, error: profilesError } = await supabase
             .from('profiles')
             .select('*')
@@ -211,11 +256,11 @@ const PlaydateDetailPage = () => {
         .eq('playdate_id', playdate.id);
       
       if (updatedParticipantsData) {
-        // Convert to proper PlaydateParticipant type
+        // Make sure to handle the potential missing parent_id
         const typedParticipants: PlaydateParticipant[] = updatedParticipantsData.map(p => ({
           id: p.id,
           playdate_id: p.playdate_id,
-          parent_id: p.parent_id || user.id, // Provide default for backward compatibility
+          parent_id: p.parent_id || user.id, // Use the current user ID as fallback
           child_id: p.child_id,
           status: p.status,
           created_at: p.created_at,
@@ -265,11 +310,11 @@ const PlaydateDetailPage = () => {
         .eq('playdate_id', playdate.id);
       
       if (updatedParticipantsData) {
-        // Convert to proper PlaydateParticipant type
+        // Make sure to handle the potential missing parent_id
         const typedParticipants: PlaydateParticipant[] = updatedParticipantsData.map(p => ({
           id: p.id,
           playdate_id: p.playdate_id,
-          parent_id: p.parent_id || user.id, // Provide default for backward compatibility
+          parent_id: p.parent_id || user.id, // Use the current user ID as fallback
           child_id: p.child_id,
           status: p.status,
           created_at: p.created_at,
