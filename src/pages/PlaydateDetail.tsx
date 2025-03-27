@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import AppLayout from '@/components/AppLayout';
@@ -28,6 +29,11 @@ interface Playdate {
   updated_at: string;
 }
 
+// Helper type for enriched participant data
+interface EnrichedParticipant extends PlaydateParticipant {
+  parent_id: string; // This ensures parent_id is always available in the enriched data
+}
+
 const PlaydateDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -35,7 +41,7 @@ const PlaydateDetailPage = () => {
   
   const [playdate, setPlaydate] = useState<Playdate | null>(null);
   const [creator, setCreator] = useState<ParentProfile | null>(null);
-  const [participants, setParticipants] = useState<PlaydateParticipant[]>([]);
+  const [participants, setParticipants] = useState<EnrichedParticipant[]>([]); // Using EnrichedParticipant
   const [participantProfiles, setParticipantProfiles] = useState<Record<string, ParentProfile>>({});
   const [participantChildren, setParticipantChildren] = useState<Record<string, ChildProfile[]>>({});
   const [userChildren, setUserChildren] = useState<ChildProfile[]>([]);
@@ -101,13 +107,18 @@ const PlaydateDetailPage = () => {
           }
           
           // Now enrich the participant data with parent information
-          const enrichedParticipants = participantsData.map(participant => {
-            // If participant has no parent_id, try to get it from the child-parent map
+          const enrichedParticipants: EnrichedParticipant[] = participantsData.map(participant => {
+            // If participant has no parent_id, get it from the child-parent map
             const parentId = participant.parent_id || childToParentMap[participant.child_id];
+            
+            if (!parentId) {
+              console.warn(`No parent found for child ${participant.child_id}`);
+            }
+            
             return {
               ...participant,
-              parent_id: parentId
-            };
+              parent_id: parentId || 'unknown' // Ensure parent_id is always set
+            } as EnrichedParticipant;
           });
           
           setParticipants(enrichedParticipants);
@@ -121,8 +132,8 @@ const PlaydateDetailPage = () => {
           // Collect unique parent IDs from the enriched participants
           const parentIds = Array.from(new Set(
             enrichedParticipants
-              .filter(p => p.parent_id)
-              .map(p => p.parent_id as string)
+              .filter(p => p.parent_id && p.parent_id !== 'unknown')
+              .map(p => p.parent_id)
           ));
           
           // Get participant profiles if we have parent IDs
@@ -256,13 +267,13 @@ const PlaydateDetailPage = () => {
         }
         
         // Now enrich the participant data with parent information
-        const enrichedParticipants = updatedParticipantsData.map(participant => {
+        const enrichedParticipants: EnrichedParticipant[] = updatedParticipantsData.map(participant => {
           // If participant has no parent_id, try to get it from the child-parent map
           const parentId = participant.parent_id || childToParentMap[participant.child_id];
           return {
             ...participant,
-            parent_id: parentId
-          };
+            parent_id: parentId || 'unknown'
+          } as EnrichedParticipant;
         });
         
         setParticipants(enrichedParticipants);
@@ -327,13 +338,13 @@ const PlaydateDetailPage = () => {
         }
         
         // Now enrich the participant data with parent information
-        const enrichedParticipants = updatedParticipantsData.map(participant => {
+        const enrichedParticipants: EnrichedParticipant[] = updatedParticipantsData.map(participant => {
           // If participant has no parent_id, try to get it from the child-parent map
           const parentId = participant.parent_id || childToParentMap[participant.child_id];
           return {
             ...participant,
-            parent_id: parentId
-          };
+            parent_id: parentId || 'unknown'
+          } as EnrichedParticipant;
         });
         
         setParticipants(enrichedParticipants);
