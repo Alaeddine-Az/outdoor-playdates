@@ -6,7 +6,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Save } from 'lucide-react';
+import { Save, ArrowLeft } from 'lucide-react';
 import { useProfileUpdate } from '@/hooks/useProfileUpdate';
 import ProfilePictureUploader from '@/components/profile/ProfilePictureUploader';
 import PersonalInfoForm from '@/components/profile/PersonalInfoForm';
@@ -103,6 +103,14 @@ const EditProfile = () => {
   return (
     <AppLayout>
       <div className="p-6 max-w-3xl mx-auto animate-fade-in">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate('/parent-profile')}
+          className="mb-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Profile
+        </Button>
+        
         <h1 className="text-2xl font-bold mb-6">Edit Your Profile</h1>
         
         <div className="space-y-6">

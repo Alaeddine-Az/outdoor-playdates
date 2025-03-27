@@ -11,6 +11,36 @@ export const useProfileUpdate = (userId: string | undefined, profile: ParentProf
   const [isSaving, setIsSaving] = useState(false);
   const { uploadAvatar, isUploading } = useAvatarUpload(userId);
 
+  // Helper function to convert ZIP code to city name
+  const convertZipToCity = async (zipCode: string): Promise<string> => {
+    try {
+      // In a real app, you would call a ZIP code API here
+      // For demo purposes, we'll use a simple mapping
+      // This would be replaced with an actual API call in production
+      
+      // Sample mapping for demo
+      const zipMap: Record<string, string> = {
+        '90210': 'Beverly Hills',
+        '10001': 'New York',
+        '60601': 'Chicago',
+        '75001': 'Dallas',
+        '33101': 'Miami',
+        'V6B': 'Vancouver',
+        'T2P': 'Calgary',
+        'M5V': 'Toronto',
+      };
+      
+      // Get first 3-5 characters of ZIP to do a lookup
+      const zipPrefix = zipCode.substring(0, Math.min(5, zipCode.length));
+      
+      // Return the mapped city or a default with the ZIP
+      return zipMap[zipPrefix] || `${zipCode.substring(0, 3)} Area`;
+    } catch (error) {
+      console.error('Error converting ZIP to city:', error);
+      return 'Unknown Location';
+    }
+  };
+
   const updateProfile = async (
     name: string,
     description: string,
@@ -34,9 +64,8 @@ export const useProfileUpdate = (userId: string | undefined, profile: ParentProf
       // Validate postal code and derive city
       let derivedCity = city;
       if (location !== profile?.location) {
-        // In a real app, you would validate postal code with an API
-        // and get the city name. Here we'll just use the one entered.
-        derivedCity = city || 'Unknown City';
+        // Convert ZIP code to city name
+        derivedCity = await convertZipToCity(location);
       }
       
       // Update profile
