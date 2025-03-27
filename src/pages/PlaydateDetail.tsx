@@ -108,15 +108,18 @@ const PlaydateDetailPage = () => {
           
           // Now enrich the participant data with parent information
           const enrichedParticipants: EnrichedParticipant[] = participantsData.map(participant => {
+            // Explicitly cast the database result to include our optional parent_id
+            const participantWithParentId = participant as PlaydateParticipant;
+            
             // Try to get parent_id from the participant itself or from the child-parent map
-            const parentId = participant.parent_id || childToParentMap[participant.child_id];
+            const parentId = participantWithParentId.parent_id || childToParentMap[participant.child_id];
             
             if (!parentId) {
               console.warn(`No parent found for child ${participant.child_id}`);
             }
             
             return {
-              ...participant,
+              ...participantWithParentId,
               parent_id: parentId || 'unknown' // Ensure parent_id is always set
             } as EnrichedParticipant;
           });
@@ -268,10 +271,13 @@ const PlaydateDetailPage = () => {
         
         // Now enrich the participant data with parent information
         const enrichedParticipants: EnrichedParticipant[] = updatedParticipantsData.map(participant => {
+          // Explicitly cast the database result to include our optional parent_id
+          const participantWithParentId = participant as PlaydateParticipant;
+          
           // Try to get parent_id from the participant or from the child-parent map
-          const parentId = participant.parent_id || childToParentMap[participant.child_id];
+          const parentId = participantWithParentId.parent_id || childToParentMap[participant.child_id];
           return {
-            ...participant,
+            ...participantWithParentId,
             parent_id: parentId || 'unknown'
           } as EnrichedParticipant;
         });
@@ -339,10 +345,13 @@ const PlaydateDetailPage = () => {
         
         // Now enrich the participant data with parent information
         const enrichedParticipants: EnrichedParticipant[] = updatedParticipantsData.map(participant => {
+          // Explicitly cast the database result to include our optional parent_id
+          const participantWithParentId = participant as PlaydateParticipant;
+          
           // Try to get parent_id from the participant or from the child-parent map
-          const parentId = participant.parent_id || childToParentMap[participant.child_id];
+          const parentId = participantWithParentId.parent_id || childToParentMap[participant.child_id];
           return {
-            ...participant,
+            ...participantWithParentId,
             parent_id: parentId || 'unknown'
           } as EnrichedParticipant;
         });
