@@ -22,8 +22,10 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header is always rendered, not just when user is authenticated */}
-      <Header />
+      {/* Header is always rendered and always sticky */}
+      <div className="sticky top-0 z-50">
+        <Header />
+      </div>
       <main className="flex-1">
         {children || <Outlet />}
       </main>

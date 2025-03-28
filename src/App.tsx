@@ -15,6 +15,7 @@ import Terms from './pages/Terms';
 import Contact from './pages/Contact';
 import ThankYou from './pages/ThankYou';
 import Index from './pages/Index';
+import Dashboard from './pages/Dashboard';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -36,7 +37,8 @@ function App() {
             
             {/* Main Layout with protected routes */}
             <Route element={<MainLayout />}>
-              {/* Protected routes */}
+              {/* Protected routes - add Dashboard explicitly here */}
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard/*" element={<ProtectedRoutes />} />
               <Route path="/parent/*" element={<ProtectedRoutes />} />
               <Route path="/parent-profile" element={<ProtectedRoutes />} />

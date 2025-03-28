@@ -109,6 +109,7 @@ export function useSignIn() {
       if (lowerEmail === 'admin@admin.com') {
         navigate('/admin');
       } else {
+        // Make sure we navigate to exactly /dashboard
         navigate('/dashboard');
       }
     } catch (error: any) {

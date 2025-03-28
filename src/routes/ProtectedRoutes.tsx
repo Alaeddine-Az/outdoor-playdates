@@ -52,7 +52,7 @@ const ProtectedRoutes = () => {
 
   return (
     <Routes>
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route index element={<Dashboard />} />
       <Route path="/parent/:id" element={<UserProfile />} />
       <Route path="/parent-profile" element={<UserProfile />} />
       <Route path="/child/:id" element={<ChildProfile />} />

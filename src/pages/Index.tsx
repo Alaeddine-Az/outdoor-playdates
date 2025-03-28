@@ -6,7 +6,6 @@ import FeatureSection from '@/components/FeatureSection';
 import HowItWorks from '@/components/HowItWorks';
 import PlaymateFinderPreview from '@/components/PlaymateFinderPreview';
 import PlaydateSchedulerPreview from '@/components/PlaydateSchedulerPreview';
-//import GamifiedChallengePreview from '@/components/GamifiedChallengePreview';
 import CommunityPreview from '@/components/CommunityPreview';
 import TestimonialsCarousel from '@/components/TestimonialsCarousel';
 import OnboardingFlow from '@/components/OnboardingFlow';
@@ -32,6 +31,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
+      {/* Header is now in a sticky container in the MainLayout */}
       <Header />
       <Hero />
       <HowItWorks id="how-it-works" />
