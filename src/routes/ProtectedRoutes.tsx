@@ -43,120 +43,29 @@ export const ProtectedRouteContent = ({ children }: { children: React.ReactNode 
 };
 
 const ProtectedRoutes = () => {
+  const { user } = useAuth();
+
+  // If no user, redirect to auth page
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
   return (
     <Routes>
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRouteContent>
-            <Dashboard />
-          </ProtectedRouteContent>
-        }
-      />
-      <Route
-        path="/parent/:id"
-        element={
-          <ProtectedRouteContent>
-            <UserProfile />
-          </ProtectedRouteContent>
-        }
-      />
-      <Route
-        path="/parent-profile"
-        element={
-          <ProtectedRouteContent>
-            <UserProfile />
-          </ProtectedRouteContent>
-        }
-      />
-      <Route
-        path="/child/:id"
-        element={
-          <ProtectedRouteContent>
-            <ChildProfile />
-          </ProtectedRouteContent>
-        }
-      />
-      <Route
-        path="/add-child"
-        element={
-          <ProtectedRouteContent>
-            <AddChild />
-          </ProtectedRouteContent>
-        }
-      />
-      <Route
-        path="/connections"
-        element={
-          <ProtectedRouteContent>
-            <Connections />
-          </ProtectedRouteContent>
-        }
-      />
-      <Route
-        path="/messages/:id"
-        element={
-          <ProtectedRouteContent>
-            <Messages />
-          </ProtectedRouteContent>
-        }
-      />
-      <Route
-        path="/events"
-        element={
-          <ProtectedRouteContent>
-            <Events />
-          </ProtectedRouteContent>
-        }
-      />
-      <Route
-        path="/create-event"
-        element={
-          <ProtectedRouteContent>
-            <CreateEvent />
-          </ProtectedRouteContent>
-        }
-      />
-      <Route
-        path="/event/:id"
-        element={
-          <ProtectedRouteContent>
-            <EventDetail />
-          </ProtectedRouteContent>
-        }
-      />
-      <Route
-        path="/playdates"
-        element={
-          <ProtectedRouteContent>
-            <Playdates />
-          </ProtectedRouteContent>
-        }
-      />
-      <Route
-        path="/create-playdate"
-        element={
-          <ProtectedRouteContent>
-            <CreatePlaydate />
-          </ProtectedRouteContent>
-        }
-      />
-      <Route
-        path="/playdate/:id"
-        element={
-          <ProtectedRouteContent>
-            <PlaydateDetail />
-          </ProtectedRouteContent>
-        }
-      />
-      <Route
-        path="/group/:id"
-        element={
-          <ProtectedRouteContent>
-            <GroupDetail />
-          </ProtectedRouteContent>
-        }
-      />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/parent/:id" element={<UserProfile />} />
+      <Route path="/parent-profile" element={<UserProfile />} />
+      <Route path="/child/:id" element={<ChildProfile />} />
+      <Route path="/add-child" element={<AddChild />} />
+      <Route path="/connections" element={<Connections />} />
+      <Route path="/messages/:id" element={<Messages />} />
+      <Route path="/events" element={<Events />} />
+      <Route path="/create-event" element={<CreateEvent />} />
+      <Route path="/event/:id" element={<EventDetail />} />
+      <Route path="/playdates" element={<Playdates />} />
+      <Route path="/create-playdate" element={<CreatePlaydate />} />
+      <Route path="/playdate/:id" element={<PlaydateDetail />} />
+      <Route path="/group/:id" element={<GroupDetail />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

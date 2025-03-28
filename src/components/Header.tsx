@@ -10,11 +10,16 @@ import MobileMenu from './header/MobileMenu';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   const isMobile = useIsMobile();
+
+  // If authentication is loading or there's no user, don't render the header
+  if (loading) {
+    return null;
+  }
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -55,7 +60,7 @@ const Header = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-      navigate('/');
+      // Navigation is now handled inside signOut function
     } catch (error) {
       console.error('Error signing out:', error);
     }

@@ -18,16 +18,37 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            {/* Main Layout with nested routes */}
+            {/* Public routes (outside main layout) */}
+            <Route path="/auth" element={<PublicRoutes />} />
+            <Route path="/thank-you" element={<PublicRoutes />} />
+            <Route path="/about" element={<PublicRoutes />} />
+            <Route path="/faq" element={<PublicRoutes />} />
+            <Route path="/terms" element={<PublicRoutes />} />
+            <Route path="/contact" element={<PublicRoutes />} />
+            
+            {/* Home page */}
+            <Route path="/" element={<PublicRoutes />} />
+            
+            {/* Main Layout with protected routes */}
             <Route element={<MainLayout />}>
-              {/* Public routes */}
-              <Route path="/*" element={<PublicRoutes />} />
-              
               {/* Protected routes */}
-              <Route path="/*" element={<ProtectedRoutes />} />
+              <Route path="/dashboard/*" element={<ProtectedRoutes />} />
+              <Route path="/parent/*" element={<ProtectedRoutes />} />
+              <Route path="/parent-profile" element={<ProtectedRoutes />} />
+              <Route path="/child/*" element={<ProtectedRoutes />} />
+              <Route path="/add-child" element={<ProtectedRoutes />} />
+              <Route path="/connections/*" element={<ProtectedRoutes />} />
+              <Route path="/messages/*" element={<ProtectedRoutes />} />
+              <Route path="/events/*" element={<ProtectedRoutes />} />
+              <Route path="/create-event" element={<ProtectedRoutes />} />
+              <Route path="/event/*" element={<ProtectedRoutes />} />
+              <Route path="/playdates/*" element={<ProtectedRoutes />} />
+              <Route path="/create-playdate" element={<ProtectedRoutes />} />
+              <Route path="/playdate/*" element={<ProtectedRoutes />} />
+              <Route path="/group/*" element={<ProtectedRoutes />} />
               
               {/* Admin routes */}
-              <Route path="/*" element={<AdminRoutes />} />
+              <Route path="/admin/*" element={<AdminRoutes />} />
             </Route>
             
             {/* Catch-all route */}

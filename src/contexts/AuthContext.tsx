@@ -306,7 +306,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(null);
       setIsAdmin(false);
       
-      // Navigation is handled in the component that calls signOut
+      // Add a small delay before navigation to allow auth state to update
+      setTimeout(() => {
+        navigate('/auth');
+      }, 20);
     } catch (error) {
       console.error('Error signing out:', error);
       throw error;
