@@ -21,7 +21,11 @@ import GroupDetail from '@/pages/GroupDetail';
 import NotFound from '@/pages/NotFound';
 
 // Reusable component for protected routes
-export const ProtectedRouteContent = ({ children }: { children: React.ReactNode }) => {
+interface ProtectedRouteContentProps {
+  children: React.ReactNode;
+}
+
+export const ProtectedRouteContent: React.FC<ProtectedRouteContentProps> = ({ children }) => {
   const { user, loading } = useAuth();
   
   if (loading) {

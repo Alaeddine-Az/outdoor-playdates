@@ -1,7 +1,8 @@
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import PublicRoutes from './routes/PublicRoutes';
 import ProtectedRoutes from './routes/ProtectedRoutes';
 import AdminRoutes from './routes/AdminRoutes';
@@ -61,16 +62,6 @@ function AppRoutes() {
 }
 
 function App() {
-  const { loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <span className="text-muted-foreground text-lg">Loading...</span>
-      </div>
-    );
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

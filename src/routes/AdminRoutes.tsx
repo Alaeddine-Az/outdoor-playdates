@@ -5,7 +5,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import AdminDashboard from '@/pages/AdminDashboard';
 
 // Reusable component for admin routes
-export const AdminRouteContent = ({ children }: { children: React.ReactNode }) => {
+interface AdminRouteContentProps {
+  children: React.ReactNode;
+}
+
+export const AdminRouteContent: React.FC<AdminRouteContentProps> = ({ children }) => {
   const { user, loading, isAdmin } = useAuth();
   
   if (loading) {
