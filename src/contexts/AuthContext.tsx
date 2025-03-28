@@ -17,6 +17,32 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Helper function to check if a user is an admin
+ */
+const checkAdminStatus = async (user: User | null): Promise<boolean> => {
+  // Return early if no user is provided
+  if (!user) return false;
+  
+  // Check if email is admin@admin.com (case insensitive)
+  if (user.email?.toLowerCase() === 'admin@admin.com') {
+    return true;
+  }
+  
+  try {
+    // Check admin status via RPC
+    const { data, error } = await supabase.rpc('is_admin', { user_id: user.id });
+    if (error) {
+      console.error('Error checking admin status:', error);
+      return false;
+    }
+    return !!data;
+  } catch (err) {
+    console.error('Exception checking admin status:', err);
+    return false;
+  }
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -26,96 +52,67 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     console.log('Auth provider initialized');
-    let authListenerSubscription: { unsubscribe: () => void } | null = null;
     
-    const initializeAuth = async () => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        console.log('Auth state changed:', event, newSession?.user?.id);
+        
+        // Update session and user state
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        
+        // Check admin status when session changes
+        if (newSession?.user) {
+          const adminStatus = await checkAdminStatus(newSession.user);
+          setIsAdmin(adminStatus);
+        } else {
+          setIsAdmin(false);
+        }
+        
+        // Always update loading state after processing auth change
+        setLoading(false);
+      }
+    );
+    
+    // Check for existing session
+    const initializeSession = async () => {
       try {
-        // Set up auth state listener FIRST
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (event, newSession) => {
-            console.log('Auth state changed:', event, newSession?.user?.id);
-            
-            // Update session and user state
-            setSession(newSession);
-            setUser(newSession?.user ?? null);
-            
-            // Check if user is admin when session changes
-            if (newSession?.user) {
-              if (newSession.user.email === 'admin@admin.com') {
-                setIsAdmin(true);
-              } else {
-                try {
-                  const { data, error } = await supabase.rpc('is_admin', { user_id: newSession.user.id });
-                  if (!error) {
-                    setIsAdmin(!!data);
-                  }
-                } catch (err) {
-                  console.error('Error checking admin status:', err);
-                  setIsAdmin(false);
-                }
-              }
-            } else {
-              setIsAdmin(false);
-            }
-            
-            // Always set loading to false after processing the auth state change
-            setLoading(false);
-          }
-        );
+        console.log('Checking for existing session');
+        const { data: { session: existingSession }, error } = await supabase.auth.getSession();
         
-        authListenerSubscription = subscription;
+        if (error) {
+          console.error('Error getting session:', error);
+          setLoading(false);
+          return;
+        }
         
-        // THEN check for existing session (with a slight delay to ensure listener is set up)
-        setTimeout(async () => {
-          try {
-            console.log('Checking for existing session');
-            const { data: { session: existingSession }, error } = await supabase.auth.getSession();
-            
-            if (error) {
-              throw error;
-            }
-            
-            console.log('Existing session check result:', existingSession?.user?.id);
-            
-            if (existingSession) {
-              setSession(existingSession);
-              setUser(existingSession.user);
-              
-              // Check admin status
-              if (existingSession.user.email === 'admin@admin.com') {
-                setIsAdmin(true);
-              } else {
-                try {
-                  const { data, error } = await supabase.rpc('is_admin', { user_id: existingSession.user.id });
-                  if (!error) {
-                    setIsAdmin(!!data);
-                  }
-                } catch (err) {
-                  console.error('Error checking admin status:', err);
-                  setIsAdmin(false);
-                }
-              }
-            }
-          } catch (error) {
-            console.error('Error checking session:', error);
-          } finally {
-            // Always set loading to false, even if there's an error
-            setLoading(false);
-          }
-        }, 50);
+        console.log('Existing session check result:', existingSession?.user?.id);
+        
+        // Update state based on session
+        setSession(existingSession);
+        setUser(existingSession?.user ?? null);
+        
+        // Check admin status if user exists
+        if (existingSession?.user) {
+          const adminStatus = await checkAdminStatus(existingSession.user);
+          setIsAdmin(adminStatus);
+        }
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error('Exception checking session:', error);
+      } finally {
+        // Always ensure loading is set to false
         setLoading(false);
       }
     };
     
-    initializeAuth();
+    // Initialize session
+    initializeSession();
     
+    // Clean up subscription when component unmounts
     return () => {
       console.log('Cleaning up auth subscription');
-      if (authListenerSubscription) {
-        authListenerSubscription.unsubscribe();
-      }
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -123,12 +120,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setLoading(true);
       
+      const lowerEmail = email.toLowerCase();
+      
       // First check if email exists in approved signups
-      if (email !== 'admin@admin.com' && email !== 'test@user.com') {
+      if (lowerEmail !== 'admin@admin.com' && lowerEmail !== 'test@user.com') {
         const { data: signupData, error: signupError } = await supabase
           .from('early_signups')
           .select('status')
-          .eq('email', email)
+          .eq('email', lowerEmail)
           .single();
         
         if (signupError && signupError.code !== 'PGRST116') {
@@ -143,7 +142,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // Proceed with sign up
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: lowerEmail,
         password,
         options: {
           data: metadata
@@ -153,7 +152,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw error;
       
       // Special handling for admin and test users
-      if (email === 'admin@admin.com') {
+      if (lowerEmail === 'admin@admin.com') {
         // Navigate admin to admin dashboard
         toast({
           title: "Admin account created!",
@@ -183,18 +182,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setLoading(true);
       
+      const lowerEmail = email.toLowerCase();
+      
       // Special case for admin login
-      if (email === 'admin@admin.com' && password === '@dmin1234') {
+      if (lowerEmail === 'admin@admin.com' && password === '@dmin1234') {
         // Create admin account if it doesn't exist
         const { data: checkData, error: checkError } = await supabase.auth.signInWithPassword({
-          email,
+          email: lowerEmail,
           password
         });
         
         if (checkError && checkError.message.includes('Invalid login credentials')) {
           // Create admin account
           const { data, error } = await supabase.auth.signUp({
-            email,
+            email: lowerEmail,
             password,
             options: {
               data: { parent_name: 'Admin' }
@@ -205,7 +206,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           
           // Sign in with newly created account
           const { error: signInError } = await supabase.auth.signInWithPassword({
-            email,
+            email: lowerEmail,
             password
           });
           
@@ -223,17 +224,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       // Special case for test user login
-      if (email === 'test@user.com' && password === 'testuser1@') {
+      if (lowerEmail === 'test@user.com' && password === 'testuser1@') {
         // Create test user account if it doesn't exist
         const { data: checkData, error: checkError } = await supabase.auth.signInWithPassword({
-          email,
+          email: lowerEmail,
           password
         });
         
         if (checkError && checkError.message.includes('Invalid login credentials')) {
           // Create test user account
           const { data, error } = await supabase.auth.signUp({
-            email,
+            email: lowerEmail,
             password,
             options: {
               data: { 
@@ -247,7 +248,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           
           // Sign in with newly created account
           const { error: signInError } = await supabase.auth.signInWithPassword({
-            email,
+            email: lowerEmail,
             password
           });
           
@@ -265,7 +266,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // Normal login flow
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: lowerEmail,
         password
       });
 
@@ -276,7 +277,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         description: "You've successfully signed in.",
       });
       
-      if (email === 'admin@admin.com') {
+      if (lowerEmail === 'admin@admin.com') {
         setIsAdmin(true);
         navigate('/admin');
       } else {
