@@ -39,7 +39,7 @@ function AppRoutes() {
         <Route element={<AppLayout />}>
           {/* Protected routes */}
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/connections" element={<Connections />} />
+          <Route path="/connections" element={<ConnectionsPage />} />
           <Route path="/parent/*" element={<ProtectedRoutes />} />
           <Route path="/parent-profile" element={<ProtectedRoutes />} />
           <Route path="/child/*" element={<ProtectedRoutes />} />
