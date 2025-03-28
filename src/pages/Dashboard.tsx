@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import AppLayout from '@/components/AppLayout';
+import AppLayoutWrapper from '@/components/AppLayoutWrapper';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -38,7 +38,7 @@ const Dashboard = () => {
   // Better error handling in the UI
   if (error) {
     return (
-      <AppLayout>
+      <AppLayoutWrapper>
         <div className="animate-fade-in min-h-[60vh] flex flex-col items-center justify-center">
           <h2 className="text-2xl font-bold mb-4">Unable to load dashboard</h2>
           <p className="text-muted-foreground mb-6">There was a problem retrieving your information.</p>
@@ -46,7 +46,7 @@ const Dashboard = () => {
             Try Again
           </Button>
         </div>
-      </AppLayout>
+      </AppLayoutWrapper>
     );
   }
 
@@ -58,7 +58,7 @@ const Dashboard = () => {
   const interests = profile?.interests || ['Arts & Crafts', 'Nature', 'STEM'];
   
   return (
-    <AppLayout>
+    <AppLayoutWrapper>
       <div className="animate-fade-in">
         {loading ? (
           <div className="space-y-8">
@@ -121,7 +121,7 @@ const Dashboard = () => {
           </>
         )}
       </div>
-    </AppLayout>
+    </AppLayoutWrapper>
   );
 };
 

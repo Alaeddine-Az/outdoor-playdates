@@ -1,6 +1,6 @@
 
 import React from 'react';
-import AppLayout from '@/components/AppLayout';
+import AppLayoutWrapper from '@/components/AppLayoutWrapper';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -26,7 +26,7 @@ const Playdates = () => {
   }
 
   return (
-    <AppLayout>
+    <AppLayoutWrapper>
       <div className="animate-fade-in">
         <header className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -82,7 +82,7 @@ const Playdates = () => {
           <PlaydateSidebar />
         </div>
       </div>
-    </AppLayout>
+    </AppLayoutWrapper>
   );
 };
 

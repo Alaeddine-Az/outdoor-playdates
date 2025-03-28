@@ -1,6 +1,6 @@
 
 import React from 'react';
-import AppLayout from '@/components/AppLayout';
+import AppLayoutWrapper from '@/components/AppLayoutWrapper';
 import PlaydateCreationForm from '@/components/PlaydateCreationForm';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,11 +13,11 @@ const CreatePlaydate = () => {
   
   if (loading) {
     return (
-      <AppLayout>
+      <AppLayoutWrapper>
         <div className="container flex items-center justify-center py-12">
           <div className="text-center">Loading...</div>
         </div>
-      </AppLayout>
+      </AppLayoutWrapper>
     );
   }
   
@@ -31,12 +31,12 @@ const CreatePlaydate = () => {
   }
   
   return (
-    <AppLayout>
+    <AppLayoutWrapper>
       <div className={`container ${isMobile ? 'px-2 py-4' : 'py-8'}`}>
         <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center">Create a New Playdate</h1>
         <PlaydateCreationForm />
       </div>
-    </AppLayout>
+    </AppLayoutWrapper>
   );
 };
 

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import AppLayout from '@/components/AppLayout';
+import AppLayoutWrapper from '@/components/AppLayoutWrapper';
 import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/contexts/AuthContext';
 import ProfileHeader from '@/components/ProfileHeader';
@@ -18,31 +18,31 @@ const UserProfile = () => {
   
   if (loading) {
     return (
-      <AppLayout>
+      <AppLayoutWrapper>
         <div className="space-y-6">
           <Skeleton className="h-[250px] w-full rounded-xl" />
           <Skeleton className="h-10 w-32" />
           <Skeleton className="h-[300px] w-full rounded-xl" />
         </div>
-      </AppLayout>
+      </AppLayoutWrapper>
     );
   }
 
   if (error || !profile) {
     return (
-      <AppLayout>
+      <AppLayoutWrapper>
         <div className="p-8 text-center">
           <h1 className="text-2xl font-bold mb-4">Profile Not Found</h1>
           <p className="text-muted-foreground">
             {error || "The requested profile could not be found."}
           </p>
         </div>
-      </AppLayout>
+      </AppLayoutWrapper>
     );
   }
 
   return (
-    <AppLayout>
+    <AppLayoutWrapper>
       <div className="animate-fade-in space-y-6">
         <ProfileHeader 
           profile={profile} 
@@ -84,7 +84,7 @@ const UserProfile = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </AppLayout>
+    </AppLayoutWrapper>
   );
 };
 

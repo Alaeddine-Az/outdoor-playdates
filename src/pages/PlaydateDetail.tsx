@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import AppLayout from '@/components/AppLayout';
+import AppLayoutWrapper from '@/components/AppLayoutWrapper';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -372,19 +371,19 @@ const PlaydateDetailPage = () => {
   
   if (loading) {
     return (
-      <AppLayout>
+      <AppLayoutWrapper>
         <div className="p-6 max-w-4xl mx-auto">
           <div className="h-8 w-32 bg-muted animate-pulse rounded mb-4"></div>
           <div className="h-64 w-full bg-muted animate-pulse rounded mb-6"></div>
           <div className="h-32 w-full bg-muted animate-pulse rounded"></div>
         </div>
-      </AppLayout>
+      </AppLayoutWrapper>
     );
   }
   
   if (!playdate || !creator) {
     return (
-      <AppLayout>
+      <AppLayoutWrapper>
         <div className="p-6 max-w-4xl mx-auto text-center">
           <h1 className="text-2xl font-bold mb-4">Playdate Not Found</h1>
           <p className="text-muted-foreground mb-6">
@@ -394,7 +393,7 @@ const PlaydateDetailPage = () => {
             <ArrowLeft className="h-4 w-4 mr-2" /> Back to Playdates
           </Button>
         </div>
-      </AppLayout>
+      </AppLayoutWrapper>
     );
   }
   
@@ -413,7 +412,7 @@ const PlaydateDetailPage = () => {
   const isCreator = user?.id === playdate.creator_id;
   
   return (
-    <AppLayout>
+    <AppLayoutWrapper>
       <div className="p-6 max-w-4xl mx-auto animate-fade-in">
         <Button 
           variant="ghost" 
@@ -668,7 +667,7 @@ const PlaydateDetailPage = () => {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </AppLayoutWrapper>
   );
 };
 

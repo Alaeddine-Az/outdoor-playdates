@@ -1,10 +1,10 @@
 import React from 'react';
-import AppLayout from '@/components/AppLayout';
+import AppLayoutWrapper from '@/components/AppLayoutWrapper';
 import { Trophy } from 'lucide-react';
 
 const Achievements = () => {
   return (
-    <AppLayout>
+    <AppLayoutWrapper>
       <div className="animate-fade-in">
         <header className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight mb-2">Achievements</h1>
@@ -42,7 +42,7 @@ const Achievements = () => {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </AppLayoutWrapper>
   );
 };
 

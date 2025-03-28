@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import AppLayout from '@/components/AppLayout';
+import AppLayoutWrapper from '@/components/AppLayoutWrapper';
 import { useConnections } from '@/hooks/useConnections';
 import ConnectionsList from '@/components/ConnectionsList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -24,17 +24,17 @@ const ConnectionsPage = () => {
   
   if (loading) {
     return (
-      <AppLayout>
+      <AppLayoutWrapper>
         <div className="space-y-6">
           <Skeleton className="h-10 w-60" />
           <Skeleton className="h-[400px] w-full rounded-xl" />
         </div>
-      </AppLayout>
+      </AppLayoutWrapper>
     );
   }
 
   return (
-    <AppLayout>
+    <AppLayoutWrapper>
       <div className="animate-fade-in">
         <h1 className="text-2xl font-bold mb-6">Your Connections</h1>
         
@@ -115,7 +115,7 @@ const ConnectionsPage = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </AppLayout>
+    </AppLayoutWrapper>
   );
 };
 
