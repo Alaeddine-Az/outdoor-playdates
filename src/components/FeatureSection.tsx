@@ -73,10 +73,6 @@ const FeatureSection = ({ id }: { id?: string }) => {
             <h2 className="text-3xl font-bold tracking-tight mb-4 relative z-10">
               Why Parents Love <span className="text-primary relative">
                 GoPlayNow
-                <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 100 15" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M0,5 Q25,0 50,5 T100,5" fill="none" stroke="hsl(var(--secondary))" strokeWidth="2" 
-                    strokeLinecap="round" />
-                </svg>
               </span>
             </h2>
           </div>
