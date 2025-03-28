@@ -16,6 +16,9 @@ const Header = () => {
   const isHomePage = location.pathname === '/';
   const isMobile = useIsMobile();
 
+  // Log for debugging
+  console.log('Header rendering... isMenuOpen:', isMenuOpen);
+
   // Keep ref in sync with menu state
   useEffect(() => {
     menuOpenRef.current = isMenuOpen;
@@ -32,7 +35,7 @@ const Header = () => {
     return () => (document.body.style.overflow = '');
   }, [isMenuOpen]);
 
-  // Handle outside click to close menu (no weird one-time bug)
+  // Handle outside click to close menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -49,7 +52,10 @@ const Header = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+  const toggleMenu = () => {
+    console.log('🔁 TOGGLE MENU CLICKED');
+    setIsMenuOpen((prev) => !prev);
+  };
 
   const handleSignOut = async () => {
     try {
@@ -79,8 +85,10 @@ const Header = () => {
         <div className="container flex h-14 sm:h-16 items-center justify-between">
           <HeaderLogo />
           <DesktopNav user={user} scrollToSection={scrollToSection} />
+
+          {/* Debug version of toggle button */}
           <button
-            className="block md:hidden"
+            className="fixed top-4 right-4 z-[9999] bg-red-500 text-white p-4 md:hidden"
             onClick={toggleMenu}
             aria-label="Toggle navigation menu"
             data-menu-toggle
