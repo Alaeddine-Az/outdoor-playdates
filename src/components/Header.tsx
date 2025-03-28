@@ -15,18 +15,15 @@ const Header = () => {
   const isHomePage = location.pathname === '/';
   const isMobile = useIsMobile();
 
-  // Close menu on route change
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
-  // Prevent background scroll when menu is open
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? 'hidden' : '';
     return () => (document.body.style.overflow = '');
   }, [isMenuOpen]);
 
-  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -43,7 +40,6 @@ const Header = () => {
   }, [isMenuOpen]);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
-
 
   const handleSignOut = async () => {
     try {
@@ -91,22 +87,13 @@ const Header = () => {
             aria-hidden="true"
             onClick={() => setIsMenuOpen(false)}
           />
-          {isMenuOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
-                aria-hidden="true"
-                onClick={() => setIsMenuOpen(false)}
-              />
-              <MobileMenu
-                isOpen={isMenuOpen}
-                user={user}
-                scrollToSection={scrollToSection}
-                handleSignOut={handleSignOut}
-                closeMenu={() => setIsMenuOpen(false)} // optional, for in-menu closing
-              />
-            </>
-          )}
+          <MobileMenu
+            isOpen={isMenuOpen}
+            user={user}
+            scrollToSection={scrollToSection}
+            handleSignOut={handleSignOut}
+            closeMenu={() => setIsMenuOpen(false)}
+          />
         </>
       )}
     </>
