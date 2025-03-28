@@ -37,7 +37,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
               <SidebarLink to="/dashboard" label="Dashboard" icon={LayoutDashboard} />
               <SidebarLink to="/playdates" label="My Playdates" icon={CalendarCheck} />
-              <SidebarLink to="/community" label="Community" icon={Users} />
+              <SidebarLink to="/connections" label="connections" icon={Users} />
               <button
                 onClick={handleSignOut}
                 className="flex w-full items-center gap-3 rounded-md px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
@@ -51,7 +51,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col px-6 pt-6">
         {children || <Outlet />}
       </div>
     </div>
