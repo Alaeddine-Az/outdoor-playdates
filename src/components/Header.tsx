@@ -90,13 +90,22 @@ const Header = () => {
             aria-hidden="true"
             onClick={() => setIsMenuOpen(false)}
           />
-          <MobileMenu
-            isOpen={isMenuOpen}
-            user={user}
-            scrollToSection={scrollToSection}
-            handleSignOut={handleSignOut}
-            closeMenu={() => setIsMenuOpen(false)}
-          />
+          {isMenuOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+                aria-hidden="true"
+                onClick={() => setIsMenuOpen(false)}
+              />
+              <MobileMenu
+                isOpen={isMenuOpen}
+                user={user}
+                scrollToSection={scrollToSection}
+                handleSignOut={handleSignOut}
+                closeMenu={() => setIsMenuOpen(false)} // optional, for in-menu closing
+              />
+            </>
+          )}
         </>
       )}
     </>
