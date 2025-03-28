@@ -17,6 +17,7 @@ import ThankYou from './pages/ThankYou';
 import Index from './pages/Index';
 import Dashboard from './pages/Dashboard';
 import ConnectionsPage from './pages/Connections';
+import ScrollToTop from './components/ScrollToTop';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -69,6 +70,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
+          <ScrollToTop />
           <AppRoutes />
           <Toaster />
         </AuthProvider>
