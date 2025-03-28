@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
@@ -82,13 +83,13 @@ const Header = () => {
           <HeaderLogo />
           <DesktopNav user={user} scrollToSection={scrollToSection} />
           <button
-            className="block md:hidden"
+            className="block md:hidden p-2 rounded-full hover:bg-muted/50 transition-colors"
             onClick={toggleMenu}
             aria-label="Toggle navigation menu"
             data-menu-toggle
           >
             {isMenuOpen ? (
-              <X className="h-5 w-5" data-menu-toggle />
+              <X className="h-5 w-5 text-primary" data-menu-toggle />
             ) : (
               <Menu className="h-5 w-5" data-menu-toggle />
             )}
@@ -99,7 +100,7 @@ const Header = () => {
       {isMenuOpen && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden animate-fade-in"
             aria-hidden="true"
             onClick={() => setIsMenuOpen(false)}
           />
