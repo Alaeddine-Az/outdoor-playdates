@@ -76,7 +76,7 @@ const HowItWorks = ({ id }: HowItWorksProps) => {
             </div>
           </div>
 
-          <div className="w-full h-full">
+          <div className="w-full h-full flex items-start justify-start md:pl-6 md:pt-6">
             <div className="space-y-10 fade-up-stagger">
               <StepItem 
                 number="1"
