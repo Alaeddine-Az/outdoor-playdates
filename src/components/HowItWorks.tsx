@@ -50,7 +50,7 @@ const HowItWorks = ({ id }: HowItWorksProps) => {
         <div className="absolute bottom-[20%] left-[5%] w-[20%] h-[20%] rounded-full bg-secondary/5 filter blur-3xl"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto relative z-10 px-4">
+      <div className="max-w-7xl mx-auto relative z-10 px-4 md:pl-32">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-block rounded-full bg-muted px-4 py-1.5 mb-4">
             <span className="text-sm font-medium text-foreground/80">
