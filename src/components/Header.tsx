@@ -44,11 +44,6 @@ const Header = () => {
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
-    // temporarily add a log to check
-  const toggleMenu = () => {
-    console.log('Toggle menu clicked!');
-    setIsMenuOpen(!isMenuOpen);
-  };
 
   const handleSignOut = async () => {
     try {
