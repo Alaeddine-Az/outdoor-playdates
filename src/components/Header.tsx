@@ -16,9 +16,6 @@ const Header = () => {
   const isHomePage = location.pathname === '/';
   const isMobile = useIsMobile();
 
-  // Log for debugging
-  console.log('Header rendering... isMenuOpen:', isMenuOpen);
-
   // Keep ref in sync with menu state
   useEffect(() => {
     menuOpenRef.current = isMenuOpen;
@@ -53,7 +50,6 @@ const Header = () => {
   }, []);
 
   const toggleMenu = () => {
-    console.log('🔁 TOGGLE MENU CLICKED');
     setIsMenuOpen((prev) => !prev);
   };
 
@@ -85,15 +81,17 @@ const Header = () => {
         <div className="container flex h-14 sm:h-16 items-center justify-between">
           <HeaderLogo />
           <DesktopNav user={user} scrollToSection={scrollToSection} />
-
-          {/* Debug version of toggle button */}
           <button
-            className="fixed top-4 right-4 z-[9999] bg-red-500 text-white p-4 md:hidden"
+            className="block md:hidden"
             onClick={toggleMenu}
             aria-label="Toggle navigation menu"
             data-menu-toggle
           >
-            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {isMenuOpen ? (
+              <X className="h-5 w-5" data-menu-toggle />
+            ) : (
+              <Menu className="h-5 w-5" data-menu-toggle />
+            )}
           </button>
         </div>
       </header>
