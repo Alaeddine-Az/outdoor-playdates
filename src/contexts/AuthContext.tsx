@@ -83,14 +83,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
           }
         }
+        
+        // Set loading to false regardless of session status
+        setLoading(false);
       } catch (error) {
         console.error('Error checking session:', error);
-      } finally {
         setLoading(false);
       }
     };
     
-    checkExistingSession();
+    // Immediate timeout to ensure the auth state change listener is set up first
+    setTimeout(() => {
+      checkExistingSession();
+    }, 0);
 
     return () => {
       console.log('Cleaning up auth subscription');
@@ -276,11 +281,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       setLoading(true);
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      // Clear state
+      setSession(null);
+      setUser(null);
       setIsAdmin(false);
-      navigate('/');
+      
+      // Navigation is handled in the component that calls signOut
     } catch (error) {
       console.error('Error signing out:', error);
+      throw error;
     } finally {
       setLoading(false);
     }
