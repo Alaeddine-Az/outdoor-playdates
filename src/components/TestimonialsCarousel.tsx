@@ -32,10 +32,6 @@ const TestimonialsCarousel = () => {
           </div>
           <h2 className="text-3xl font-bold tracking-tight mb-4 relative">
             What Families Are <span className="text-primary">Saying</span>
-            <svg className="absolute -bottom-2 left-1/4 w-1/2" viewBox="0 0 200 20" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0,10 Q50,20 100,10 T200,10" fill="none" stroke="hsl(var(--secondary))" strokeWidth="3" 
-                strokeLinecap="round" />
-            </svg>
           </h2>
           <p className="text-xl text-muted-foreground">
             Hear from parents who have transformed their children's playtime experience with GoPlayNow.
