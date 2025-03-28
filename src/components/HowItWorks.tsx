@@ -35,7 +35,7 @@ const HowItWorks = ({ id }: HowItWorksProps) => {
     <section 
       id={id}
       ref={ref as React.RefObject<HTMLDivElement>}
-      className="py-32 px-8 relative overflow-hidden"
+      className="py-24 px-6 relative overflow-hidden"
     >
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
@@ -50,7 +50,7 @@ const HowItWorks = ({ id }: HowItWorksProps) => {
         <div className="absolute bottom-[20%] left-[5%] w-[20%] h-[20%] rounded-full bg-secondary/5 filter blur-3xl"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto relative z-10 px-4 md:pl-32">
+      <div className="max-w-7xl mx-auto relative z-10 px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-block rounded-full bg-muted px-4 py-1.5 mb-4">
             <span className="text-sm font-medium text-foreground/80">
@@ -65,18 +65,18 @@ const HowItWorks = ({ id }: HowItWorksProps) => {
           </p>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-center gap-16 px-4 md:px-12">
-          <div className="w-full md:w-1/2">
-            <div className="mb-8 overflow-hidden rounded-2xl border border-muted shadow-soft">
+        <div className="grid md:grid-cols-2 gap-12 items-stretch px-4 md:px-8">
+          <div className="w-full h-full">
+            <div className="h-full overflow-hidden rounded-2xl border border-muted shadow-soft">
               <img 
                 src={randomImage || heroImages[0]} 
                 alt="Children playing outdoors" 
-                className="w-full h-auto object-cover aspect-[16/9]"
+                className="w-full h-full object-cover"
               />
             </div>
           </div>
 
-          <div className="w-full md:w-1/2">
+          <div className="w-full h-full">
             <div className="space-y-10 fade-up-stagger">
               <StepItem 
                 number="1"
