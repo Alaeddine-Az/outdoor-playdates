@@ -111,12 +111,15 @@ const Header = () => {
       )}
 
       {/* Mobile menu container */}
-      <MobileMenu
-        isOpen={isMenuOpen}
-        user={user}
-        scrollToSection={scrollToSection}
-        handleSignOut={handleSignOut}
-      />
+      {isMenuOpen && (
+        <MobileMenu
+          isOpen={isMenuOpen}
+          user={user}
+          scrollToSection={scrollToSection}
+          handleSignOut={handleSignOut}
+          closeMenu={() => setIsMenuOpen(false)}
+        />
+      )}
     </>
   );
 };
