@@ -16,7 +16,7 @@ import Contact from './pages/Contact';
 import ThankYou from './pages/ThankYou';
 import Index from './pages/Index';
 import Dashboard from './pages/Dashboard';
-import ConnectionsPage from './pages/ConnectionsPage';
+import ConnectionsPage from './pages/Connections';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -39,7 +39,7 @@ function AppRoutes() {
         <Route element={<AppLayout />}>
           {/* Protected routes */}
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/connections" element={<ConnectionsPage />} />
+          <Route path="/connections" element={<Connections />} />
           <Route path="/parent/*" element={<ProtectedRoutes />} />
           <Route path="/parent-profile" element={<ProtectedRoutes />} />
           <Route path="/child/*" element={<ProtectedRoutes />} />
