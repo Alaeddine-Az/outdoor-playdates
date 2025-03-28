@@ -36,11 +36,12 @@ function ProtectedRouteContent({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   
   if (loading) {
-    // Show loading spinner or placeholder
+    // Show a better loading indicator
     return (
       <div className="h-screen flex flex-col items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
         <p className="text-muted-foreground">Loading your account...</p>
+        <p className="text-xs text-muted-foreground mt-2">If this persists, try refreshing the page.</p>
       </div>
     );
   }

@@ -25,81 +25,97 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('Auth provider initialized, setting up auth state listener');
+    console.log('Auth provider initialized');
+    let authListenerSubscription: { unsubscribe: () => void } | null = null;
     
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Check if user is admin
-        if (session?.user) {
-          if (session.user.email === 'admin@admin.com') {
-            setIsAdmin(true);
-          } else {
-            try {
-              const { data, error } = await supabase.rpc('is_admin', { user_id: session.user.id });
-              if (!error) {
-                setIsAdmin(!!data);
-              }
-            } catch (err) {
-              console.error('Error checking admin status:', err);
-              setIsAdmin(false);
-            }
-          }
-        } else {
-          setIsAdmin(false);
-        }
-        
-        setLoading(false);
-      }
-    );
-
-    // THEN check for existing session
-    const checkExistingSession = async () => {
+    const initializeAuth = async () => {
       try {
-        console.log('Checking for existing session');
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('Existing session check result:', session?.user?.id);
-        
-        if (session) {
-          setSession(session);
-          setUser(session.user);
-          
-          // Check if user is admin
-          if (session.user.email === 'admin@admin.com') {
-            setIsAdmin(true);
-          } else {
-            try {
-              const { data, error } = await supabase.rpc('is_admin', { user_id: session.user.id });
-              if (!error) {
-                setIsAdmin(!!data);
+        // Set up auth state listener FIRST
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, newSession) => {
+            console.log('Auth state changed:', event, newSession?.user?.id);
+            
+            // Update session and user state
+            setSession(newSession);
+            setUser(newSession?.user ?? null);
+            
+            // Check if user is admin when session changes
+            if (newSession?.user) {
+              if (newSession.user.email === 'admin@admin.com') {
+                setIsAdmin(true);
+              } else {
+                try {
+                  const { data, error } = await supabase.rpc('is_admin', { user_id: newSession.user.id });
+                  if (!error) {
+                    setIsAdmin(!!data);
+                  }
+                } catch (err) {
+                  console.error('Error checking admin status:', err);
+                  setIsAdmin(false);
+                }
               }
-            } catch (err) {
-              console.error('Error checking admin status:', err);
+            } else {
               setIsAdmin(false);
             }
+            
+            // Always set loading to false after processing the auth state change
+            setLoading(false);
           }
-        }
+        );
         
-        // Set loading to false regardless of session status
-        setLoading(false);
+        authListenerSubscription = subscription;
+        
+        // THEN check for existing session (with a slight delay to ensure listener is set up)
+        setTimeout(async () => {
+          try {
+            console.log('Checking for existing session');
+            const { data: { session: existingSession }, error } = await supabase.auth.getSession();
+            
+            if (error) {
+              throw error;
+            }
+            
+            console.log('Existing session check result:', existingSession?.user?.id);
+            
+            if (existingSession) {
+              setSession(existingSession);
+              setUser(existingSession.user);
+              
+              // Check admin status
+              if (existingSession.user.email === 'admin@admin.com') {
+                setIsAdmin(true);
+              } else {
+                try {
+                  const { data, error } = await supabase.rpc('is_admin', { user_id: existingSession.user.id });
+                  if (!error) {
+                    setIsAdmin(!!data);
+                  }
+                } catch (err) {
+                  console.error('Error checking admin status:', err);
+                  setIsAdmin(false);
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Error checking session:', error);
+          } finally {
+            // Always set loading to false, even if there's an error
+            setLoading(false);
+          }
+        }, 50);
       } catch (error) {
-        console.error('Error checking session:', error);
+        console.error('Error initializing auth:', error);
         setLoading(false);
       }
     };
     
-    // Immediate timeout to ensure the auth state change listener is set up first
-    setTimeout(() => {
-      checkExistingSession();
-    }, 0);
-
+    initializeAuth();
+    
     return () => {
       console.log('Cleaning up auth subscription');
-      subscription.unsubscribe();
+      if (authListenerSubscription) {
+        authListenerSubscription.unsubscribe();
+      }
     };
   }, []);
 
