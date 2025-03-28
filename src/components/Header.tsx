@@ -16,11 +16,31 @@ const Header = () => {
   const isHomePage = location.pathname === '/';
   const isMobile = useIsMobile();
 
-  // If authentication is loading or there's no user, don't render the header
+  // If authentication is loading, render a minimal header or return null
+  // This ensures consistent hook rendering across all code paths
   if (loading) {
     return null;
   }
 
+  // Effect for closing menu on route changes
+  useEffect(() => {
+    // Close menu when route changes
+    setIsMenuOpen(false);
+  }, [location.pathname]);
+
+  // Effect for handling body overflow when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
+
+  // Effect for handling outside clicks to close the menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -34,23 +54,6 @@ const Header = () => {
 
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, [isMenuOpen]);
-
-  useEffect(() => {
-    // Close menu when route changes
-    setIsMenuOpen(false);
-  }, [location.pathname]);
-
-  // Effect to disable body scrolling when menu is open
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
   }, [isMenuOpen]);
 
   const toggleMenu = () => {
