@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 // Import pages
 import Index from '@/pages/Index';
@@ -12,15 +11,23 @@ import Terms from '@/pages/Terms';
 import Contact from '@/pages/Contact';
 
 const PublicRoutes = () => {
+  // Get the current path to determine if we're at the root path
+  const path = window.location.pathname;
+  
+  // If we're at exactly "/auth", "/about", etc. render those components
+  // Otherwise, if we're at the root path ("/"), render Index
+  // This avoids the nested routes warning
+  
   return (
     <Routes>
-      <Route path="/" element={<Index />} />
+      <Route index element={<Index />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/thank-you" element={<ThankYou />} />
       <Route path="/about" element={<About />} />
       <Route path="/faq" element={<FAQ />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/contact" element={<Contact />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

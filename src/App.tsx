@@ -8,6 +8,13 @@ import ProtectedRoutes from './routes/ProtectedRoutes';
 import AdminRoutes from './routes/AdminRoutes';
 import MainLayout from './components/layout/MainLayout';
 import NotFound from './pages/NotFound';
+import Auth from './pages/Auth';
+import About from './pages/About';
+import FAQ from './pages/FAQ';
+import Terms from './pages/Terms';
+import Contact from './pages/Contact';
+import ThankYou from './pages/ThankYou';
+import Index from './pages/Index';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -18,16 +25,14 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            {/* Public routes (outside main layout) */}
-            <Route path="/auth" element={<PublicRoutes />} />
-            <Route path="/thank-you" element={<PublicRoutes />} />
-            <Route path="/about" element={<PublicRoutes />} />
-            <Route path="/faq" element={<PublicRoutes />} />
-            <Route path="/terms" element={<PublicRoutes />} />
-            <Route path="/contact" element={<PublicRoutes />} />
-            
-            {/* Home page */}
-            <Route path="/" element={<PublicRoutes />} />
+            {/* Public pages outside main layout */}
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/thank-you" element={<ThankYou />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/contact" element={<Contact />} />
             
             {/* Main Layout with protected routes */}
             <Route element={<MainLayout />}>

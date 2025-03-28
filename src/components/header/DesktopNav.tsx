@@ -14,6 +14,16 @@ const DesktopNav = ({ user, scrollToSection }: DesktopNavProps) => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   
+  const handleGetStarted = () => {
+    if (isHomePage) {
+      // If on home page, scroll to the section
+      scrollToSection('onboarding');
+    } else {
+      // If not on home page, navigate to home page with the section hash
+      window.location.href = '/#onboarding';
+    }
+  };
+  
   return (
     <nav className="hidden md:flex items-center space-x-6">
       {user ? (
@@ -63,7 +73,7 @@ const DesktopNav = ({ user, scrollToSection }: DesktopNavProps) => {
               <Button variant="outline">Sign In</Button>
             </Link>
             <Button 
-              onClick={() => scrollToSection('onboarding')}
+              onClick={handleGetStarted}
               className="bg-primary hover:bg-primary/90"
             >
               Get Started

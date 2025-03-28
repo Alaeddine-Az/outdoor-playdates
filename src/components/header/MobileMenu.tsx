@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
 import { Button } from "@/components/ui/button";
 import { Calendar, User as UserIcon, LogOut, Users } from 'lucide-react';
@@ -13,6 +13,27 @@ interface MobileMenuProps {
 }
 
 const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenuProps) => {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+  
+  const handleGetStarted = () => {
+    if (isHomePage) {
+      // If on home page, scroll to the section
+      scrollToSection('onboarding');
+    } else {
+      // If not on home page, navigate to home page with the section hash
+      window.location.href = '/#onboarding';
+    }
+  };
+
+  const handleScrollOrNavigate = (id: string) => {
+    if (isHomePage) {
+      scrollToSection(id);
+    } else {
+      window.location.href = `/#${id}`;
+    }
+  };
+
   return (
     <div
       className={`fixed inset-y-0 right-0 z-50 w-[80%] max-w-sm pt-16 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
@@ -77,13 +98,13 @@ const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenu
             // Non-authenticated menu items
             <>
               <button
-                onClick={() => scrollToSection('features')}
+                onClick={() => handleScrollOrNavigate('features')}
                 className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors"
               >
                 <span>Features</span>
               </button>
               <button
-                onClick={() => scrollToSection('how-it-works')}
+                onClick={() => handleScrollOrNavigate('how-it-works')}
                 className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors"
               >
                 <span>How It Works</span>
@@ -103,7 +124,7 @@ const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenu
                   <Button variant="outline" className="w-full transition-colors">Sign In</Button>
                 </Link>
                 <Button 
-                  onClick={() => scrollToSection('onboarding')}
+                  onClick={handleGetStarted}
                   className="w-full bg-primary hover:bg-primary/90 py-6 text-base transition-colors"
                 >
                   Get Started
