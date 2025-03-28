@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Camera } from 'lucide-react';
@@ -24,13 +24,22 @@ const ProfilePictureUploader: React.FC<ProfilePictureUploaderProps> = ({
     }
   };
 
+  // Get initials for avatar fallback
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase();
+  };
+
   return (
     <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6">
       <div className="relative group">
         <Avatar className="w-28 h-28 border-2 border-muted">
           <AvatarImage src={avatarUrl} />
           <AvatarFallback className="bg-primary/10 text-primary font-bold text-4xl">
-            {name.charAt(0)}
+            {getInitials(name || 'U')}
           </AvatarFallback>
         </Avatar>
         
@@ -57,7 +66,7 @@ const ProfilePictureUploader: React.FC<ProfilePictureUploaderProps> = ({
           onClick={() => document.getElementById('avatar-upload')?.click()}
           disabled={isUploading}
         >
-          <Camera className="h-4 w-4 mr-2" /> Change Photo
+          <Camera className="h-4 w-4 mr-2" /> {avatarUrl ? 'Change Photo' : 'Upload Photo'}
         </Button>
       </div>
     </div>

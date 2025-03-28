@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,6 +15,8 @@ interface PersonalInfoFormProps {
   setCity: (city: string) => void;
 }
 
+const MAX_DESCRIPTION_LENGTH = 500;
+
 const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
   name,
   setName,
@@ -25,6 +27,20 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
   city,
   setCity
 }) => {
+  const [charCount, setCharCount] = useState(0);
+  
+  useEffect(() => {
+    setCharCount(description.length);
+  }, [description]);
+  
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newText = e.target.value;
+    if (newText.length <= MAX_DESCRIPTION_LENGTH) {
+      setDescription(newText);
+      setCharCount(newText.length);
+    }
+  };
+  
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -38,11 +54,16 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="description">About You</Label>
+        <div className="flex justify-between">
+          <Label htmlFor="description">About You</Label>
+          <span className={`text-xs ${charCount > MAX_DESCRIPTION_LENGTH * 0.8 ? 'text-orange-500' : 'text-muted-foreground'}`}>
+            {charCount}/{MAX_DESCRIPTION_LENGTH}
+          </span>
+        </div>
         <Textarea 
           id="description" 
           value={description} 
-          onChange={(e) => setDescription(e.target.value)} 
+          onChange={handleDescriptionChange} 
           placeholder="Tell other parents about yourself and your family"
           className="min-h-[100px]"
         />
@@ -69,9 +90,11 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
             value={city} 
             onChange={(e) => setCity(e.target.value)} 
             placeholder="e.g., Calgary"
+            readOnly
+            className="bg-muted"
           />
           <p className="text-xs text-muted-foreground">
-            This city name will be shown on your public profile
+            This city name is derived from your postal code and shown on your public profile
           </p>
         </div>
       </div>
