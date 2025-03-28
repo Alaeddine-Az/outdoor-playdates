@@ -70,8 +70,11 @@ const Header = () => {
           <HeaderLogo />
           <DesktopNav user={user} scrollToSection={scrollToSection} />
           <button
-            className="block md:hidden"
-            onClick={toggleMenu}
+            className="fixed top-4 right-4 z-[9999] bg-red-500 text-white p-4 md:hidden"
+            onClick={() => {
+              console.log('MENU BUTTON CLICKED');
+              toggleMenu();
+            }}
             aria-label="Toggle navigation menu"
             data-menu-toggle
           >
