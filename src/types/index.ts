@@ -1,4 +1,3 @@
-
 export interface ParentProfile {
   id: string;
   parent_name: string;
@@ -62,4 +61,14 @@ export interface EventParticipant {
   parent_id: string;
   children_ids: string[];
   joined_at: string;
+}
+
+export interface PlaydateParticipant {
+  id: string;
+  playdate_id: string;
+  child_id: string;
+  parent_id?: string; // Adding parent_id as optional
+  status: string;
+  created_at: string;
+  updated_at: string;
 }

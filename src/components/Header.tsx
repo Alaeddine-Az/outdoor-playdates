@@ -9,13 +9,33 @@ import DesktopNav from './header/DesktopNav';
 import MobileMenu from './header/MobileMenu';
 
 const Header = () => {
+  // Call all hooks at the top level, before any conditional logic
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   const isMobile = useIsMobile();
 
+  // Effect for closing menu on route changes
+  useEffect(() => {
+    // Close menu when route changes
+    setIsMenuOpen(false);
+  }, [location.pathname]);
+
+  // Effect for handling body overflow when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
+
+  // Effect for handling outside clicks to close the menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -31,23 +51,6 @@ const Header = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isMenuOpen]);
 
-  useEffect(() => {
-    // Close menu when route changes
-    setIsMenuOpen(false);
-  }, [location.pathname]);
-
-  // Effect to disable body scrolling when menu is open
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isMenuOpen]);
-
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -55,7 +58,7 @@ const Header = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-      navigate('/');
+      // Navigation is now handled inside signOut function
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -73,9 +76,14 @@ const Header = () => {
     setIsMenuOpen(false);
   };
 
+  // Only return null after all hooks have been called
+  if (loading) {
+    return null;
+  }
+
   return (
     <>
-      <header className="sticky top-0 z-40 w-full backdrop-blur-sm border-b bg-white/90 border-muted">
+      <header className="sticky top-0 z-50 w-full backdrop-blur-sm border-b bg-white/90 border-muted">
         <div className="container flex h-14 sm:h-16 items-center justify-between">
           <HeaderLogo />
           <DesktopNav 

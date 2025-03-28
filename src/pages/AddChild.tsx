@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AppLayout from '@/components/AppLayout';
+import AppLayoutWrapper from '@/components/AppLayoutWrapper';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -142,7 +142,7 @@ const AddChild = () => {
   };
   
   return (
-    <AppLayout>
+    <AppLayoutWrapper>
       <div className="container max-w-4xl py-8">
         <div className="bg-white p-6 rounded-xl shadow-soft">
           <div className="flex items-center gap-3 mb-6">
@@ -278,7 +278,7 @@ const AddChild = () => {
           </Form>
         </div>
       </div>
-    </AppLayout>
+    </AppLayoutWrapper>
   );
 };
 

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { cn } from '@/lib/utils';
@@ -24,11 +23,9 @@ const HowItWorks = ({ id }: HowItWorksProps) => {
     threshold: 0.1,
     triggerOnce: true
   });
-  
-  // State to hold the random image URL
+
   const [randomImage, setRandomImage] = useState<string>("");
-  
-  // Set a random image when the component mounts
+
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * heroImages.length);
     setRandomImage(heroImages[randomIndex]);
@@ -53,7 +50,7 @@ const HowItWorks = ({ id }: HowItWorksProps) => {
         <div className="absolute bottom-[20%] left-[5%] w-[20%] h-[20%] rounded-full bg-secondary/5 filter blur-3xl"></div>
       </div>
 
-      <div className="container mx-auto relative z-10">
+      <div className="max-w-7xl mx-auto relative z-10 px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-block rounded-full bg-muted px-4 py-1.5 mb-4">
             <span className="text-sm font-medium text-foreground/80">
@@ -68,18 +65,18 @@ const HowItWorks = ({ id }: HowItWorksProps) => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <div className="mb-8 overflow-hidden rounded-2xl border border-muted shadow-soft">
+        <div className="grid md:grid-cols-2 gap-12 items-stretch px-4 md:px-8">
+          <div className="w-full h-full">
+            <div className="h-full overflow-hidden rounded-2xl border border-muted shadow-soft">
               <img 
                 src={randomImage || heroImages[0]} 
                 alt="Children playing outdoors" 
-                className="w-full h-auto object-cover aspect-[16/9]"
+                className="w-full h-full object-cover"
               />
             </div>
           </div>
-          
-          <div>
+
+          <div className="w-full h-full flex items-start justify-start md:pl-6 md:pt-6">
             <div className="space-y-10 fade-up-stagger">
               <StepItem 
                 number="1"
@@ -87,14 +84,14 @@ const HowItWorks = ({ id }: HowItWorksProps) => {
                 title="Discover Local Playdates"
                 description="Find outdoor fun near you."
               />
-              
+
               <StepItem 
                 number="2"
                 icon={<Calendar className="h-6 w-6 text-primary" />}
                 title="Join or Host"
                 description="RSVP or set one up in seconds."
               />
-              
+
               <StepItem 
                 number="3"
                 icon={<Users className="h-6 w-6 text-primary" />}

@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AppLayout from '@/components/AppLayout';
+import AppLayoutWrapper from '@/components/AppLayoutWrapper';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -100,7 +101,7 @@ const CreateEventPage = () => {
   };
   
   return (
-    <AppLayout>
+    <AppLayoutWrapper>
       <div className={`${isMobile ? 'w-full' : 'max-w-2xl mx-auto'} bg-white p-4 sm:p-6 rounded-xl shadow-soft animate-fade-in`}>
         <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Create a New Event</h2>
         
@@ -302,7 +303,7 @@ const CreateEventPage = () => {
           </div>
         </form>
       </div>
-    </AppLayout>
+    </AppLayoutWrapper>
   );
 };
 

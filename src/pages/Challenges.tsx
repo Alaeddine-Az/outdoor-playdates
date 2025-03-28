@@ -1,6 +1,5 @@
-
 import React from 'react';
-import AppLayout from '@/components/AppLayout';
+import AppLayoutWrapper from '@/components/AppLayoutWrapper';
 import { Button } from '@/components/ui/button';
 import { 
   Trophy, 
@@ -16,7 +15,7 @@ import {
 
 const Challenges = () => {
   return (
-    <AppLayout>
+    <AppLayoutWrapper>
       <div className="animate-fade-in">
         <header className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -38,7 +37,6 @@ const Challenges = () => {
         </header>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Main content area */}
           <div className="md:col-span-2 space-y-6">
             <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
               <div className="flex items-center justify-between mb-6">
@@ -115,7 +113,6 @@ const Challenges = () => {
             </section>
           </div>
           
-          {/* Sidebar content */}
           <div className="space-y-6">
             <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
               <h2 className="text-lg font-medium mb-4">Challenge Stats</h2>
@@ -179,7 +176,7 @@ const Challenges = () => {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </AppLayoutWrapper>
   );
 };
 
