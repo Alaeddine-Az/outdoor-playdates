@@ -13,9 +13,13 @@ export function useAuthSession() {
   useEffect(() => {
     console.log('Auth session hook initialized');
     
+    let isMounted = true;
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
+        if (!isMounted) return;
+        
         console.log('Auth state changed:', event, newSession?.user?.id);
         
         // Update session and user state
@@ -25,13 +29,13 @@ export function useAuthSession() {
         // Check admin status when session changes
         if (newSession?.user) {
           const adminStatus = await checkAdminStatus(newSession.user);
-          setIsAdmin(adminStatus);
+          if (isMounted) setIsAdmin(adminStatus);
         } else {
-          setIsAdmin(false);
+          if (isMounted) setIsAdmin(false);
         }
         
         // Always update loading state after processing auth change
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     );
     
@@ -43,11 +47,13 @@ export function useAuthSession() {
         
         if (error) {
           console.error('Error getting session:', error);
-          setLoading(false);
+          if (isMounted) setLoading(false);
           return;
         }
         
         console.log('Existing session check result:', existingSession?.user?.id);
+        
+        if (!isMounted) return;
         
         // Update state based on session
         setSession(existingSession);
@@ -56,13 +62,13 @@ export function useAuthSession() {
         // Check admin status if user exists
         if (existingSession?.user) {
           const adminStatus = await checkAdminStatus(existingSession.user);
-          setIsAdmin(adminStatus);
+          if (isMounted) setIsAdmin(adminStatus);
         }
       } catch (error) {
         console.error('Exception checking session:', error);
       } finally {
         // Always ensure loading is set to false
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     
@@ -72,6 +78,7 @@ export function useAuthSession() {
     // Clean up subscription when component unmounts
     return () => {
       console.log('Cleaning up auth subscription');
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);

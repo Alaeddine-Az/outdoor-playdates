@@ -9,6 +9,7 @@ import DesktopNav from './header/DesktopNav';
 import MobileMenu from './header/MobileMenu';
 
 const Header = () => {
+  // Call all hooks at the top level, before any conditional logic
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
@@ -16,19 +17,13 @@ const Header = () => {
   const isHomePage = location.pathname === '/';
   const isMobile = useIsMobile();
 
-  // If authentication is loading, render a minimal header or return null
-  // This ensures consistent hook rendering across all code paths
-  if (loading) {
-    return null;
-  }
-
-  // Effect for closing menu on route changes
+  // Effect for closing menu on route changes - must be defined at top level
   useEffect(() => {
     // Close menu when route changes
     setIsMenuOpen(false);
   }, [location.pathname]);
 
-  // Effect for handling body overflow when menu is open
+  // Effect for handling body overflow when menu is open - must be defined at top level
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -40,7 +35,7 @@ const Header = () => {
     };
   }, [isMenuOpen]);
 
-  // Effect for handling outside clicks to close the menu
+  // Effect for handling outside clicks to close the menu - must be defined at top level
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -80,6 +75,11 @@ const Header = () => {
     }
     setIsMenuOpen(false);
   };
+
+  // Only return null after all hooks have been called
+  if (loading) {
+    return null;
+  }
 
   return (
     <>
