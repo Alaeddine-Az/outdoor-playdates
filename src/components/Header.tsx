@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,11 +9,17 @@ import MobileMenu from './header/MobileMenu';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuOpenRef = useRef(isMenuOpen);
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   const isMobile = useIsMobile();
+
+  // Keep ref in sync with menu state
+  useEffect(() => {
+    menuOpenRef.current = isMenuOpen;
+  }, [isMenuOpen]);
 
   // Close menu on route change
   useEffect(() => {
@@ -26,26 +32,22 @@ const Header = () => {
     return () => (document.body.style.overflow = '');
   }, [isMenuOpen]);
 
-  // Click outside to close menu — delayed to avoid conflict on open
+  // Handle outside click to close menu (no weird one-time bug)
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      const handleClickOutside = (event: MouseEvent) => {
-        const target = event.target as HTMLElement;
-        if (
-          isMenuOpen &&
-          !target.closest('[data-mobile-menu]') &&
-          !target.closest('[data-menu-toggle]')
-        ) {
-          setIsMenuOpen(false);
-        }
-      };
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (
+        menuOpenRef.current &&
+        !target.closest('[data-mobile-menu]') &&
+        !target.closest('[data-menu-toggle]')
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
 
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
-    }, 0);
-
-    return () => clearTimeout(timeout);
-  }, [isMenuOpen]);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
