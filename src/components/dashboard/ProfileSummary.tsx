@@ -43,7 +43,7 @@ const ProfileSummary = ({ name, children, interests }: ProfileSummaryProps) => {
         <Button 
           variant="outline" 
           className="w-full"
-          onClick={() => navigate('/edit-profile')}
+          onClick={() => navigate('/EditProfile')}
         >
           Edit Profile
         </Button>
