@@ -33,12 +33,13 @@ export default function AppLayout() {
               <SidebarLink to="/dashboard" label="Dashboard" icon={LayoutDashboard} />
               <SidebarLink to="/playdates" label="My Playdates" icon={CalendarCheck} />
               <SidebarLink to="/community" label="Community" icon={Users} />
-              <SidebarLink
-                label="Sign Out"
-                icon={LogOut}
+              <button
                 onClick={handleSignOut}
-                className="text-destructive hover:bg-destructive/10"
-              />
+                className="flex w-full items-center gap-3 rounded-md px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </button>
             </nav>
           </div>
         </div>
