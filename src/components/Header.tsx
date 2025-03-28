@@ -15,28 +15,36 @@ const Header = () => {
   const isHomePage = location.pathname === '/';
   const isMobile = useIsMobile();
 
+  // Close menu on route change
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
+  // Prevent background scroll when menu is open
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? 'hidden' : '';
     return () => (document.body.style.overflow = '');
   }, [isMenuOpen]);
 
+  // Click outside to close menu — delayed to avoid conflict on open
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (
-        isMenuOpen &&
-        !target.closest('[data-mobile-menu]') &&
-        !target.closest('[data-menu-toggle]')
-      ) {
-        setIsMenuOpen(false);
-      }
-    };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    const timeout = setTimeout(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        const target = event.target as HTMLElement;
+        if (
+          isMenuOpen &&
+          !target.closest('[data-mobile-menu]') &&
+          !target.closest('[data-menu-toggle]')
+        ) {
+          setIsMenuOpen(false);
+        }
+      };
+
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }, 0);
+
+    return () => clearTimeout(timeout);
   }, [isMenuOpen]);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
@@ -70,11 +78,8 @@ const Header = () => {
           <HeaderLogo />
           <DesktopNav user={user} scrollToSection={scrollToSection} />
           <button
-            className="fixed top-4 right-4 z-[9999] bg-red-500 text-white p-4 md:hidden"
-            onClick={() => {
-              console.log('MENU BUTTON CLICKED');
-              toggleMenu();
-            }}
+            className="block md:hidden"
+            onClick={toggleMenu}
             aria-label="Toggle navigation menu"
             data-menu-toggle
           >
