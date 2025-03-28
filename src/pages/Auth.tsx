@@ -41,9 +41,9 @@ const Auth = () => {
     },
   });
   
-  // If already logged in, render the Navigate component instead of returning early
+  // If already logged in, redirect to dashboard instead of home page
   if (user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
   
   const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {

@@ -17,13 +17,13 @@ const Header = () => {
   const isHomePage = location.pathname === '/';
   const isMobile = useIsMobile();
 
-  // Effect for closing menu on route changes - must be defined at top level
+  // Effect for closing menu on route changes
   useEffect(() => {
     // Close menu when route changes
     setIsMenuOpen(false);
   }, [location.pathname]);
 
-  // Effect for handling body overflow when menu is open - must be defined at top level
+  // Effect for handling body overflow when menu is open
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -35,7 +35,7 @@ const Header = () => {
     };
   }, [isMenuOpen]);
 
-  // Effect for handling outside clicks to close the menu - must be defined at top level
+  // Effect for handling outside clicks to close the menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
