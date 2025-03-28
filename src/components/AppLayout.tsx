@@ -1,4 +1,5 @@
 
+import { ReactNode } from 'react';
 import { Outlet } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -7,10 +8,13 @@ import {
   LogOut,
 } from 'lucide-react';
 import { SidebarLink } from '@/components/SidebarLink';
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function AppLayout() {
+interface AppLayoutProps {
+  children?: ReactNode;
+}
+
+export default function AppLayout({ children }: AppLayoutProps) {
   const { signOut } = useAuth();
 
   const handleSignOut = async () => {
@@ -48,7 +52,7 @@ export default function AppLayout() {
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col">
-        <Outlet />
+        {children || <Outlet />}
       </div>
     </div>
   );

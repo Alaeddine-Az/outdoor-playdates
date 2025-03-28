@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import AppLayout from '@/components/AppLayout';
+import AppLayoutWrapper from '@/components/AppLayoutWrapper';
 import { 
   User, 
   Mail, 
@@ -29,19 +29,19 @@ const ParentProfile = () => {
   
   if (loading) {
     return (
-      <AppLayout>
+      <AppLayoutWrapper>
         <div className="p-6 max-w-5xl mx-auto space-y-6">
           <div className="h-10 w-40 bg-muted rounded animate-pulse mb-4"></div>
           <div className="h-64 bg-muted rounded animate-pulse"></div>
           <div className="h-32 bg-muted rounded animate-pulse"></div>
         </div>
-      </AppLayout>
+      </AppLayoutWrapper>
     );
   }
 
   if (error || !profile) {
     return (
-      <AppLayout>
+      <AppLayoutWrapper>
         <div className="p-6 max-w-5xl mx-auto text-center">
           <h1 className="text-2xl font-bold mb-4">Profile Not Found</h1>
           <p className="text-muted-foreground mb-6">
@@ -51,12 +51,12 @@ const ParentProfile = () => {
             Return to Dashboard
           </Button>
         </div>
-      </AppLayout>
+      </AppLayoutWrapper>
     );
   }
 
   return (
-    <AppLayout>
+    <AppLayoutWrapper>
       <div className="p-6 max-w-5xl mx-auto animate-fade-in">
         <div className="flex justify-between items-start mb-6">
           <button 
@@ -93,7 +93,7 @@ const ParentProfile = () => {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </AppLayoutWrapper>
   );
 };
 

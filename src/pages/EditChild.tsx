@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import AppLayout from '@/components/AppLayout';
+import AppLayoutWrapper from '@/components/AppLayoutWrapper';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Save } from 'lucide-react';
 import ChildBasicInfoForm from '@/components/child/ChildBasicInfoForm';
@@ -26,18 +26,18 @@ const EditChild = () => {
 
   if (loading) {
     return (
-      <AppLayout>
+      <AppLayoutWrapper>
         <div className="p-6 max-w-3xl mx-auto space-y-6">
           <div className="h-10 w-40 bg-muted rounded animate-pulse mb-4"></div>
           <div className="h-32 bg-muted rounded animate-pulse"></div>
           <div className="h-32 bg-muted rounded animate-pulse"></div>
         </div>
-      </AppLayout>
+      </AppLayoutWrapper>
     );
   }
 
   return (
-    <AppLayout>
+    <AppLayoutWrapper>
       <div className="p-6 max-w-3xl mx-auto animate-fade-in">
         <Button 
           variant="ghost" 
@@ -82,7 +82,7 @@ const EditChild = () => {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </AppLayoutWrapper>
   );
 };
 

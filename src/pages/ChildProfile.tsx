@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import AppLayout from '@/components/AppLayout';
+import AppLayoutWrapper from '@/components/AppLayoutWrapper';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -61,7 +61,7 @@ const ChildProfilePage = () => {
   
   if (loading) {
     return (
-      <AppLayout>
+      <AppLayoutWrapper>
         <div className="max-w-3xl mx-auto space-y-6">
           <div className="flex gap-6">
             <Skeleton className="h-24 w-24 rounded-full" />
@@ -72,25 +72,25 @@ const ChildProfilePage = () => {
             </div>
           </div>
         </div>
-      </AppLayout>
+      </AppLayoutWrapper>
     );
   }
 
   if (!child || !parent) {
     return (
-      <AppLayout>
+      <AppLayoutWrapper>
         <div className="p-8 text-center">
           <h1 className="text-2xl font-bold mb-4">Child Profile Not Found</h1>
           <p className="text-muted-foreground">
             The requested child profile could not be found.
           </p>
         </div>
-      </AppLayout>
+      </AppLayoutWrapper>
     );
   }
 
   return (
-    <AppLayout>
+    <AppLayoutWrapper>
       <div className="max-w-3xl mx-auto animate-fade-in">
         <div className="bg-white rounded-xl shadow-soft border border-muted p-6">
           <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
@@ -137,7 +137,7 @@ const ChildProfilePage = () => {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </AppLayoutWrapper>
   );
 };
 
