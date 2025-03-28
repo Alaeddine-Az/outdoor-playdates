@@ -149,7 +149,7 @@ const Hero = () => {
                 className="button-glow bg-primary hover:bg-primary/90 text-white rounded-xl" 
                 onClick={scrollToOnboarding}
               >
-                Get Started - It's Free! <ArrowRight className="ml-2 h-4 w-4" />
+                Get Invited - It's Free! <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Button 
                 size="lg" 
