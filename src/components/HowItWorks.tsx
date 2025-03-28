@@ -65,7 +65,7 @@ const HowItWorks = ({ id }: HowItWorksProps) => {
           </p>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-center gap-12">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-16 px-4 md:px-12">
           <div className="w-full md:w-1/2">
             <div className="mb-8 overflow-hidden rounded-2xl border border-muted shadow-soft">
               <img 
