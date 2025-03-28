@@ -167,7 +167,7 @@ const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut, closeMenu }:
                 onClick={handleGetStarted} 
                 className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white transition-all duration-300 animate-pulse"
               >
-                Get Started
+                Get an Invitation
               </Button>
             </div>
           </>
