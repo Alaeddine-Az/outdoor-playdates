@@ -5,14 +5,13 @@ import AppLayout from '@/components/AppLayout';
 import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Save, ArrowLeft, Plus } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Save, ArrowLeft } from 'lucide-react';
 import { useProfileUpdate } from '@/hooks/useProfileUpdate';
 import ProfilePictureUploader from '@/components/profile/ProfilePictureUploader';
 import PersonalInfoForm from '@/components/profile/PersonalInfoForm';
 import InterestsSelector from '@/components/profile/InterestsSelector';
 import ChildrenSection from '@/components/profile/ChildrenSection';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Common parent interests for selection
 const COMMON_INTERESTS = [
@@ -34,7 +33,6 @@ const EditProfile = () => {
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [activeTab, setActiveTab] = useState('parent');
   
   // Hook for profile updates
   const { updateProfile, isSaving, isUploading } = useProfileUpdate(user?.id, profile);
@@ -77,7 +75,7 @@ const EditProfile = () => {
   if (loading) {
     return (
       <AppLayout>
-        <div className="p-6 max-w-3xl mx-auto space-y-6">
+        <div className="p-6 max-w-4xl mx-auto space-y-6">
           <div className="h-10 w-40 bg-muted rounded animate-pulse mb-4"></div>
           <div className="h-32 bg-muted rounded animate-pulse"></div>
           <div className="h-32 bg-muted rounded animate-pulse"></div>
@@ -90,7 +88,7 @@ const EditProfile = () => {
   if (error || !profile) {
     return (
       <AppLayout>
-        <div className="p-6 max-w-3xl mx-auto text-center">
+        <div className="p-6 max-w-4xl mx-auto text-center">
           <h1 className="text-2xl font-bold mb-4">Profile Not Found</h1>
           <p className="text-muted-foreground mb-6">
             {error || "There was an error loading your profile."}
@@ -105,7 +103,7 @@ const EditProfile = () => {
 
   return (
     <AppLayout>
-      <div className="p-6 max-w-3xl mx-auto animate-fade-in">
+      <div className="p-6 max-w-4xl mx-auto animate-fade-in">
         <Button 
           variant="ghost" 
           onClick={() => navigate('/parent-profile')}
@@ -114,34 +112,20 @@ const EditProfile = () => {
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Profile
         </Button>
         
-        <h1 className="text-2xl font-bold mb-6">Edit Your Profile</h1>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="parent">Parent Information</TabsTrigger>
-            <TabsTrigger value="children">Children</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="parent" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Profile Picture</CardTitle>
-              </CardHeader>
-              <CardContent>
+        <div className="space-y-8">
+          {/* Parent Information Section */}
+          <section>
+            <h2 className="text-2xl font-bold mb-6">Parent Information</h2>
+            
+            <Card className="bg-white border">
+              <CardContent className="p-6 space-y-8">
                 <ProfilePictureUploader 
                   name={name}
                   avatarUrl={avatarUrl}
                   onFileChange={handleAvatarChange}
                   isUploading={isUploading}
                 />
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Personal Information</CardTitle>
-              </CardHeader>
-              <CardContent>
+                
                 <PersonalInfoForm 
                   name={name}
                   setName={setName}
@@ -152,14 +136,7 @@ const EditProfile = () => {
                   city={city}
                   setCity={setCity}
                 />
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Interests</CardTitle>
-              </CardHeader>
-              <CardContent>
+                
                 <InterestsSelector 
                   selectedInterests={selectedInterests}
                   setSelectedInterests={setSelectedInterests}
@@ -167,47 +144,34 @@ const EditProfile = () => {
                 />
               </CardContent>
             </Card>
-            
-            <div className="flex justify-end gap-4 sticky bottom-4 bg-background pt-4 pb-2 px-4 rounded-lg shadow-lg border z-10">
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/parent-profile')}
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSave}
-                disabled={isUploading || isSaving || !name}
-                className="button-glow bg-primary hover:bg-primary/90 text-white"
-              >
-                <Save className="h-4 w-4 mr-2" />
-                {isSaving ? "Saving..." : "Save Changes"}
-              </Button>
-            </div>
-          </TabsContent>
+          </section>
           
-          <TabsContent value="children" className="space-y-6">
+          {/* Children Section */}
+          <section>
             <ChildrenSection 
               children={children}
             />
-            
-            <div className="flex justify-between items-center sticky bottom-4 bg-background pt-4 pb-2 px-4 rounded-lg shadow-lg border z-10">
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/add-child')}
-              >
-                <Plus className="h-4 w-4 mr-2" /> Add Child
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/parent-profile')}
-              >
-                Done
-              </Button>
-            </div>
-          </TabsContent>
-        </Tabs>
+          </section>
+          
+          {/* Save Button */}
+          <div className="flex justify-end sticky bottom-4 bg-background pt-4 pb-2 px-4 rounded-lg shadow-lg border z-10">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/parent-profile')}
+              className="mr-2"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSave}
+              disabled={isUploading || isSaving || !name}
+              className="bg-primary hover:bg-primary/90 text-white"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {isSaving ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </div>
       </div>
     </AppLayout>
   );

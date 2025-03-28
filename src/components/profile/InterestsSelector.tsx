@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { PlusCircle, XCircle } from 'lucide-react';
+import { PlusCircle, XCircle, Plus } from 'lucide-react';
+import { Label } from '@/components/ui/label';
 
 interface InterestsSelectorProps {
   selectedInterests: string[];
@@ -38,30 +39,38 @@ const InterestsSelector: React.FC<InterestsSelectorProps> = ({
   };
 
   return (
-    <div className="space-y-4">
-      <p className="text-muted-foreground">
-        Select interests that help other parents connect with you. These will be visible on your profile.
-      </p>
+    <div className="space-y-3">
+      <Label className="text-base font-medium">Interests</Label>
       
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 max-w-2xl">
         {selectedInterests.map((interest) => (
           <Badge 
             key={interest}
             variant="secondary"
-            className="rounded-full py-1.5 px-3 flex items-center gap-1 text-sm"
+            className="rounded-full py-1 px-3 flex items-center gap-1"
           >
             {interest}
             <XCircle 
-              className="h-4 w-4 ml-1 cursor-pointer" 
+              className="h-3.5 w-3.5 ml-1 cursor-pointer" 
               onClick={() => removeInterest(interest)}
             />
           </Badge>
         ))}
+        
+        <Button
+          variant="outline"
+          size="sm"
+          className="rounded-full h-7 gap-1"
+          onClick={() => document.getElementById('custom-interest')?.focus()}
+        >
+          <Plus className="h-3.5 w-3.5" /> Add Interest
+        </Button>
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 max-w-sm">
         <Input
-          placeholder="Add a custom interest..."
+          id="custom-interest"
+          placeholder="Add custom interest..."
           value={customInterest}
           onChange={(e) => setCustomInterest(e.target.value)}
           onKeyDown={(e) => {
@@ -70,30 +79,16 @@ const InterestsSelector: React.FC<InterestsSelectorProps> = ({
               addInterest(customInterest);
             }
           }}
+          className="h-9"
         />
         <Button 
           variant="outline" 
           onClick={() => addInterest(customInterest)}
           disabled={!customInterest}
+          className="h-9"
         >
-          <PlusCircle className="h-4 w-4 mr-2" /> Add
+          Add
         </Button>
-      </div>
-      
-      <div className="mt-4">
-        <p className="text-sm font-medium mb-2">Common Interests</p>
-        <div className="flex flex-wrap gap-2">
-          {commonInterests.map((interest) => (
-            <Badge 
-              key={interest}
-              variant={selectedInterests.includes(interest) ? "default" : "outline"}
-              className="rounded-full py-1.5 px-3 cursor-pointer"
-              onClick={() => toggleInterest(interest)}
-            >
-              {interest}
-            </Badge>
-          ))}
-        </div>
       </div>
     </div>
   );

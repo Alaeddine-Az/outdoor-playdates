@@ -42,60 +42,57 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
   };
   
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="name">Your Name</Label>
+    <div className="space-y-6">
+      <div className="space-y-3">
+        <Label htmlFor="name" className="text-base font-medium">Full Name</Label>
         <Input 
           id="name" 
           value={name} 
           onChange={(e) => setName(e.target.value)} 
           placeholder="Your full name"
+          className="max-w-md"
         />
       </div>
       
-      <div className="space-y-2">
-        <div className="flex justify-between">
-          <Label htmlFor="description">About You</Label>
-          <span className={`text-xs ${charCount > MAX_DESCRIPTION_LENGTH * 0.8 ? 'text-orange-500' : 'text-muted-foreground'}`}>
-            {charCount}/{MAX_DESCRIPTION_LENGTH}
-          </span>
-        </div>
+      <div className="space-y-3">
+        <Label htmlFor="description" className="text-base font-medium">Description</Label>
         <Textarea 
           id="description" 
           value={description} 
           onChange={handleDescriptionChange} 
           placeholder="Tell other parents about yourself and your family"
-          className="min-h-[100px]"
+          className="min-h-[120px] max-w-2xl"
         />
+        <p className="text-xs text-muted-foreground">
+          {charCount}/{MAX_DESCRIPTION_LENGTH} characters
+        </p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="location">Postal Code (Private)</Label>
-          <Input 
-            id="location" 
-            value={location} 
-            onChange={(e) => setLocation(e.target.value)} 
-            placeholder="e.g., T2A 3K1"
-          />
-          <p className="text-xs text-muted-foreground">
-            Your postal code is private and used for finding nearby playdates
-          </p>
-        </div>
+      <div className="space-y-3">
+        <h3 className="text-base font-medium">Location</h3>
         
-        <div className="space-y-2">
-          <Label htmlFor="city">City (Public)</Label>
-          <Input 
-            id="city" 
-            value={city} 
-            onChange={(e) => setCity(e.target.value)} 
-            placeholder="e.g., Calgary"
-            readOnly
-            className="bg-muted"
-          />
-          <p className="text-xs text-muted-foreground">
-            This city name is derived from your postal code and shown on your public profile
-          </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md">
+          <div>
+            <Label htmlFor="location" className="text-sm text-muted-foreground">ZIP Code</Label>
+            <Input 
+              id="location" 
+              value={location} 
+              onChange={(e) => setLocation(e.target.value)} 
+              placeholder="e.g., 10001"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="city" className="text-sm text-muted-foreground">City</Label>
+            <Input 
+              id="city" 
+              value={city} 
+              onChange={(e) => setCity(e.target.value)} 
+              placeholder="e.g., New York City"
+              readOnly
+              className="bg-muted"
+            />
+          </div>
         </div>
       </div>
     </div>
