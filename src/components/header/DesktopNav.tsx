@@ -25,7 +25,8 @@ const DesktopNav = ({ user, scrollToSection }: DesktopNavProps) => {
   };
   
   return (
-    <nav className="hidden md:flex items-center space-x-6">
+    <div className="sticky top-0 z-50 bg-white shadow-sm">
+      <nav className="hidden md:flex items-center space-x-6 max-w-screen-xl mx-auto px-4">
       {user ? (
         <>
           <div className="flex items-center space-x-5">
@@ -86,6 +87,7 @@ const DesktopNav = ({ user, scrollToSection }: DesktopNavProps) => {
         </>
       )}
     </nav>
+   </div>
   );
 };
 
