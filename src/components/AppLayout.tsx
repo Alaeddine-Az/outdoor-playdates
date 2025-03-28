@@ -1,3 +1,4 @@
+
 import { Outlet } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -5,7 +6,7 @@ import {
   Users,
   LogOut,
 } from 'lucide-react';
-import { SidebarLink } from './SidebarLink';
+import { SidebarLink } from '@/components/SidebarLink';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
