@@ -30,7 +30,9 @@ const Header = () => {
   // Prevent background scroll when menu is open
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? 'hidden' : '';
-    return () => (document.body.style.overflow = '');
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isMenuOpen]);
 
   // Handle outside click to close menu
