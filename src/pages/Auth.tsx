@@ -22,7 +22,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -31,6 +32,7 @@ const loginSchema = z.object({
 
 const Auth = () => {
   const { user, signIn, loading } = useAuth();
+  const navigate = useNavigate();
   
   // Define forms outside any conditional rendering
   const loginForm = useForm<z.infer<typeof loginSchema>>({
@@ -41,7 +43,7 @@ const Auth = () => {
     },
   });
   
-  // If already logged in, redirect to dashboard instead of home page
+  // If already logged in, redirect to dashboard
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }

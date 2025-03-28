@@ -56,7 +56,7 @@ const ProtectedRoutes = () => {
 
   return (
     <Routes>
-      <Route index element={<Dashboard />} />
+      <Route index element={<Playdates />} />
       <Route path="/parent/:id" element={<UserProfile />} />
       <Route path="/parent-profile" element={<UserProfile />} />
       <Route path="/child/:id" element={<ChildProfile />} />

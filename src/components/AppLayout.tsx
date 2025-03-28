@@ -1,4 +1,5 @@
-import { Outlet } from 'react-router-dom';
+
+import { Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   CalendarCheck,
@@ -8,8 +9,13 @@ import {
 import { SidebarLink } from '@/components/SidebarLink';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function AppLayout() {
+export interface AppLayoutProps {
+  children?: React.ReactNode;
+}
+
+export default function AppLayout({ children }: AppLayoutProps) {
   const { signOut } = useAuth();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     try {
@@ -46,7 +52,7 @@ export default function AppLayout() {
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col">
-        <Outlet />
+        {children || <Outlet />}
       </div>
     </div>
   );

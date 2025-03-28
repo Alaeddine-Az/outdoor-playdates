@@ -7,6 +7,7 @@ import PublicRoutes from './routes/PublicRoutes';
 import ProtectedRoutes from './routes/ProtectedRoutes';
 import AdminRoutes from './routes/AdminRoutes';
 import MainLayout from './components/layout/MainLayout';
+import AppLayout from './components/AppLayout';
 import NotFound from './pages/NotFound';
 import Auth from './pages/Auth';
 import About from './pages/About';
@@ -34,22 +35,24 @@ function AppRoutes() {
 
       {/* Main Layout with protected routes */}
       <Route element={<MainLayout />}>
-        {/* Protected routes - add Dashboard explicitly here */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/dashboard/*" element={<ProtectedRoutes />} />
-        <Route path="/parent/*" element={<ProtectedRoutes />} />
-        <Route path="/parent-profile" element={<ProtectedRoutes />} />
-        <Route path="/child/*" element={<ProtectedRoutes />} />
-        <Route path="/add-child" element={<ProtectedRoutes />} />
-        <Route path="/connections/*" element={<ProtectedRoutes />} />
-        <Route path="/messages/*" element={<ProtectedRoutes />} />
-        <Route path="/events/*" element={<ProtectedRoutes />} />
-        <Route path="/create-event" element={<ProtectedRoutes />} />
-        <Route path="/event/*" element={<ProtectedRoutes />} />
-        <Route path="/playdates/*" element={<ProtectedRoutes />} />
-        <Route path="/create-playdate" element={<ProtectedRoutes />} />
-        <Route path="/playdate/*" element={<ProtectedRoutes />} />
-        <Route path="/group/*" element={<ProtectedRoutes />} />
+        {/* App Layout for protected app pages */}
+        <Route element={<AppLayout />}>
+          {/* Protected routes */}
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/parent/*" element={<ProtectedRoutes />} />
+          <Route path="/parent-profile" element={<ProtectedRoutes />} />
+          <Route path="/child/*" element={<ProtectedRoutes />} />
+          <Route path="/add-child" element={<ProtectedRoutes />} />
+          <Route path="/connections/*" element={<ProtectedRoutes />} />
+          <Route path="/messages/*" element={<ProtectedRoutes />} />
+          <Route path="/events" element={<ProtectedRoutes />} />
+          <Route path="/create-event" element={<ProtectedRoutes />} />
+          <Route path="/event/*" element={<ProtectedRoutes />} />
+          <Route path="/playdates" element={<ProtectedRoutes />} />
+          <Route path="/create-playdate" element={<ProtectedRoutes />} />
+          <Route path="/playdate/*" element={<ProtectedRoutes />} />
+          <Route path="/group/*" element={<ProtectedRoutes />} />
+        </Route>
 
         {/* Admin routes */}
         <Route path="/admin/*" element={<AdminRoutes />} />
