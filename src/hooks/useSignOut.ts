@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,13 +12,21 @@ export function useSignOut() {
       setLoading(true);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      
-      // Add a small delay before navigation to allow auth state to update
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 20);
+
+      toast({
+        title: 'Signed out successfully',
+        description: 'You have been signed out of your account.',
+      });
+
+      // Navigate to home page after successful sign out
+      navigate('/');
     } catch (error) {
       console.error('Error signing out:', error);
+      toast({
+        title: 'Sign out failed',
+        description: 'There was an error signing out. Please try again.',
+        variant: 'destructive',
+      });
       throw error;
     } finally {
       setLoading(false);
@@ -28,6 +35,6 @@ export function useSignOut() {
 
   return {
     signOut,
-    loading
+    loading,
   };
 }
