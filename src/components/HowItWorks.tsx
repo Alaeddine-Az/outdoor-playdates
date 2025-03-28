@@ -35,7 +35,7 @@ const HowItWorks = ({ id }: HowItWorksProps) => {
     <section 
       id={id}
       ref={ref as React.RefObject<HTMLDivElement>}
-      className="py-24 px-6 relative overflow-hidden"
+      className="py-32 px-8 relative overflow-hidden"
     >
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
