@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -17,6 +16,7 @@ import Contact from './pages/Contact';
 import ThankYou from './pages/ThankYou';
 import Index from './pages/Index';
 import Dashboard from './pages/Dashboard';
+import ConnectionsPage from './pages/ConnectionsPage';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -39,11 +39,11 @@ function AppRoutes() {
         <Route element={<AppLayout />}>
           {/* Protected routes */}
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/connections" element={<ConnectionsPage />} />
           <Route path="/parent/*" element={<ProtectedRoutes />} />
           <Route path="/parent-profile" element={<ProtectedRoutes />} />
           <Route path="/child/*" element={<ProtectedRoutes />} />
           <Route path="/add-child" element={<ProtectedRoutes />} />
-          <Route path="/connections/*" element={<ProtectedRoutes />} />
           <Route path="/messages/*" element={<ProtectedRoutes />} />
           <Route path="/events" element={<ProtectedRoutes />} />
           <Route path="/create-event" element={<ProtectedRoutes />} />
