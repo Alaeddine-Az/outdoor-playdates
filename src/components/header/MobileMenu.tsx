@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
@@ -10,23 +9,24 @@ interface MobileMenuProps {
   user: User | null;
   scrollToSection: (id: string) => void;
   handleSignOut: () => Promise<void>;
+  closeMenu: () => void;
 }
 
-const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenuProps) => {
+const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut, closeMenu }: MobileMenuProps) => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
-  
+
   const handleGetStarted = () => {
+    closeMenu();
     if (isHomePage) {
-      // If on home page, scroll to the section
       scrollToSection('onboarding');
     } else {
-      // If not on home page, navigate to home page with the section hash
       window.location.href = '/#onboarding';
     }
   };
 
   const handleScrollOrNavigate = (id: string) => {
+    closeMenu();
     if (isHomePage) {
       scrollToSection(id);
     } else {
@@ -45,7 +45,6 @@ const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenu
       <div className="container py-4 h-full overflow-y-auto">
         <div className="flex flex-col h-full pb-safe">
           {user ? (
-            // User menu items
             <>
               <div className="flex items-center space-x-3 p-4 mb-2 border-b">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
@@ -56,38 +55,30 @@ const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenu
                   <p className="text-xs text-muted-foreground">Member</p>
                 </div>
               </div>
-              <Link 
-                to="/dashboard" 
-                className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors"
-              >
+
+              <Link to="/dashboard" onClick={closeMenu} className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors">
                 <span className="mr-3">Dashboard</span>
               </Link>
-              <Link 
-                to="/playdates" 
-                className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors"
-              >
+              <Link to="/playdates" onClick={closeMenu} className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors">
                 <Calendar className="w-5 h-5 mr-3" />
                 <span>Playdates</span>
               </Link>
-              <Link 
-                to="/connections" 
-                className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors"
-              >
+              <Link to="/connections" onClick={closeMenu} className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors">
                 <Users className="w-5 h-5 mr-3" />
                 <span>Connections</span>
               </Link>
-              <Link 
-                to="/parent-profile" 
-                className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors"
-              >
+              <Link to="/parent-profile" onClick={closeMenu} className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors">
                 <UserIcon className="w-5 h-5 mr-3" />
                 <span>Profile</span>
               </Link>
-              
+
               <div className="mt-auto border-t pt-2">
                 <button
+                  onClick={() => {
+                    handleSignOut();
+                    closeMenu();
+                  }}
                   className="flex items-center w-full px-4 py-3 text-base font-medium rounded-md text-red-500 hover:bg-red-50 transition-colors"
-                  onClick={handleSignOut}
                 >
                   <LogOut className="w-5 h-5 mr-3" />
                   <span>Sign Out</span>
@@ -95,38 +86,28 @@ const MobileMenu = ({ isOpen, user, scrollToSection, handleSignOut }: MobileMenu
               </div>
             </>
           ) : (
-            // Non-authenticated menu items
             <>
-              <button
-                onClick={() => handleScrollOrNavigate('features')}
-                className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors"
-              >
+              <button onClick={() => handleScrollOrNavigate('features')} className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors">
                 <span>Features</span>
               </button>
-              <button
-                onClick={() => handleScrollOrNavigate('how-it-works')}
-                className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors"
-              >
+              <button onClick={() => handleScrollOrNavigate('how-it-works')} className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors">
                 <span>How It Works</span>
               </button>
-              <Link to="/about" className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors">
+              <Link to="/about" onClick={closeMenu} className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors">
                 <span>About</span>
               </Link>
-              <Link to="/faq" className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors">
+              <Link to="/faq" onClick={closeMenu} className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors">
                 <span>FAQ</span>
               </Link>
-              <Link to="/contact" className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors">
+              <Link to="/contact" onClick={closeMenu} className="flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-muted transition-colors">
                 <span>Contact</span>
               </Link>
-              
+
               <div className="px-4 mt-4 space-y-3">
-                <Link to="/auth" className="w-full">
+                <Link to="/auth" onClick={closeMenu} className="w-full">
                   <Button variant="outline" className="w-full transition-colors">Sign In</Button>
                 </Link>
-                <Button 
-                  onClick={handleGetStarted}
-                  className="w-full bg-primary hover:bg-primary/90 py-6 text-base transition-colors"
-                >
+                <Button onClick={handleGetStarted} className="w-full bg-primary hover:bg-primary/90 py-6 text-base transition-colors">
                   Get Started
                 </Button>
               </div>
