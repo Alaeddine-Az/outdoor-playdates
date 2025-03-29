@@ -1,8 +1,6 @@
 
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from './contexts/AuthContext';
 import PublicRoutes from './routes/PublicRoutes';
 import ProtectedRoutes from './routes/ProtectedRoutes';
 import AdminRoutes from './routes/AdminRoutes';
@@ -21,9 +19,6 @@ import ConnectionsPage from './pages/Connections';
 import ScrollToTop from './components/ScrollToTop';
 import { useEffect } from 'react';
 import { ensureAdminUser } from './utils/adminInitializer';
-
-// Create a client
-const queryClient = new QueryClient();
 
 function AppRoutes() {
   // Initialize admin user
@@ -75,15 +70,11 @@ function AppRoutes() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthProvider>
-          <ScrollToTop />
-          <AppRoutes />
-          <Toaster />
-        </AuthProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <>
+      <ScrollToTop />
+      <AppRoutes />
+      <Toaster />
+    </>
   );
 }
 
