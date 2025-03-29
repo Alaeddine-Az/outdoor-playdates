@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
@@ -11,7 +11,11 @@ import {
 import { SidebarLink } from '@/components/SidebarLink';
 import { useAuth } from '@/contexts/AuthContext';
 
-const AdminLayout: React.FC = () => {
+interface AdminLayoutProps {
+  children: React.ReactNode;
+}
+
+const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -52,7 +56,7 @@ const AdminLayout: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col px-6 pt-6">
-        <Outlet />
+        {children}
       </div>
     </div>
   );
