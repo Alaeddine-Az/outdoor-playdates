@@ -17,6 +17,8 @@ import CreatePlaydate from '@/pages/CreatePlaydate';
 import PlaydateDetail from '@/pages/PlaydateDetail';
 import GroupDetail from '@/pages/GroupDetail';
 import NotFound from '@/pages/NotFound';
+import EditProfile from '@/pages/EditProfile';
+import ParentProfile from '@/pages/ParentProfile';
 
 const ProtectedRoutes = () => {
   const { user, loading } = useAuth();
@@ -37,8 +39,8 @@ const ProtectedRoutes = () => {
 
   return (
     <Routes>
-      <Route path="/parent/:id" element={<UserProfile />} />
-      <Route path="/parent-profile" element={<UserProfile />} />
+      <Route path="/parent/:id" element={<ParentProfile />} />
+      <Route path="/parent-profile" element={<ParentProfile />} />
       <Route path="/child/:id" element={<ChildProfile />} />
       <Route path="/add-child" element={<AddChild />} />
       <Route path="/connections" element={<Connections />} />
@@ -50,6 +52,7 @@ const ProtectedRoutes = () => {
       <Route path="/create-playdate" element={<CreatePlaydate />} />
       <Route path="/playdate/:id" element={<PlaydateDetail />} />
       <Route path="/group/:id" element={<GroupDetail />} />
+      <Route path="/edit-profile" element={<EditProfile />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

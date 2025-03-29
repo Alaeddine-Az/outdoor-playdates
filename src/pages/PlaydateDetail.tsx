@@ -8,13 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, Clock, MapPin, Users, ArrowLeft, Check, Calendar as CalendarIcon } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-import { ParentProfile, ChildProfile, PlaydateParticipant } from '@/types';
+import { ParentProfile, ChildProfile } from '@/types';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface Playdate {
   id: string;
@@ -29,17 +28,22 @@ interface Playdate {
   updated_at: string;
 }
 
-interface EnrichedParticipant extends PlaydateParticipant {
+interface PlaydateParticipant {
+  id: string;
+  playdate_id: string;
   parent_id: string;
+  children_ids: string[];
+  created_at: string;
+  status: string;
 }
 
 const PlaydateDetailPage = () => {
-  const { playdateId } = useParams<{ playdateId: string }>();
+  const { id: playdateId } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [playdate, setPlaydate] = useState<Playdate | null>(null);
   const [creator, setCreator] = useState<ParentProfile | null>(null);
-  const [participants, setParticipants] = useState<EnrichedParticipant[]>([]);
+  const [participants, setParticipants] = useState<PlaydateParticipant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isJoining, setIsJoining] = useState(false);
   const [selectedChildren, setSelectedChildren] = useState<string[]>([]);
@@ -86,10 +90,17 @@ const PlaydateDetailPage = () => {
           
         if (participantsError) throw participantsError;
         
-        setParticipants(participantsData || []);
+        // Ensure participants have the correct structure
+        const enrichedParticipants = participantsData?.map(p => ({
+          ...p,
+          parent_id: p.parent_id || '',
+          children_ids: p.children_ids || []
+        })) || [];
+        
+        setParticipants(enrichedParticipants);
         
         // Check if user is already a participant
-        const isUserParticipant = participantsData?.some(
+        const isUserParticipant = enrichedParticipants?.some(
           (p) => p.parent_id === user.id
         );
         setIsParticipant(isUserParticipant || false);
@@ -136,15 +147,21 @@ const PlaydateDetailPage = () => {
         .insert({
           playdate_id: playdate.id,
           parent_id: user.id,
-          children_ids: selectedChildren,
+          children_ids: selectedChildren
         })
         .select()
         .single();
         
       if (error) throw error;
       
-      // Update participants list
-      setParticipants([...participants, data]);
+      // Update participants list with correctly structured participant
+      const newParticipant: PlaydateParticipant = {
+        ...data,
+        parent_id: user.id,
+        children_ids: selectedChildren
+      };
+      
+      setParticipants([...participants, newParticipant]);
       setIsParticipant(true);
       
       toast({

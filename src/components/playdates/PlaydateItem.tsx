@@ -1,6 +1,8 @@
+
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Calendar, Clock, MapPin, Users } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 interface PlaydateItemProps {
   title: string;
@@ -8,74 +10,71 @@ interface PlaydateItemProps {
   time: string;
   location: string;
   attendees: number;
-  status: 'pending' | 'confirmed' | 'completed';
-  onClick: () => void;
+  status?: 'upcoming' | 'confirmed' | 'past' | 'cancelled';
+  onClick?: () => void;
+  id: string;
 }
 
 const statusColors = {
-  pending: 'bg-amber-500 text-white',
-  confirmed: 'bg-blue-500 text-white',
-  completed: 'bg-green-500 text-white',
+  upcoming: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
+  confirmed: 'bg-green-100 text-green-800 hover:bg-green-200',
+  past: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
+  cancelled: 'bg-red-100 text-red-800 hover:bg-red-200',
 };
 
-const statusLabels = {
-  pending: 'Pending',
-  confirmed: 'Confirmed',
-  completed: 'Completed',
-};
-
-const PlaydateItem: React.FC<PlaydateItemProps> = ({
+const PlaydateItem = ({
+  id,
   title,
   date,
   time,
   location,
   attendees,
-  status,
-  onClick,
-}) => {
-  const statusClass = statusColors[status] || 'bg-muted text-muted-foreground';
-
+  status = 'upcoming',
+  onClick
+}: PlaydateItemProps) => {
+  const navigate = useNavigate();
+  
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      navigate(`/playdate/${id}`);
+    }
+  };
+  
   return (
     <div
-      onClick={onClick}
-      className="rounded-xl border border-muted bg-white p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
+      className="bg-white rounded-lg border border-muted p-4 hover:shadow-md transition-all cursor-pointer"
+      onClick={handleClick}
     >
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1">
-        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
-        <span
-          className={cn(
-            'px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap mt-1 sm:mt-0',
-            statusClass
-          )}
-        >
-          {statusLabels[status]}
-        </span>
+      <div className="flex justify-between items-start mb-2">
+        <h3 className="font-medium">{title}</h3>
+        <Badge className={statusColors[status] || 'bg-gray-100 text-gray-800'}>
+          {status.charAt(0).toUpperCase() + status.slice(1)}
+        </Badge>
       </div>
-
-      {/* Info Items */}
-      <div className="grid gap-3 text-sm text-muted-foreground">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-          <div className="flex items-center gap-2 bg-muted px-2 py-1 rounded-md">
-            <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
-            <span>{date}</span>
-          </div>
-          <div className="flex items-center gap-2 bg-muted px-2 py-1 rounded-md">
-            <Clock className="w-4 h-4 text-primary flex-shrink-0" />
-            <span>{time}</span>
-          </div>
-        </div>
-
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 text-sm text-muted-foreground">
         <div className="flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
-          <p className="line-clamp-1">{location}</p>
+          <Calendar className="h-4 w-4 text-primary flex-shrink-0" />
+          <span>{date}</span>
         </div>
-
+        
         <div className="flex items-center gap-2">
-          <Users className="w-4 h-4 text-primary flex-shrink-0" />
-          <p>
+          <Clock className="h-4 w-4 text-primary flex-shrink-0" />
+          <span>{time}</span>
+        </div>
+        
+        <div className="flex items-center gap-2 md:col-span-2">
+          <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+          <span className="truncate">{location}</span>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Users className="h-4 w-4 text-primary flex-shrink-0" />
+          <span>
             {attendees} {attendees === 1 ? 'family' : 'families'}
-          </p>
+          </span>
         </div>
       </div>
     </div>

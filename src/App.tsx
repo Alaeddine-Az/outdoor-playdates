@@ -19,6 +19,7 @@ import ConnectionsPage from './pages/Connections';
 import ScrollToTop from './components/ScrollToTop';
 import { useEffect } from 'react';
 import { ensureAdminUser } from './utils/adminInitializer';
+import PlaydateDetail from './pages/PlaydateDetail';
 
 function AppRoutes() {
   // Initialize admin user
@@ -47,6 +48,7 @@ function AppRoutes() {
           {/* Protected routes */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/connections" element={<ConnectionsPage />} />
+          <Route path="/playdate/:playdateId" element={<PlaydateDetail />} />
           <Route path="/*" element={<ProtectedRoutes />} />
         </Route>
       </Route>

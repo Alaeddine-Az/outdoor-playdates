@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { Calendar, MapPin, Users, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 interface PlaydateCardProps {
   playdate: {
@@ -24,11 +26,19 @@ const statusColors = {
 };
 
 const PlaydateCard: React.FC<PlaydateCardProps> = ({ playdate }) => {
-  const { title, date, time, location, families, status = 'upcoming', host = 'Unknown Host' } = playdate;
+  const navigate = useNavigate();
+  const { id, title, date, time, location, families, status = 'upcoming', host = 'Unknown Host' } = playdate;
   const statusClass = statusColors[status as keyof typeof statusColors] || 'bg-muted text-muted-foreground';
 
+  const handleClick = () => {
+    navigate(`/playdate/${id}`);
+  };
+
   return (
-    <div className="rounded-xl border border-muted bg-white p-4 shadow-sm hover:shadow-md transition-all">
+    <div 
+      className="rounded-xl border border-muted bg-white p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
+      onClick={handleClick}
+    >
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1">
         <h3 className="text-lg font-semibold text-foreground">{title}</h3>
