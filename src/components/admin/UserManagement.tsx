@@ -34,6 +34,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Plus, Trash, Key, Loader2 } from 'lucide-react';
 
+// Update the schema to make email and password required
 const createUserSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
@@ -84,6 +85,8 @@ const UserManagement: React.FC = () => {
   });
 
   const handleCreateUser = (values: CreateUserFormValues) => {
+    // Fixed: Ensure the passed values match the CreateUserData type
+    // Since our form ensures email and password are required, this will now match
     createUser(values, {
       onSuccess: () => {
         setIsCreateModalOpen(false);

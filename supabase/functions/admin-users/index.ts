@@ -69,12 +69,20 @@ serve(async (req) => {
     // Handle different endpoints based on the request URL and method
     const url = new URL(req.url)
     const path = url.pathname.split('/').pop()
-
+    
     // List users
     if (req.method === 'GET' && path === 'admin-users') {
-      // Get query parameters
-      const page = url.searchParams.get('page') || '1'
-      const perPage = url.searchParams.get('per_page') || '10'
+      // Get parameters from the request body
+      let body = {};
+      try {
+        body = await req.json();
+      } catch (e) {
+        // If body parsing fails, use default values
+        console.log('No body or invalid JSON, using defaults');
+      }
+      
+      const page = body.page || '1';
+      const perPage = body.per_page || '10';
       
       // Fetch users using the Supabase Admin API
       const response = await fetch(

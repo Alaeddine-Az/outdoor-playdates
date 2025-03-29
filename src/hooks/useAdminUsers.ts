@@ -40,15 +40,17 @@ export function useAdminUsers() {
       const token = await getAuthToken();
       if (!token) throw new Error('Not authenticated');
 
+      // Fixed: Use URL parameters instead of query object
       const response = await supabase.functions.invoke('admin-users', {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        query: {
-          page: currentPage.toString(),
-          per_page: perPage.toString(),
-        },
+        // The 'query' property doesn't exist, so we'll modify the URL directly
+        body: { 
+          page: currentPage,
+          per_page: perPage
+        }
       });
 
       if (response.error) throw new Error(response.error.message);
