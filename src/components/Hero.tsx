@@ -140,12 +140,12 @@ const Hero = () => {
             </div>
             
             <h1 className="font-bold tracking-tight mb-8 text-4xl sm:text-5xl md:text-6xl">
-              <span className="block mb-2">Connect with</span>
-              <span className="block bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">Friendly Families.</span>
-              <span className="block mt-2">Enjoy Outdoor Fun!</span>
+              <span className="block mb-2 text-left">Connect with</span>
+              <span className="block bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent text-left">Families.</span>
+              <span className="block mt-2 text-left">Enjoy Outdoor Fun!</span>
             </h1>
             
-            <p className="text-xl text-muted-foreground mb-10 max-w-xl">
+            <p className="text-xl text-muted-foreground mb-10 max-w-xl text-left">
               GoPlayNow makes it easy to find trusted playmates, schedule outdoor adventures, and create wonderful memories together.
             </p>
             
