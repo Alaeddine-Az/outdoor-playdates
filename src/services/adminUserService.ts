@@ -31,14 +31,12 @@ export const fetchUsers = async (currentPage: number, perPage: number): Promise<
     const token = await getAuthToken();
     if (!token) throw new Error('Not authenticated');
 
-    // Use POST method instead of GET since we need to send body data
     const response = await supabase.functions.invoke('admin-users', {
-      method: 'POST',
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
       },
       body: { 
-        action: 'list',
         page: currentPage,
         per_page: perPage
       }
@@ -69,7 +67,6 @@ export const createUser = async (userData: CreateUserData): Promise<any> => {
         Authorization: `Bearer ${token}`,
       },
       body: {
-        action: 'create',
         email: userData.email,
         password: userData.password,
         user_metadata: {
@@ -93,12 +90,11 @@ export const updateUserPassword = async ({ userId, password }: { userId: string;
     if (!token) throw new Error('Not authenticated');
 
     const response = await supabase.functions.invoke('admin-users', {
-      method: 'POST',
+      method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,
       },
       body: {
-        action: 'update_password',
         user_id: userId,
         password,
       },
@@ -119,12 +115,11 @@ export const deleteUser = async (userId: string): Promise<any> => {
     if (!token) throw new Error('Not authenticated');
 
     const response = await supabase.functions.invoke('admin-users', {
-      method: 'POST',
+      method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,
       },
       body: {
-        action: 'delete',
         user_id: userId,
       },
     });
