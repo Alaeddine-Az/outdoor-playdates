@@ -3,16 +3,19 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const initializeAdminRole = async () => {
   try {
-    // Get the user ID for admin@admin.com
-    const { data: userData, error: userError } = await supabase.auth.admin
-      .getUserByEmail('admin@admin.com');
+    // Get all users with email admin@admin.com
+    const { data: userData, error: userError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', 'admin@admin.com')
+      .single();
       
-    if (userError || !userData?.user?.id) {
+    if (userError || !userData?.id) {
       console.error('Error fetching admin user:', userError);
       return { success: false, error: userError };
     }
     
-    const adminUserId = userData.user.id;
+    const adminUserId = userData.id;
     
     // Check if the role already exists
     const { data: existingRole, error: checkError } = await supabase
