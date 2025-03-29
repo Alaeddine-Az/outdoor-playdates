@@ -23,7 +23,7 @@ import { useForm } from "react-hook-form";
 import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate, Link, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -32,6 +32,7 @@ const loginSchema = z.object({
 
 const Auth = () => {
   const { user, signIn, loading } = useAuth();
+  const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
   
   // Define forms outside any conditional rendering
@@ -49,7 +50,13 @@ const Auth = () => {
   }
   
   const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
-    await signIn(values.email, values.password);
+    setAuthError(null);
+    try {
+      await signIn(values.email, values.password);
+    } catch (error: any) {
+      console.error('Login error:', error);
+      setAuthError(error.message || 'Failed to sign in. Please check your credentials.');
+    }
   };
   
   return (
@@ -69,6 +76,12 @@ const Auth = () => {
           </CardHeader>
           
           <CardContent>
+            {authError && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{authError}</AlertDescription>
+              </Alert>
+            )}
+            
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                 <FormField

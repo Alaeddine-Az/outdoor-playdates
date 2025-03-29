@@ -19,6 +19,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Create admin function called");
+    
     // Create a Supabase client with the admin key
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -39,15 +41,47 @@ serve(async (req) => {
     })
 
     if (searchError) {
+      console.error("Error checking for existing user:", searchError);
       throw new Error(`Error checking for existing user: ${searchError.message}`)
     }
+
+    console.log("Existing users check result:", existingUsers);
 
     // If user already exists, return that info
     if (existingUsers && existingUsers.users.length > 0) {
       const existingUser = existingUsers.users[0]
+      console.log("User already exists:", existingUser.id);
+      
+      // Check if they already have admin role
+      const { data: roleData, error: roleCheckError } = await supabaseAdmin
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', existingUser.id)
+        .eq('role', 'admin')
+        .single();
+        
+      if (roleCheckError && roleCheckError.code !== 'PGRST116') {
+        console.error("Error checking role:", roleCheckError);
+      }
+      
+      // If no admin role, assign it
+      if (!roleData) {
+        console.log("Assigning admin role to existing user");
+        const { error: roleError } = await supabaseAdmin
+          .from('user_roles')
+          .insert({
+            user_id: existingUser.id,
+            role: 'admin'
+          });
+          
+        if (roleError) {
+          console.error("Error assigning role:", roleError);
+          throw new Error(`Error assigning admin role: ${roleError.message}`);
+        }
+      }
       
       return new Response(JSON.stringify({
-        message: "Admin user already exists",
+        message: "Admin user already exists and has admin privileges",
         userId: existingUser.id,
         email: existingUser.email
       }), {
@@ -56,6 +90,8 @@ serve(async (req) => {
       })
     }
 
+    console.log("Creating new admin user");
+    
     // Create the admin user
     const { data: userData, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email: adminEmail,
@@ -67,8 +103,11 @@ serve(async (req) => {
     })
 
     if (createError) {
+      console.error("Error creating user:", createError);
       throw new Error(`Error creating admin user: ${createError.message}`)
     }
+    
+    console.log("User created:", userData.user.id);
 
     // Assign admin role to the user
     const { error: roleError } = await supabaseAdmin
@@ -79,8 +118,11 @@ serve(async (req) => {
       })
 
     if (roleError) {
+      console.error("Error assigning role:", roleError);
       throw new Error(`Error assigning admin role: ${roleError.message}`)
     }
+    
+    console.log("Admin role assigned successfully");
 
     return new Response(JSON.stringify({
       message: "Admin user created successfully",

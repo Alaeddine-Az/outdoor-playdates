@@ -19,7 +19,10 @@ const CreateAdmin: React.FC = () => {
         method: 'POST'
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Function invoke error:', error);
+        throw error;
+      }
       
       setResult(data);
       
@@ -28,13 +31,14 @@ const CreateAdmin: React.FC = () => {
         title: data.message,
         description: `Admin account for ${data.email} is ready to use.`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating admin:', error);
-      setResult({ error: error.message });
+      const errorMessage = error.message || 'Unknown error occurred';
+      setResult({ error: errorMessage });
       
       toast({
         title: 'Failed to create admin',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -63,6 +67,7 @@ const CreateAdmin: React.FC = () => {
             <div className={`p-4 rounded-md ${result.error ? 'bg-destructive/20' : 'bg-green-100'} mb-4`}>
               <p className="font-medium">{result.message || result.error}</p>
               {result.email && <p className="text-sm">Email: {result.email}</p>}
+              {result.userId && <p className="text-sm">User ID: {result.userId}</p>}
             </div>
           )}
         </CardContent>

@@ -21,7 +21,14 @@ export function useSignIn() {
         password
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase sign in error:', error);
+        throw error;
+      }
+      
+      if (!data.user) {
+        throw new Error('No user data returned from authentication');
+      }
       
       // Check if user is admin
       const isAdmin = await checkAdminStatus(data.user);
@@ -37,13 +44,16 @@ export function useSignIn() {
       } else {
         navigate('/dashboard');
       }
+      
+      return data;
     } catch (error: any) {
       toast({
         title: "Sign in failed",
-        description: error.message,
+        description: error.message || "An error occurred during sign in",
         variant: "destructive"
       });
       console.error('Error signing in:', error);
+      throw error;
     } finally {
       setLoading(false);
     }

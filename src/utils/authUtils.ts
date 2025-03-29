@@ -9,32 +9,48 @@ export const checkAdminStatus = async (user: User | null): Promise<boolean> => {
   // Return early if no user is provided
   if (!user) return false;
   
-  // Check if email is admin@admin.com (quick check)
-  if (user.email?.toLowerCase() === 'admin@admin.com') {
-    // Verify in database to be sure
-    try {
-      const { data, error } = await supabase.rpc('is_admin', { user_id: user.id });
-      if (error) {
-        console.error('Error checking admin status:', error);
-        return false;
-      }
-      return !!data;
-    } catch (err) {
-      console.error('Exception checking admin status:', err);
-      return false;
-    }
-  }
+  console.log("Checking admin status for user:", user.id);
   
   try {
-    // Check admin status via RPC
-    const { data, error } = await supabase.rpc('is_admin', { user_id: user.id });
-    if (error) {
-      console.error('Error checking admin status:', error);
-      return false;
+    // Always check directly for the specific admin email first
+    if (user.email?.toLowerCase() === 'alaeddine.azaiez@gmail.com') {
+      console.log("Admin email match found");
+      return true;
     }
-    return !!data;
+    
+    // Check admin status via the user_roles table
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle();
+      
+    if (error) {
+      console.error('Error checking admin status via roles table:', error);
+    }
+    
+    if (data) {
+      console.log("Admin role found in database");
+      return true;
+    }
+    
+    // Fall back to RPC if implemented
+    try {
+      const { data: rpcData, error: rpcError } = await supabase.rpc('is_admin', { user_id: user.id });
+      if (rpcError) {
+        console.error('Error checking admin status via RPC:', rpcError);
+      } else if (rpcData) {
+        console.log("Admin status confirmed via RPC");
+        return true;
+      }
+    } catch (err) {
+      console.error('Exception checking admin status via RPC:', err);
+    }
+    
+    return false;
   } catch (err) {
-    console.error('Exception checking admin status:', err);
+    console.error('Exception in checkAdminStatus:', err);
     return false;
   }
 };
