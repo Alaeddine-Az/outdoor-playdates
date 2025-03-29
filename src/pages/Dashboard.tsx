@@ -1,147 +1,63 @@
-
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
-import ProfileSummary from '@/components/dashboard/ProfileSummary';
-import PlaydatesList from '@/components/dashboard/PlaydatesList';
-import SuggestedConnections from '@/components/dashboard/SuggestedConnections';
-import NearbyEvents from '@/components/dashboard/NearbyEvents';
-import { useDashboard } from '@/hooks/useDashboard';
-import { toast } from '@/components/ui/use-toast';
-import { Link } from 'react-router-dom';
+import BearCharacter from '@/components/characters/BearCharacter';
+import { motion } from 'framer-motion';
 
-const Dashboard = () => {
-  const navigate = useNavigate();
-  const {
-    loading,
-    profile,
-    children,
-    upcomingPlaydates,
-    suggestedConnections,
-    nearbyEvents,
-    error,
-  } = useDashboard();
-
-  useEffect(() => {
-    if (error) {
-      toast({
-        title: 'Dashboard Error',
-        description: 'There was a problem loading your dashboard data. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  }, [error]);
-
-  if (error) {
-    return (
-      <div className="animate-fade-in min-h-[60vh] flex flex-col items-center justify-center">
-        <h2 className="text-2xl font-bold mb-4">Unable to load dashboard</h2>
-        <p className="text-muted-foreground mb-6">There was a problem retrieving your information.</p>
-        <Button onClick={() => window.location.reload()}>Try Again</Button>
-      </div>
-    );
-  }
-
-  const childrenWithAges = children?.map((child) => ({
-    name: child.name,
-    age: child.age,
-  })) || [];
-
-  const interests = profile?.interests || ['Arts & Crafts', 'Nature', 'STEM'];
-
+const DashboardHero = ({ name = 'Friend', onEditProfile }: { name?: string; onEditProfile?: () => void }) => {
   return (
-    <div className="animate-fade-in px-4 pt-6 pb-10 md:px-8">
-      {/* New Playful Hero Section */}
-      <header className="relative w-full rounded-3xl overflow-hidden mb-6">
-        <div className="bg-[#D8F1FF] p-6 md:p-8 rounded-3xl relative overflow-hidden">
-          {/* Wavy Background Elements */}
-          <div className="absolute inset-0 z-0 pointer-events-none">
-            <svg className="absolute top-0 left-0 w-full" viewBox="0 0 800 200" preserveAspectRatio="none">
-              <path
-                d="M0,100 C150,0 350,200 800,100 L800,0 L0,0 Z"
-                fill="#B6E5FF"
-                fillOpacity="0.6"
-              ></path>
-            </svg>
-            <div className="absolute top-10 right-10">
-              <svg width="100" height="100" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" fill="#FFDD65" />
-                <path
-                  d="M25,50 Q50,20 75,50 Q50,80 25,50 Z"
-                  fill="white"
-                  fillOpacity="0.7"
-                ></path>
-              </svg>
-            </div>
-            <div className="absolute bottom-0 left-0 w-full h-16 bg-[#8DD35A] opacity-50 rounded-br-3xl rounded-bl-3xl"></div>
-          </div>
-
-          <div className="relative z-10 flex flex-col md:flex-row items-start gap-6">
-            <div className="space-y-2 max-w-2xl">
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[#333333]">
-                Welcome back, 
-                <span className="block">{profile?.parent_name?.split(' ')[0] || 'Friend'}!</span>
-              </h1>
-              <p className="text-[#333333] text-xl">
-                Here's what's happening with your playdates and connections.
-              </p>
-              
-              <div className="pt-4">
-                <Link to="/edit-profile">
-                  <Button className="rounded-full bg-[#FFD761] hover:bg-[#FFC530] text-[#333333] font-medium px-6 py-2 shadow-md">
-                    Edit Profile
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
+    <div className="relative w-full rounded-2xl overflow-hidden bg-[#DFF1FF] shadow-md">
+      {/* Sky and cloud background */}
+      <div className="absolute inset-0">
+        <svg viewBox="0 0 1000 300" preserveAspectRatio="none" className="w-full h-full">
+          <path d="M0,100 Q250,0 500,100 T1000,100 V300 H0 Z" fill="#DFF1FF" />
+          <path d="M0,160 Q250,60 500,160 T1000,160 V300 H0 Z" fill="#C0E3F7" />
+        </svg>
+        {/* Sun */}
+        <motion.div
+          className="absolute top-6 right-10 w-16 h-16 bg-yellow-300 rounded-full shadow-md"
+          animate={{ y: [0, -5, 0] }}
+          transition={{ repeat: Infinity, duration: 3 }}
+        />
+        {/* Cloud */}
+        <motion.div
+          className="absolute top-10 left-10 w-24 h-12 bg-white rounded-full shadow"
+          animate={{ x: [0, 10, 0] }}
+          transition={{ repeat: Infinity, duration: 6 }}
+        />
+        {/* Hill */}
+        <div className="absolute bottom-0 w-full">
+          <svg viewBox="0 0 1000 200" preserveAspectRatio="none" className="w-full h-40">
+            <path d="M0,100 Q250,200 500,100 T1000,100 V200 H0 Z" fill="#A3D977" />
+          </svg>
         </div>
-      </header>
+      </div>
 
-      {/* Loading State */}
-      {loading ? (
-        <div className="space-y-8">
-          <Skeleton className="h-9 w-64 mb-2" />
-          <Skeleton className="h-4 w-full max-w-md mb-8" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2">
-              <Skeleton className="h-96 w-full" />
-            </div>
-            <div className="space-y-6">
-              <Skeleton className="h-64 w-full" />
-              <Skeleton className="h-80 w-full" />
-              <Skeleton className="h-48 w-full" />
-            </div>
-          </div>
+      {/* Content */}
+      <div className="relative z-10 flex flex-col md:flex-row items-center justify-between px-6 py-10">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back, {name}!</h1>
+          <p className="text-muted-foreground text-lg mb-4 max-w-md">
+            Here’s what’s happening with your playdates and connections.
+          </p>
+          <Button
+            onClick={onEditProfile}
+            className="rounded-full bg-yellow-300 hover:bg-yellow-400 text-black font-semibold px-6 py-2 shadow"
+          >
+            Edit Profile
+          </Button>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-6">
-            <PlaydatesList
-              title="Upcoming Playdates"
-              playdates={upcomingPlaydates}
-              showNewButton={true}
-              viewAllLink="/playdates"
-            />
-          </div>
 
-          <div className="space-y-6">
-            <ProfileSummary
-              name={profile?.parent_name || 'User'}
-              children={childrenWithAges}
-              interests={interests}
-            />
-
-            <SuggestedConnections connections={suggestedConnections} />
-
-            <NearbyEvents events={nearbyEvents} />
-          </div>
-        </div>
-      )}
+        <motion.div
+          className="mt-8 md:mt-0 md:ml-8"
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+        >
+          <BearCharacter className="w-36 md:w-48" />
+        </motion.div>
+      </div>
     </div>
   );
 };
 
-export default Dashboard;
+export default DashboardHero;
