@@ -93,7 +93,8 @@ export function useAdminUsers() {
   return {
     users: usersQuery.data?.users || [],
     isLoading: usersQuery.isLoading || isLoading,
-    error: usersQuery.error ? (usersQuery.error as string) : null,
+    error: usersQuery.error ? (typeof usersQuery.error === 'string' ? usersQuery.error : 
+           (usersQuery.error instanceof Error ? usersQuery.error.message : 'An unknown error occurred')) : null,
     currentPage,
     setCurrentPage,
     perPage,
