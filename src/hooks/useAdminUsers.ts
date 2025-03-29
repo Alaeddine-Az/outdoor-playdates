@@ -16,10 +16,20 @@ export function useAdminUsers() {
     queryKey: ['adminUsers', currentPage, perPage],
     queryFn: () => {
       setIsLoading(true);
+      console.log(`Fetching users with page=${currentPage}, perPage=${perPage}`);
       return fetchUsers(currentPage, perPage)
+        .then(result => {
+          console.log('Fetched users:', result);
+          return result;
+        })
+        .catch(error => {
+          console.error('Error in useAdminUsers query:', error);
+          throw error;
+        })
         .finally(() => setIsLoading(false));
     },
     refetchOnWindowFocus: false,
+    retry: 2,
   });
 
   const createUserMutation = useMutation({
@@ -34,7 +44,7 @@ export function useAdminUsers() {
     onError: (error: Error) => {
       toast({
         title: 'Error creating user',
-        description: error.message,
+        description: error.message || 'Failed to create user',
         variant: 'destructive',
       });
     },
@@ -51,7 +61,7 @@ export function useAdminUsers() {
     onError: (error: Error) => {
       toast({
         title: 'Error updating password',
-        description: error.message,
+        description: error.message || 'Failed to update password',
         variant: 'destructive',
       });
     },
@@ -69,7 +79,7 @@ export function useAdminUsers() {
     onError: (error: Error) => {
       toast({
         title: 'Error deleting user',
-        description: error.message,
+        description: error.message || 'Failed to delete user',
         variant: 'destructive',
       });
     },
@@ -78,7 +88,7 @@ export function useAdminUsers() {
   return {
     users: usersQuery.data?.users || [],
     isLoading: usersQuery.isLoading || isLoading,
-    error: usersQuery.error,
+    error: usersQuery.error ? (usersQuery.error as Error).message : null,
     currentPage,
     setCurrentPage,
     perPage,

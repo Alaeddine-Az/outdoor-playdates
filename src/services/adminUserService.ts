@@ -31,10 +31,12 @@ export const fetchUsers = async (currentPage: number, perPage: number): Promise<
     const token = await getAuthToken();
     if (!token) throw new Error('Not authenticated');
 
-    const response = await supabase.functions.invoke('admin-users', {
+    // Using the body parameter for pagination instead of query params
+    const { data, error } = await supabase.functions.invoke('admin-users', {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
       body: { 
         page: currentPage,
@@ -42,13 +44,17 @@ export const fetchUsers = async (currentPage: number, perPage: number): Promise<
       }
     });
 
-    if (response.error) throw new Error(response.error.message);
-    return response.data;
-  } catch (error) {
+    if (error) {
+      console.error('Error invoking admin-users function:', error);
+      throw new Error(error.message || 'Failed to fetch users');
+    }
+    
+    return data || { users: [] };
+  } catch (error: any) {
     console.error('Error fetching users:', error);
     toast({
       title: 'Error fetching users',
-      description: error.message,
+      description: error.message || 'Failed to send a request to the edge function',
       variant: 'destructive',
     });
     throw error;
@@ -61,10 +67,11 @@ export const createUser = async (userData: CreateUserData): Promise<any> => {
     const token = await getAuthToken();
     if (!token) throw new Error('Not authenticated');
 
-    const response = await supabase.functions.invoke('admin-users', {
+    const { data, error } = await supabase.functions.invoke('admin-users', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
       body: {
         email: userData.email,
@@ -75,9 +82,9 @@ export const createUser = async (userData: CreateUserData): Promise<any> => {
       },
     });
 
-    if (response.error) throw new Error(response.error.message);
-    return response.data;
-  } catch (error) {
+    if (error) throw new Error(error.message || 'Failed to create user');
+    return data;
+  } catch (error: any) {
     console.error('Error creating user:', error);
     throw error;
   }
@@ -89,10 +96,11 @@ export const updateUserPassword = async ({ userId, password }: { userId: string;
     const token = await getAuthToken();
     if (!token) throw new Error('Not authenticated');
 
-    const response = await supabase.functions.invoke('admin-users', {
+    const { data, error } = await supabase.functions.invoke('admin-users', {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
       body: {
         user_id: userId,
@@ -100,9 +108,9 @@ export const updateUserPassword = async ({ userId, password }: { userId: string;
       },
     });
 
-    if (response.error) throw new Error(response.error.message);
-    return response.data;
-  } catch (error) {
+    if (error) throw new Error(error.message || 'Failed to update user password');
+    return data;
+  } catch (error: any) {
     console.error('Error updating user password:', error);
     throw error;
   }
@@ -114,19 +122,20 @@ export const deleteUser = async (userId: string): Promise<any> => {
     const token = await getAuthToken();
     if (!token) throw new Error('Not authenticated');
 
-    const response = await supabase.functions.invoke('admin-users', {
+    const { data, error } = await supabase.functions.invoke('admin-users', {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
       body: {
         user_id: userId,
       },
     });
 
-    if (response.error) throw new Error(response.error.message);
-    return response.data;
-  } catch (error) {
+    if (error) throw new Error(error.message || 'Failed to delete user');
+    return data;
+  } catch (error: any) {
     console.error('Error deleting user:', error);
     throw error;
   }
