@@ -42,18 +42,18 @@ const PlaydateCard: React.FC<PlaydateCardProps> = ({ playdate }) => {
         </span>
       </div>
 
-      <p className="text-xs text-muted-foreground mb-3">Hosted by {host}</p>
+      <p className="text-sm font-medium text-primary mb-3">Hosted by {host}</p>
 
       {/* Info Items */}
       <div className="grid gap-3 text-sm text-muted-foreground">
-        <div className="flex items-start sm:items-center gap-2">
-          <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
-          <div>
-            <p>{date}</p>
-            <div className="flex items-center gap-2 mt-1 sm:mt-0">
-              <Clock className="w-4 h-4 text-primary flex-shrink-0" />
-              <p>{time}</p>
-            </div>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <div className="flex items-center gap-2 bg-muted px-2 py-1 rounded-md">
+            <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
+            <span>{date}</span>
+          </div>
+          <div className="flex items-center gap-2 bg-muted px-2 py-1 rounded-md">
+            <Clock className="w-4 h-4 text-primary flex-shrink-0" />
+            <span>{time}</span>
           </div>
         </div>
 
