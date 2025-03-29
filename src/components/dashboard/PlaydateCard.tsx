@@ -1,16 +1,18 @@
 
 import React from 'react';
 import { Calendar, MapPin, Users } from 'lucide-react';
-import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface PlaydateCardProps {
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  families: number;
-  status?: 'upcoming' | 'past' | 'confirmed' | 'pending' | 'completed';
+  playdate: {
+    id: string;
+    title: string;
+    date: string;
+    time: string;
+    location: string;
+    families: number;
+    status?: string;
+  };
 }
 
 const statusColors = {
@@ -21,15 +23,9 @@ const statusColors = {
   completed: 'bg-green-500 text-white',
 };
 
-const PlaydateCard: React.FC<PlaydateCardProps> = ({
-  title,
-  date,
-  time,
-  location,
-  families,
-  status = 'upcoming',
-}) => {
-  const statusClass = statusColors[status] || 'bg-muted text-muted-foreground';
+const PlaydateCard: React.FC<PlaydateCardProps> = ({ playdate }) => {
+  const { title, date, time, location, families, status = 'upcoming' } = playdate;
+  const statusClass = statusColors[status as keyof typeof statusColors] || 'bg-muted text-muted-foreground';
 
   return (
     <div className="rounded-xl border border-muted bg-white p-4 shadow-sm hover:shadow-md transition-all space-y-4">
@@ -50,7 +46,7 @@ const PlaydateCard: React.FC<PlaydateCardProps> = ({
       <div className="space-y-3 text-sm text-muted-foreground">
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-primary" />
-          <span>{format(new Date(date), 'EEE, MMM d')}, {time}</span>
+          <span>{date}, {time}</span>
         </div>
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 text-primary" />

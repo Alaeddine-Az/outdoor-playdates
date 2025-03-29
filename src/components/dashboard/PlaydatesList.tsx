@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CalendarDays, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -56,12 +57,18 @@ const PlaydatesList = ({
       </div>
 
       <div className="space-y-4">
-        {playdates.map((playdate) => (
-          <PlaydateCard key={playdate.id} playdate={playdate} />
-        ))}
+        {playdates.length > 0 ? (
+          playdates.map((playdate) => (
+            <PlaydateCard key={playdate.id} playdate={playdate} />
+          ))
+        ) : (
+          <div className="py-4 text-center text-muted-foreground">
+            No playdates available
+          </div>
+        )}
       </div>
 
-      {viewAllLink && (
+      {viewAllLink && playdates.length > 0 && (
         <div className="text-right mt-4">
           <Link
             to={viewAllLink}
