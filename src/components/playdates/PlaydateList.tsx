@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -80,6 +81,7 @@ const PlaydateList = ({
           {playdates.map((playdate) => (
             <PlaydateItem 
               key={playdate.id}
+              id={playdate.id}  // Added the missing 'id' property here
               title={playdate.title}
               date={playdate.date}
               time={playdate.time}
