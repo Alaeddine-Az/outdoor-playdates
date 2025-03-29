@@ -68,9 +68,9 @@ const Dashboard = () => {
   <div className="absolute top-8 left-6 w-24 h-24 bg-white rounded-full opacity-90 z-20" />
 
   {/* Parallax Hills */}
-  <div className="absolute bottom-0 w-full h-[80px] bg-[#D4F7D3] rounded-t-[100%] z-0" />
-  <div className="absolute bottom-0 w-full h-[70px] bg-[#A5E4A2] rounded-t-[100%] z-10 translate-y-[8px]" />
-  <div className="absolute bottom-0 w-full h-[60px] bg-[#73C770] rounded-t-[100%] z-20 translate-y-[16px]" />
+<div className="absolute bottom-0 w-[110%] left-[-5%] h-[80px] bg-[#D4F7D3] rounded-t-[50%] z-0" />
+<div className="absolute bottom-0 w-[110%] left-[-5%] h-[70px] bg-[#A5E4A2] rounded-t-[50%] z-10 translate-y-[6px]" />
+<div className="absolute bottom-0 w-[110%] left-[-5%] h-[60px] bg-[#73C770] rounded-t-[50%] z-20 translate-y-[12px]" />
 
   {/* Text */}
   <div className="relative z-30 text-left mt-8">
