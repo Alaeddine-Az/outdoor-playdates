@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -31,7 +30,7 @@ const loginSchema = z.object({
 });
 
 const Auth = () => {
-  const { user, signIn, loading } = useAuth();
+  const { user, signIn, loading, isAdmin } = useAuth();
   const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
   
@@ -43,17 +42,22 @@ const Auth = () => {
       password: "",
     },
   });
-  
-  // If already logged in, redirect to dashboard
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
-  
+
+  // Redirect based on admin status after login
+  useEffect(() => {
+    if (user) {
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+    }
+  }, [user, isAdmin, navigate]);
+
   const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
     setAuthError(null);
     try {
       await signIn(values.email, values.password);
-      // No need to navigate here as the signIn function already handles navigation
     } catch (error: any) {
       console.error('Login error:', error);
       setAuthError(error.message || 'Failed to sign in. Please check your credentials.');
