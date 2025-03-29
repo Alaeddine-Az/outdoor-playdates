@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -78,7 +77,6 @@ const samplePlaydates = [{
   },
   children: "Charlotte (6) and Benjamin (8)"
 }];
-
 const Hero = () => {
   const [playdateIndex, setPlaydateIndex] = useState(0);
   const [playdate, setPlaydate] = useState(samplePlaydates[0]);
@@ -94,8 +92,10 @@ const Hero = () => {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
-
-  const { ref, isIntersecting } = useIntersectionObserver({
+  const {
+    ref,
+    isIntersecting
+  } = useIntersectionObserver({
     threshold: 0.1,
     triggerOnce: true
   });
@@ -106,90 +106,95 @@ const Hero = () => {
       behavior: 'smooth'
     });
   };
-
   const scrollToOnboarding = () => {
     document.getElementById('onboarding')?.scrollIntoView({
       behavior: 'smooth'
     });
   };
-
-  return (
-    <section ref={ref as React.RefObject<HTMLDivElement>} className="relative min-h-screen flex items-center px-6 pt-16 pb-20 overflow-hidden">
-      {/* Background Elements */}
+  return <section ref={ref as React.RefObject<HTMLDivElement>} className="relative min-h-screen flex items-center px-6 pt-16 pb-20 overflow-hidden">
+      {/* Background Elements - Updated with more playful, vibrant gradients */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-radial from-primary/5 to-transparent my-0 py-0"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/10 filter blur-3xl"></div>
-        <div className="absolute top-[20%] left-[-5%] w-[30%] h-[30%] rounded-full bg-primary/10 filter blur-3xl"></div>
-        <div className="absolute top-[60%] right-[20%] w-[15%] h-[15%] rounded-full bg-accent/10 filter blur-3xl"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-pink-50 via-blue-50 to-white my-0 py-0"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-secondary/15 filter blur-3xl animate-pulse"></div>
+        <div className="absolute top-[20%] left-[-5%] w-[40%] h-[40%] rounded-full bg-primary/15 filter blur-3xl animate-pulse"></div>
+        <div className="absolute top-[60%] right-[20%] w-[25%] h-[25%] rounded-full bg-accent/15 filter blur-3xl animate-pulse"></div>
+        
+        {/* Decorative floating shapes for playful aesthetic */}
+        <div className="absolute top-[15%] right-[15%] w-12 h-12 bg-yellow-200 rounded-full opacity-20 animate-bounce"></div>
+        <div className="absolute bottom-[25%] left-[10%] w-6 h-6 bg-green-300 rounded-full opacity-30 animate-ping" style={{
+        animationDuration: '3s'
+      }}></div>
+        <div className="absolute top-[40%] right-[30%] w-8 h-8 bg-purple-300 rounded-full opacity-20 animate-ping" style={{
+        animationDuration: '4s'
+      }}></div>
       </div>
 
       <div className="container mx-auto relative z-10 -mt-12 my-0">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12 py-[13px]">
           <div className="">
-            <div className="inline-block rounded-full bg-muted mb-4 px-[12px] mx-0 py-[6px]">
-              <span className="text-sm font-medium text-foreground/80 text-center">
+            <div className="inline-flex items-center rounded-full bg-gradient-to-r from-blue-100 to-pink-100 mb-6 px-[14px] py-[8px] shadow-sm">
+              <span className="text-sm font-medium text-foreground/90 text-center flex items-center">
+                <Sparkles className="h-4 w-4 mr-2 text-yellow-500" />
                 Safe, Fun Outdoor Playdates for Kids
               </span>
             </div>
             
-            <h1 className="font-bold tracking-tight mb-6">
-              <span className="block">
-            </span>
-              <span className="block text-primary">Connect with Families.</span>
-              <span className="block">Spark Outdoor Adventures.</span>
+            <h1 className="font-bold tracking-tight mb-8 text-4xl sm:text-5xl md:text-6xl">
+              <span className="block mb-2 text-left">Connect with</span>
+              <span className="block bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent text-left">Families.</span>
+              <span className="block mt-2 text-left">Enjoy Outdoor Fun!</span>
             </h1>
             
-            <p className="text-xl text-muted-foreground" mb-10>
-              GoPlayNow makes it easy to find trusted playmates, schedule outdoor fun, and keep kids engaged with exciting challenges.
+            <p className="text-xl text-muted-foreground mb-10 max-w-xl text-left">
+              GoPlayNow makes it easy to find trusted playmates, schedule outdoor adventures, and create wonderful memories together.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start">
-              <Button 
-                size="lg" 
-                className="button-glow bg-primary hover:bg-primary/90 text-white rounded-xl" 
-                onClick={scrollToOnboarding}
-              >
-                Get Started - It's Free! <ArrowRight className="ml-2 h-4 w-4" />
+              <Button size="lg" className="button-glow bg-gradient-to-r from-primary to-secondary hover:opacity-90 shadow-md text-white rounded-xl transform transition-all duration-300 hover:scale-105" onClick={scrollToOnboarding}>
+                Get Invited - It's Free! <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="rounded-xl hover:bg-primary hover:text-white" 
-                onClick={scrollToFeatures}
-              >
+              <Button size="lg" variant="outline" className="rounded-xl hover:bg-white hover:text-primary border-2 border-primary/30 shadow-sm transition-all duration-300 hover:scale-105 hover:border-primary" onClick={scrollToFeatures}>
                 Learn More
               </Button>
+            </div>
+            
+            {/* Feature bubbles */}
+            <div className="flex flex-wrap mt-10 gap-2">
+              {['Fun Adventures', 'Safe Environment', 'Make Friends', 'Great Memories'].map((feature, i) => <div key={i} className="flex items-center bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm shadow-sm">
+                  <Check className="h-3.5 w-3.5 mr-1.5 text-green-500" />
+                  <span>{feature}</span>
+                </div>)}
             </div>
           </div>
           
           <div className={cn("relative w-full max-w-lg", isIntersecting ? "animate-scale-up" : "opacity-0")}>
-            <div className="relative z-10 bg-white rounded-2xl shadow-soft p-6 backdrop-blur-sm border border-muted py-[24px]">
-              <div className="aspect-video w-full rounded-xl overflow-hidden">
-                <img src={playdate.image} alt="Playdate activity" className="w-full h-full object-cover transition-opacity duration-500" key={playdateIndex} />
+            <div className="relative z-10 bg-white/90 backdrop-blur-sm rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] p-6 border border-muted/50 py-[24px] transform transition-all duration-500 hover:scale-[1.02]">
+              <div className="aspect-video w-full rounded-xl overflow-hidden shadow-inner">
+                <img src={playdate.image} alt="Playdate activity" className="w-full h-full object-cover transition-all duration-500 hover:scale-105" key={playdateIndex} />
               </div>
               
-              <div className="mt-4 space-y-3">
+              <div className="mt-5 space-y-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="font-medium">{playdate.title}</h3>
-                    <p className="text-sm text-muted-foreground">{playdate.location}</p>
+                    <h3 className="font-semibold text-lg text-left">{playdate.title}</h3>
+                    <p className="text-sm text-muted-foreground text-left">{playdate.location}</p>
                   </div>
-                  <div className="bg-primary/10 text-primary font-medium px-3 py-1 rounded-full text-sm">
+                  <div className="bg-gradient-to-r from-primary/10 to-secondary/10 text-primary font-medium px-3 py-1.5 rounded-full text-sm">
                     {playdate.time}
                   </div>
                 </div>
                 
-                <div className="bg-muted rounded-lg p-3">
+                <div className="bg-muted/30 rounded-xl p-4 hover:bg-muted/50 transition-colors">
                   <div className="flex space-x-3">
-                    <Avatar className="h-8 w-8">
+                    <Avatar className="h-10 w-10 ring-2 ring-white">
                       <AvatarImage src={playdate.parent.avatar} alt={playdate.parent.name} />
-                      <AvatarFallback className="bg-secondary/20 text-secondary">
+                      <AvatarFallback className="bg-gradient-to-br from-primary/20 to-secondary/20 text-secondary-foreground">
                         {playdate.parent.name[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <span className="block text-sm font-medium">{playdate.parent.name}</span>
-                      <span className="block text-xs text-muted-foreground">with {playdate.children}</span>
+                      <span className="block text-sm font-semibold text-left">{playdate.parent.name}</span>
+                      <span className="block text-xs text-muted-foreground text-left">with {playdate.children}</span>
                     </div>
                   </div>
                 </div>
@@ -197,19 +202,17 @@ const Hero = () => {
             </div>
             
             {/* Decorative elements */}
-            <div className="absolute top-[-10%] right-[-10%] h-40 w-40 bg-primary/10 rounded-full filter blur-xl"></div>
-            <div className="absolute bottom-[-5%] left-[-5%] h-24 w-24 bg-secondary/10 rounded-full filter blur-xl"></div>
+            <div className="absolute top-[-5%] right-[-5%] h-40 w-40 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full filter blur-xl animate-pulse"></div>
+            <div className="absolute bottom-[-5%] left-[-5%] h-24 w-24 bg-gradient-to-br from-secondary/10 to-accent/10 rounded-full filter blur-xl animate-pulse"></div>
           </div>
         </div>
       </div>
       
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
-        <button onClick={scrollToFeatures} aria-label="Scroll to features" className="animate-bounce flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-soft my-0 py-0">
-          <ArrowRight className="h-5 w-5 text-primary transform rotate-90" />
+      <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2">
+        <button onClick={scrollToFeatures} aria-label="Scroll to features" className="animate-bounce flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-lg transition-transform duration-300 hover:scale-110 text-justify my-0 py-0 text-base">
+          <ArrowRight className="h-5 w-5 text-primary transform rotate-90 py-0" />
         </button>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Hero;

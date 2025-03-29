@@ -22,8 +22,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate, Link, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { Navigate, Link } from 'react-router-dom';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -31,10 +31,10 @@ const loginSchema = z.object({
 });
 
 const Auth = () => {
-  const { user, signIn, loading } = useAuth();
-  const navigate = useNavigate();
+  const { user, signIn, loading: authLoading, isAdmin } = useAuth();
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [submitLoading, setSubmitLoading] = useState(false);
   
-  // Define forms outside any conditional rendering
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -42,14 +42,24 @@ const Auth = () => {
       password: "",
     },
   });
-  
-  // If already logged in, redirect to dashboard
+
+  // Redirect if already authenticated
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace />;
   }
-  
+
   const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
-    await signIn(values.email, values.password);
+    setSubmitLoading(true);
+    setAuthError(null);
+    try {
+      await signIn(values.email, values.password);
+      // The redirect is handled by the conditional return above
+    } catch (error: any) {
+      console.error('Login error:', error);
+      setAuthError(error.message || 'Failed to sign in. Please check your credentials.');
+    } finally {
+      setSubmitLoading(false);
+    }
   };
   
   return (
@@ -69,6 +79,12 @@ const Auth = () => {
           </CardHeader>
           
           <CardContent>
+            {authError && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{authError}</AlertDescription>
+              </Alert>
+            )}
+            
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                 <FormField
@@ -118,9 +134,14 @@ const Auth = () => {
                 <Button 
                   type="submit" 
                   className="w-full button-glow bg-primary hover:bg-primary/90 text-white rounded-xl"
-                  disabled={loading}
+                  disabled={submitLoading || authLoading}
                 >
-                  {loading ? "Signing in..." : "Sign In"}
+                  {(submitLoading || authLoading) ? (
+                    <div className="flex items-center">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      Signing in...
+                    </div>
+                  ) : "Sign In"}
                 </Button>
                 
                 <div className="mt-4 text-center">

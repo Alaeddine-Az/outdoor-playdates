@@ -1,4 +1,3 @@
-
 import { Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -14,7 +13,7 @@ export interface AppLayoutProps {
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {
-  const { signOut } = useAuth();
+  const { signOut, isAdmin } = useAuth(); // ← Added isAdmin
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -38,6 +37,15 @@ export default function AppLayout({ children }: AppLayoutProps) {
               <SidebarLink to="/dashboard" label="Dashboard" icon={LayoutDashboard} />
               <SidebarLink to="/playdates" label="My Playdates" icon={CalendarCheck} />
               <SidebarLink to="/connections" label="Connections" icon={Users} />
+
+              {isAdmin && (
+                <>
+                  <SidebarLink to="/admin/users" label="Admin Users" icon={Users} />
+                  <SidebarLink to="/admin/signups" label="Signups" icon={Users} />
+                  <SidebarLink to="/admin/logs" label="Logs" icon={LayoutDashboard} />
+                </>
+              )}
+
               <button
                 onClick={handleSignOut}
                 className="flex w-full items-center gap-3 rounded-md px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"

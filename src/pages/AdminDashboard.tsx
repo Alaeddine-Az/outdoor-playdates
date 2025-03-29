@@ -1,102 +1,71 @@
 
-import React, { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
-import Header from '@/components/Header';
-import { useAdminDashboard } from '@/hooks/useAdminDashboard';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SignupCardGrid from '@/components/admin/SignupCardGrid';
-import EarlySignupList from '@/components/admin/EarlySignupList';
-import AccountCreationModal from '@/components/admin/AccountCreationModal';
-import { useAdminSignups } from '@/hooks/useAdminSignups';
+import React from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, ClipboardList, FileBarChart2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-const AdminDashboard = () => {
-  const {
-    user,
-    loading: authLoading,
-    isAdmin,
-    pendingSignups,
-    handleApprove: handleApproveRequest,
-    handleReject: handleRejectRequest
-  } = useAdminDashboard();
-
-  const {
-    loading: signupsLoading,
-    signups,
-    handleApprove,
-    handleReject,
-    handleCreateAccount,
-    isModalOpen,
-    selectedSignup,
-    handleCloseModal,
-    handleConfirmAccountCreation,
-    isCreatingAccount,
-    refreshSignups
-  } = useAdminSignups();
-
-  useEffect(() => {
-    if (user && isAdmin) {
-      refreshSignups();
-    }
-  }, [user, isAdmin]);
-
-  // Redirect if not admin
-  if (user && !isAdmin && !authLoading) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  // Redirect if not logged in
-  if (!user && !authLoading) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  const loading = authLoading || signupsLoading;
+const AdminDashboard: React.FC = () => {
+  const { user } = useAuth();
 
   return (
-    <>
-      <Header />
-      <main className="container max-w-6xl py-6">
-        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-        
-        <Tabs defaultValue="early-signups" className="mb-8">
-          <TabsList>
-            <TabsTrigger value="early-signups">Early Signups</TabsTrigger>
-            <TabsTrigger value="approval-requests">Approval Requests</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="early-signups" className="mt-6">
-            <EarlySignupList 
-              signups={signups}
-              onApprove={handleApprove}
-              onReject={handleReject}
-              onCreateAccount={handleCreateAccount}
-              loading={loading}
-            />
-          </TabsContent>
-          
-          <TabsContent value="approval-requests" className="mt-6">
-            <h2 className="text-xl font-semibold mb-4">Pending Approval Requests</h2>
-            
-            {loading ? (
-              <p>Loading requests...</p>
-            ) : (
-              <SignupCardGrid 
-                signups={pendingSignups}
-                onApprove={handleApproveRequest}
-                onReject={handleRejectRequest}
-              />
-            )}
-          </TabsContent>
-        </Tabs>
-      </main>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
       
-      <AccountCreationModal 
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        signup={selectedSignup}
-        onConfirm={handleConfirmAccountCreation}
-        isLoading={isCreatingAccount}
-      />
-    </>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Link to="/admin/users">
+          <Card className="transition-all hover:shadow-md cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Manage Users</CardTitle>
+              <Users className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <CardDescription>Create, update, and manage user accounts</CardDescription>
+            </CardContent>
+          </Card>
+        </Link>
+        
+        <Link to="/admin/signups">
+          <Card className="transition-all hover:shadow-md cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Early Signups</CardTitle>
+              <ClipboardList className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <CardDescription>Review and approve early access requests</CardDescription>
+            </CardContent>
+          </Card>
+        </Link>
+        
+        <Link to="/admin/logs">
+          <Card className="transition-all hover:shadow-md cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">System Logs</CardTitle>
+              <FileBarChart2 className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <CardDescription>Monitor system activity and events</CardDescription>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
+      
+      <div className="mt-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Welcome, Admin</CardTitle>
+            <CardDescription>
+              Logged in as {user?.email}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              This is the admin dashboard for GoPlayNow. You can manage users, review early signups, and monitor system activity from here.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 

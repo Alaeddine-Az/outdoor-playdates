@@ -1,9 +1,8 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { CalendarDays, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 import PlaydateCard from './PlaydateCard';
 
 interface Playdate {
@@ -12,8 +11,8 @@ interface Playdate {
   date: string;
   time: string;
   location: string;
-  attendees: number;
-  status: 'upcoming' | 'pending' | 'completed';
+  families: number;
+  status?: string;
 }
 
 interface PlaydatesListProps {
@@ -21,61 +20,65 @@ interface PlaydatesListProps {
   playdates: Playdate[];
   showNewButton?: boolean;
   viewAllLink?: string;
+  className?: string;
 }
 
-const PlaydatesList = ({ title, playdates, showNewButton = false, viewAllLink = '/playdates' }: PlaydatesListProps) => {
-  const navigate = useNavigate();
-  
+const PlaydatesList = ({
+  title,
+  playdates,
+  showNewButton = false,
+  viewAllLink,
+  className = '',
+}: PlaydatesListProps) => {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-xl font-medium">{title}</CardTitle>
-        {showNewButton && (
-          <Button 
-            className="button-glow bg-primary hover:bg-primary/90 text-white rounded-xl" 
-            onClick={() => navigate('/create-playdate')}
-          >
-            <PlusCircle className="h-4 w-4 mr-2" />
-            New Playdate
-          </Button>
-        )}
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {playdates.length > 0 ? (
-            playdates.map((playdate) => (
-              <PlaydateCard 
-                key={playdate.id}
-                id={playdate.id}
-                title={playdate.title}
-                date={playdate.date}
-                time={playdate.time}
-                location={playdate.location}
-                attendees={playdate.attendees}
-                status={playdate.status}
-              />
-            ))
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              No playdates found
-            </div>
-          )}
+    <div
+      className={cn(
+        'rounded-3xl bg-[#FFF9E9] px-4 py-6 md:px-6 md:py-8 space-y-6',
+        className
+      )}
+    >
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="bg-[#F9DA6F] p-2 rounded-xl">
+            <CalendarDays className="text-orange-500 w-5 h-5" />
+          </div>
+          <h2 className="text-lg md:text-xl font-bold text-neutral-800">
+            {title}
+          </h2>
         </div>
-        
-        {playdates.length > 0 && (
-          <div className="mt-4 text-center">
-            <Button 
-              variant="ghost" 
-              className="text-muted-foreground"
-              onClick={() => navigate(viewAllLink)}
-            >
-              View All Playdates
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+        {showNewButton && (
+          <Link to="/create-playdate" className="self-start md:self-auto">
+            <button className="flex items-center gap-2 rounded-full bg-primary text-white px-5 py-2 text-sm hover:bg-primary/90">
+              <Plus className="w-4 h-4" />
+              <span>New Playdate</span>
+            </button>
+          </Link>
+        )}
+      </div>
+
+      <div className="space-y-4">
+        {playdates.length > 0 ? (
+          playdates.map((playdate) => (
+            <PlaydateCard key={playdate.id} playdate={playdate} />
+          ))
+        ) : (
+          <div className="py-4 text-center text-muted-foreground">
+            No playdates available
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+
+      {viewAllLink && playdates.length > 0 && (
+        <div className="text-right mt-4">
+          <Link
+            to={viewAllLink}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            View All
+          </Link>
+        </div>
+      )}
+    </div>
   );
 };
 

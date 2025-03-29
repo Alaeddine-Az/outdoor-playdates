@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
+import { checkAdminStatus } from '@/utils/authUtils';
 
 export function useAuthSession() {
   const [session, setSession] = useState<Session | null>(null);
@@ -10,57 +11,64 @@ export function useAuthSession() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
+    let mounted = true;
 
-    console.info('Auth session hook initialized');
+    // First set up the auth state listener to handle changes in real-time
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        console.log('Auth state changed:', event, { sessionExists: !!newSession });
+        
+        if (!mounted) return;
+        
+        // Update session and user state synchronously
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        
+        // Check admin status when session changes - do this in a setTimeout to avoid
+        // potential deadlocks with Supabase client
+        if (newSession?.user) {
+          setTimeout(async () => {
+            if (!mounted) return;
+            const isUserAdmin = await checkAdminStatus(newSession.user);
+            setIsAdmin(isUserAdmin);
+          }, 0);
+        } else {
+          setIsAdmin(false);
+        }
+      }
+    );
 
-    const initializeSession = async () => {
-      console.info('Checking for existing session');
-      const { data, error } = await supabase.auth.getSession();
-      
-      console.info('Existing session check result:', { _type: typeof data?.session, value: typeof data?.session });
-      
-      const currentSession = data?.session ?? null;
-      const currentUser = currentSession?.user ?? null;
-
-      if (!isMounted) return;
-
-      setSession(currentSession);
-      setUser(currentUser);
-      setIsAdmin(currentUser?.email?.endsWith('@admin.com') || false);
-      setLoading(false);
+    // Then check for an existing session
+    const initSession = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        console.log('Initial session check:', { sessionExists: !!data.session });
+        
+        if (!mounted) return;
+        
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+        
+        // Check admin status if we have a user
+        if (data.session?.user) {
+          const isUserAdmin = await checkAdminStatus(data.session.user);
+          setIsAdmin(isUserAdmin);
+        }
+      } catch (error) {
+        console.error('Error getting session:', error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
     };
 
-    // Initial session fetch
-    initializeSession();
+    initSession();
 
-    // Timeout fallback if Supabase hangs
-    const fallbackTimeout = setTimeout(() => {
-      if (isMounted) {
-        console.warn('Auth check timeout fallback triggered.');
-        setLoading(false);
-      }
-    }, 5000);
-
-    // Listen for auth changes
-    const { data } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      console.info('Auth state changed:', _event, { _type: typeof newSession, value: typeof newSession });
-      
-      if (!isMounted) return;
-      
-      setSession(newSession);
-      const currentUser = newSession?.user ?? null;
-      setUser(currentUser);
-      setIsAdmin(currentUser?.email?.endsWith('@admin.com') || false);
-    });
-
+    // Cleanup function
     return () => {
-      console.info('Cleaning up auth subscription');
-      isMounted = false;
-      if (data?.subscription) {
-        data.subscription.unsubscribe();
-      }
-      clearTimeout(fallbackTimeout);
+      mounted = false;
+      subscription.unsubscribe();
     };
   }, []);
 
