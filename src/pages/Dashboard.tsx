@@ -1,14 +1,15 @@
-""import React, { useEffect } from 'react';
-import { useDashboard } from '@/hooks/useDashboard';
+import React, { useEffect } from 'react';
+import AppLayoutWrapper from '@/components/AppLayoutWrapper';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import ProfileSummary from '@/components/dashboard/ProfileSummary';
 import PlaydatesList from '@/components/dashboard/PlaydatesList';
 import SuggestedConnections from '@/components/dashboard/SuggestedConnections';
 import NearbyEvents from '@/components/dashboard/NearbyEvents';
+import { useDashboard } from '@/hooks/useDashboard';
 import { toast } from '@/components/ui/use-toast';
-import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-  const navigate = useNavigate();
   const {
     loading,
     profile,
@@ -16,7 +17,7 @@ const Dashboard = () => {
     upcomingPlaydates,
     suggestedConnections,
     nearbyEvents,
-    error
+    error,
   } = useDashboard();
 
   useEffect(() => {
@@ -29,60 +30,68 @@ const Dashboard = () => {
     }
   }, [error]);
 
-  const parentName = profile?.parent_name?.split(' ')[0] || 'there';
+  const childrenWithAges = children?.map(child => ({ name: child.name, age: child.age })) || [];
+  const interests = profile?.interests || ['Arts & Crafts', 'Nature', 'STEM'];
 
   return (
-    <div className="space-y-8 px-4 md:px-8 py-4 md:py-8">
-      {/* Hero Section */}
-      <section className="relative w-full rounded-3xl overflow-hidden" style={{ backgroundColor: '#CEEBF0' }}>
-        {/* Sky / Cloud Shape */}
-        <div className="absolute top-0 left-0 w-full h-full">
-          <svg viewBox="0 0 800 200" preserveAspectRatio="none" className="w-full h-full">
-            <path d="M0,100 C150,200 650,0 800,100 L800,0 L0,0 Z" fill="#CEEBF0" />
-          </svg>
+    <AppLayoutWrapper>
+      <div className="animate-fade-in px-4 sm:px-6 lg:px-8">
+        {/* Hero Section */}
+        <div className="relative w-full rounded-3xl overflow-hidden bg-[#CEEBF0] pb-8 pt-6 sm:pt-10 mb-10">
+          <div className="absolute bottom-0 left-0 w-full h-24 bg-[#73C770] rounded-t-[50%]" />
+          <div className="absolute top-6 left-6 w-16 h-10 bg-white rounded-full animate-cloud float-left" />
+          <div className="absolute top-6 right-6 w-16 h-16 rounded-full bg-[#F9DA6F] animate-pulse" />
+
+          <div className="relative z-10 px-6 sm:px-10">
+            <h1 className="text-4xl font-bold font-[Baloo_2] text-black mb-2">
+              Welcome back, {profile?.parent_name?.split(' ')[0] || 'there'}!
+            </h1>
+            <p className="text-lg text-black font-[Baloo_2]">
+              Here's what's happening with your playdates and connections.
+            </p>
+          </div>
+
+          <div className="absolute bottom-4 right-4 z-10">
+            <Button className="bg-[#F9DA6F] text-black font-semibold rounded-full px-6 py-3 hover:brightness-95">
+              Edit Profile
+            </Button>
+          </div>
         </div>
 
-        {/* Sun */}
-        <div className="absolute top-4 right-6 w-16 h-16 bg-[#F9DA6F] rounded-full animate-pulse-slow" />
-
-        {/* Cloud */}
-        <div className="absolute top-8 left-4 w-24 h-10 bg-white rounded-full opacity-70 blur-sm animate-float-slow" />
-
-        {/* Content */}
-        <div className="relative z-10 p-6 md:p-10 space-y-2 font-rounded">
-          <h1 className="text-3xl md:text-5xl font-extrabold text-black">Welcome back, {parentName}!</h1>
-          <p className="text-md md:text-lg text-black">Here's what's happening with your playdates and connections.</p>
-        </div>
-
-        {/* Ground */}
-        <div className="w-full h-20 md:h-28 bg-[#73C770] rounded-t-[3rem]" />
-
-        {/* Button */}
-        <div className="absolute bottom-6 right-6">
-          <Button
-            onClick={() => navigate('/parent-profile')}
-            className="bg-[#F9DA6F] text-black text-base font-semibold px-6 py-3 rounded-full transition-transform hover:scale-105"
-          >
-            Edit Profile
-          </Button>
-        </div>
-      </section>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-6">
-          <PlaydatesList
-            title="Upcoming Playdates"
-            playdates={upcomingPlaydates}
-            showNewButton={true}
-            viewAllLink="/playdates"
-          />
-        </div>
-        <div className="space-y-6">
-          <SuggestedConnections connections={suggestedConnections} />
-          <NearbyEvents events={nearbyEvents} />
-        </div>
+        {loading ? (
+          <div className="space-y-8">
+            <Skeleton className="h-9 w-64 mb-2" />
+            <Skeleton className="h-4 w-full max-w-md mb-8" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="md:col-span-2">
+                <Skeleton className="h-96 w-full" />
+              </div>
+              <div className="space-y-6">
+                <Skeleton className="h-64 w-full" />
+                <Skeleton className="h-80 w-full" />
+                <Skeleton className="h-48 w-full" />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2 space-y-6">
+              <PlaydatesList
+                title="Upcoming Playdates"
+                playdates={upcomingPlaydates}
+                showNewButton={true}
+                viewAllLink="/playdates"
+              />
+            </div>
+            <div className="space-y-6">
+              <ProfileSummary name={profile?.parent_name || 'User'} children={childrenWithAges} interests={interests} />
+              <SuggestedConnections connections={suggestedConnections} />
+              <NearbyEvents events={nearbyEvents} />
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </AppLayoutWrapper>
   );
 };
 
