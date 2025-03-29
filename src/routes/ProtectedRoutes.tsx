@@ -1,8 +1,6 @@
-
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
 
 // Import pages
 import Dashboard from '@/pages/Dashboard';
@@ -20,14 +18,9 @@ import PlaydateDetail from '@/pages/PlaydateDetail';
 import GroupDetail from '@/pages/GroupDetail';
 import NotFound from '@/pages/NotFound';
 
-// Reusable component for protected routes
-interface ProtectedRouteContentProps {
-  children: React.ReactNode;
-}
-
-export const ProtectedRouteContent: React.FC<ProtectedRouteContentProps> = ({ children }) => {
+const ProtectedRoutes = () => {
   const { user, loading } = useAuth();
-  
+
   if (loading) {
     return (
       <div className="h-screen flex flex-col items-center justify-center">
@@ -37,20 +30,9 @@ export const ProtectedRouteContent: React.FC<ProtectedRouteContentProps> = ({ ch
       </div>
     );
   }
-  
+
   if (!user) {
     console.log("No user found, redirecting to auth page");
-    return <Navigate to="/auth" replace />;
-  }
-  
-  return <>{children}</>;
-};
-
-const ProtectedRoutes = () => {
-  const { user } = useAuth();
-
-  // If no user, redirect to auth page
-  if (!user) {
     return <Navigate to="/auth" replace />;
   }
 
