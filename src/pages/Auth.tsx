@@ -31,11 +31,11 @@ const loginSchema = z.object({
 });
 
 const Auth = () => {
-  const { user, signIn, loading, isAdmin } = useAuth();
+  const { user, signIn, loading: authLoading, isAdmin } = useAuth();
   const [authError, setAuthError] = useState<string | null>(null);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const navigate = useNavigate();
   
-  // Define forms outside any conditional rendering
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -44,25 +44,22 @@ const Auth = () => {
     },
   });
 
-  // Redirect based on admin status after login
-  useEffect(() => {
-    if (user) {
-      if (isAdmin) {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
-    }
-  }, [user, isAdmin, navigate]);
+  // Redirect if already authenticated
+  if (user) {
+    return <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace />;
+  }
 
   const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
+    setSubmitLoading(true);
     setAuthError(null);
     try {
       await signIn(values.email, values.password);
-      // Redirection is handled by the effect hook above
+      // The redirect is handled by the conditional return above
     } catch (error: any) {
       console.error('Login error:', error);
       setAuthError(error.message || 'Failed to sign in. Please check your credentials.');
+    } finally {
+      setSubmitLoading(false);
     }
   };
   
@@ -138,9 +135,14 @@ const Auth = () => {
                 <Button 
                   type="submit" 
                   className="w-full button-glow bg-primary hover:bg-primary/90 text-white rounded-xl"
-                  disabled={loading}
+                  disabled={submitLoading || authLoading}
                 >
-                  {loading ? "Signing in..." : "Sign In"}
+                  {(submitLoading || authLoading) ? (
+                    <div className="flex items-center">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      Signing in...
+                    </div>
+                  ) : "Sign In"}
                 </Button>
                 
                 <div className="mt-4 text-center">

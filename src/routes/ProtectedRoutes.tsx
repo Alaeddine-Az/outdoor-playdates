@@ -23,10 +23,9 @@ const ProtectedRoutes = () => {
 
   if (loading) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+      <div className="flex flex-col items-center justify-center min-h-[70vh]">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
         <p className="text-muted-foreground">Loading your account...</p>
-        <p className="text-xs text-muted-foreground mt-2">If this persists, try refreshing the page.</p>
       </div>
     );
   }

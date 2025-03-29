@@ -11,72 +11,57 @@ export function useAuthSession() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
+    let mounted = true;
 
-    console.info('Auth session hook initialized');
-
-    const initializeSession = async () => {
-      console.info('Checking for existing session');
-      const { data, error } = await supabase.auth.getSession();
+    // First set up the auth state listener to handle changes in real-time
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      console.log('Auth state changed:', event, { sessionExists: !!newSession });
       
-      console.info('Existing session check result:', { _type: typeof data?.session, value: typeof data?.session });
-      
-      const currentSession = data?.session ?? null;
-      const currentUser = currentSession?.user ?? null;
-
-      if (!isMounted) return;
-
-      setSession(currentSession);
-      setUser(currentUser);
-      
-      // Check admin status
-      if (currentUser) {
-        const isUserAdmin = await checkAdminStatus(currentUser);
-        setIsAdmin(isUserAdmin);
-      } else {
-        setIsAdmin(false);
-      }
-      
-      setLoading(false);
-    };
-
-    // Initial session fetch
-    initializeSession();
-
-    // Timeout fallback if Supabase hangs
-    const fallbackTimeout = setTimeout(() => {
-      if (isMounted) {
-        console.warn('Auth check timeout fallback triggered.');
-        setLoading(false);
-      }
-    }, 5000);
-
-    // Listen for auth changes
-    const { data } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      console.info('Auth state changed:', _event, { _type: typeof newSession, value: typeof newSession });
-      
-      if (!isMounted) return;
+      if (!mounted) return;
       
       setSession(newSession);
-      const currentUser = newSession?.user ?? null;
-      setUser(currentUser);
+      setUser(newSession?.user ?? null);
       
-      // Check admin status on auth change
-      if (currentUser) {
-        const isUserAdmin = await checkAdminStatus(currentUser);
+      // Check admin status when session changes
+      if (newSession?.user) {
+        const isUserAdmin = await checkAdminStatus(newSession.user);
         setIsAdmin(isUserAdmin);
       } else {
         setIsAdmin(false);
       }
     });
 
-    return () => {
-      console.info('Cleaning up auth subscription');
-      isMounted = false;
-      if (data?.subscription) {
-        data.subscription.unsubscribe();
+    // Then check for an existing session
+    const initSession = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        console.log('Initial session check:', { sessionExists: !!data.session });
+        
+        if (!mounted) return;
+        
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+        
+        // Check admin status if we have a user
+        if (data.session?.user) {
+          const isUserAdmin = await checkAdminStatus(data.session.user);
+          setIsAdmin(isUserAdmin);
+        }
+      } catch (error) {
+        console.error('Error getting session:', error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
-      clearTimeout(fallbackTimeout);
+    };
+
+    initSession();
+
+    // Cleanup function
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
     };
   }, []);
 
