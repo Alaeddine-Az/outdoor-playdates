@@ -53,41 +53,37 @@ const Dashboard = () => {
   return (
     <div className="animate-fade-in px-4 py-6 max-w-6xl mx-auto">
       {/* Hero Section */}
-      <section
-  className="relative bg-[#CEEBF0] rounded-3xl overflow-hidden mb-8"
-  style={{ height: '210px', fontFamily: '"Baloo 2", cursive' }}
+     <section
+  className="relative bg-[#CEEBF0] rounded-3xl overflow-hidden mb-8 px-4 py-6 sm:px-6 sm:py-8"
+  style={{ height: '220px', fontFamily: '"Baloo 2", cursive' }}
 >
-  {/* Sky Background */}
+  {/* Sky + Sun + Clouds */}
   <div className="absolute inset-0 bg-[#CEEBF0]">
     {/* Clouds */}
-    <div className="absolute w-24 h-16 bg-white rounded-full top-10 left-10 opacity-90 animate-cloud" />
-    <div className="absolute w-16 h-10 bg-white rounded-full top-[60px] left-[100px] opacity-70 blur-sm" />
-    <div className="absolute w-20 h-12 bg-white rounded-full top-[90px] left-[200px] opacity-70 blur-sm" />
+    <div className="absolute w-20 h-12 bg-white rounded-full top-8 left-6 opacity-80 blur-sm" />
+    <div className="absolute w-16 h-10 bg-white rounded-full top-16 left-24 opacity-60 blur-sm" />
 
     {/* Sun Emoji */}
-    <div className="absolute text-6xl top-12 right-16 animate-bounce-sun">☀️</div>
+    <div className="absolute text-5xl top-6 right-6 animate-bounce-sun">🌞</div>
   </div>
 
-  {/* Parallax Hills */}
+  {/* Hills */}
   <div className="absolute bottom-0 w-full h-[80px] bg-[#D4F7D3] rounded-t-[100%] z-0" />
-  <div className="absolute bottom-0 w-full h-[70px] bg-[#A5E4A2] rounded-t-[100%] z-10 translate-y-[8px]" />
-  <div className="absolute bottom-0 w-full h-[60px] bg-[#73C770] rounded-t-[100%] z-20 translate-y-[16px]" />
+  <div className="absolute bottom-0 w-full h-[70px] bg-[#A5E4A2] rounded-t-[100%] z-10 translate-y-[6px]" />
+  <div className="absolute bottom-0 w-full h-[60px] bg-[#73C770] rounded-t-[100%] z-20 translate-y-[12px]" />
 
   {/* Content */}
-  <div className="relative z-30 h-full px-6 py-6 flex flex-col justify-center">
-    <div className="text-left">
-      <h1 className="text-4xl font-extrabold text-black mb-2">
-        Welcome back, {profile?.parent_name?.split(' ')[0] || 'there'}!
-      </h1>
-      <p className="text-lg text-black">
-        Here&apos;s what&apos;s happening with your playdates and connections.
-      </p>
-    </div>
+  <div className="relative z-30 h-full flex flex-col justify-center items-start sm:items-start text-left gap-2">
+    <h1 className="text-3xl sm:text-4xl font-extrabold text-black leading-snug">
+      Welcome back, {profile?.parent_name?.split(' ')[0] || 'there'}!
+    </h1>
+    <p className="text-base sm:text-lg text-black leading-snug">
+      Here&apos;s what&apos;s happening with your playdates and connections.
+    </p>
 
-    {/* Edit Button */}
-    <div className="absolute bottom-4 right-6">
+    <div className="mt-4 self-center sm:self-end">
       <Button
-        className="bg-[#F9DA6F] text-black font-semibold px-5 py-2 rounded-full hover:brightness-110"
+        className="bg-[#F9DA6F] text-black font-semibold px-5 py-2 rounded-full hover:brightness-110 transition"
         onClick={() => navigate('/parent-profile')}
       >
         Edit Profile
