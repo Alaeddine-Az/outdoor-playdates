@@ -58,21 +58,22 @@ const Dashboard = () => {
   className="relative bg-[#CEEBF0] rounded-3xl overflow-hidden mb-8 px-6 py-8"
   style={{ height: '240px', fontFamily: '"Baloo 2", cursive' }}
 >
-  {/* Sky */}
+  {/* Sky Background */}
   <div className="absolute inset-0 bg-[#CEEBF0]" />
 
   {/* Sun Emoji */}
-  <div className="absolute top-6 right-6 text-4xl">🌞</div>
+  <div className="absolute top-6 right-6 text-4xl z-30">🌞</div>
 
   {/* Cloud */}
-  <div className="absolute top-8 left-8 w-24 h-24 bg-white rounded-full opacity-90" />
+  <div className="absolute top-8 left-6 w-24 h-24 bg-white rounded-full opacity-90 z-20" />
 
   {/* Parallax Hills */}
-  <div className="absolute bottom-0 w-full h-24 bg-[#AEE9A8] rounded-t-[100%]" />
-  <div className="absolute bottom-0 w-full h-20 bg-[#73C770] rounded-t-[100%]" />
+  <div className="absolute bottom-0 w-full h-[80px] bg-[#D4F7D3] rounded-t-[100%] z-0" />
+  <div className="absolute bottom-0 w-full h-[70px] bg-[#A5E4A2] rounded-t-[100%] z-10 translate-y-[8px]" />
+  <div className="absolute bottom-0 w-full h-[60px] bg-[#73C770] rounded-t-[100%] z-20 translate-y-[16px]" />
 
   {/* Text */}
-  <div className="relative z-10 text-left mt-4 md:mt-8">
+  <div className="relative z-30 text-left mt-8">
     <h1 className="text-3xl md:text-4xl font-extrabold text-black mb-2">
       Welcome back, {profile?.parent_name?.split(' ')[0] || 'Test'}!
     </h1>
@@ -82,7 +83,7 @@ const Dashboard = () => {
   </div>
 
   {/* Edit Profile Button - Mobile */}
-  <div className="absolute bottom-4 right-4 md:hidden">
+  <div className="absolute bottom-4 right-4 md:hidden z-30">
     <Button
       size="icon"
       className="bg-[#F9DA6F] text-black hover:brightness-110 w-12 h-12 rounded-full"
@@ -93,7 +94,7 @@ const Dashboard = () => {
   </div>
 
   {/* Edit Profile Button - Desktop */}
-  <div className="hidden md:block absolute bottom-6 left-6">
+  <div className="hidden md:block absolute bottom-6 left-6 z-30">
     <Button
       className="bg-[#F9DA6F] text-black font-semibold px-5 py-2 rounded-full hover:brightness-110"
       onClick={() => navigate('/parent-profile')}
