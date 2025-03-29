@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
+import { checkAdminStatus } from '@/utils/authUtils';
 
 export function useAuthSession() {
   const [session, setSession] = useState<Session | null>(null);
@@ -27,7 +28,15 @@ export function useAuthSession() {
 
       setSession(currentSession);
       setUser(currentUser);
-      setIsAdmin(currentUser?.email?.endsWith('@admin.com') || false);
+      
+      // Check admin status
+      if (currentUser) {
+        const isUserAdmin = await checkAdminStatus(currentUser);
+        setIsAdmin(isUserAdmin);
+      } else {
+        setIsAdmin(false);
+      }
+      
       setLoading(false);
     };
 
@@ -43,7 +52,7 @@ export function useAuthSession() {
     }, 5000);
 
     // Listen for auth changes
-    const { data } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
       console.info('Auth state changed:', _event, { _type: typeof newSession, value: typeof newSession });
       
       if (!isMounted) return;
@@ -51,7 +60,14 @@ export function useAuthSession() {
       setSession(newSession);
       const currentUser = newSession?.user ?? null;
       setUser(currentUser);
-      setIsAdmin(currentUser?.email?.endsWith('@admin.com') || false);
+      
+      // Check admin status on auth change
+      if (currentUser) {
+        const isUserAdmin = await checkAdminStatus(currentUser);
+        setIsAdmin(isUserAdmin);
+      } else {
+        setIsAdmin(false);
+      }
     });
 
     return () => {
