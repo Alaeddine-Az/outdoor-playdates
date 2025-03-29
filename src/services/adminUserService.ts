@@ -31,14 +31,16 @@ export const fetchUsers = async (currentPage: number, perPage: number): Promise<
     const token = await getAuthToken();
     if (!token) throw new Error('Not authenticated');
 
-    // Using the body parameter for pagination instead of query params
+    console.log(`Fetching users with page=${currentPage}, perPage=${perPage}`);
+    
+    // Make the request to the edge function
     const { data, error } = await supabase.functions.invoke('admin-users', {
-      method: 'GET',
+      method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: { 
+        action: 'getUsers',
         page: currentPage,
         per_page: perPage
       }
@@ -49,6 +51,7 @@ export const fetchUsers = async (currentPage: number, perPage: number): Promise<
       throw new Error(error.message || 'Failed to fetch users');
     }
     
+    console.log('Fetched user data:', data);
     return data || { users: [] };
   } catch (error: any) {
     console.error('Error fetching users:', error);
@@ -57,7 +60,7 @@ export const fetchUsers = async (currentPage: number, perPage: number): Promise<
       description: error.message || 'Failed to send a request to the edge function',
       variant: 'destructive',
     });
-    throw error;
+    throw error.message || 'Failed to fetch users';
   }
 };
 
@@ -70,10 +73,10 @@ export const createUser = async (userData: CreateUserData): Promise<any> => {
     const { data, error } = await supabase.functions.invoke('admin-users', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: {
+        action: 'createUser',
         email: userData.email,
         password: userData.password,
         user_metadata: {
@@ -86,7 +89,7 @@ export const createUser = async (userData: CreateUserData): Promise<any> => {
     return data;
   } catch (error: any) {
     console.error('Error creating user:', error);
-    throw error;
+    throw error.message || 'Failed to create user';
   }
 };
 
@@ -97,12 +100,12 @@ export const updateUserPassword = async ({ userId, password }: { userId: string;
     if (!token) throw new Error('Not authenticated');
 
     const { data, error } = await supabase.functions.invoke('admin-users', {
-      method: 'PATCH',
+      method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: {
+        action: 'updatePassword',
         user_id: userId,
         password,
       },
@@ -112,7 +115,7 @@ export const updateUserPassword = async ({ userId, password }: { userId: string;
     return data;
   } catch (error: any) {
     console.error('Error updating user password:', error);
-    throw error;
+    throw error.message || 'Failed to update user password';
   }
 };
 
@@ -123,12 +126,12 @@ export const deleteUser = async (userId: string): Promise<any> => {
     if (!token) throw new Error('Not authenticated');
 
     const { data, error } = await supabase.functions.invoke('admin-users', {
-      method: 'DELETE',
+      method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: {
+        action: 'deleteUser',
         user_id: userId,
       },
     });
@@ -137,6 +140,6 @@ export const deleteUser = async (userId: string): Promise<any> => {
     return data;
   } catch (error: any) {
     console.error('Error deleting user:', error);
-    throw error;
+    throw error.message || 'Failed to delete user';
   }
 };

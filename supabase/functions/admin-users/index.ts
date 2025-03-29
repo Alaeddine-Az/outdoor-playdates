@@ -71,25 +71,57 @@ serve(async (req) => {
       })
     }
 
-    // Handle different endpoints based on the request method
-    // List users
-    if (req.method === 'GET') {
-      console.log('Processing GET request to fetch users');
-      
-      // Get parameters from the request body
-      let body = {};
-      try {
-        body = await req.json();
-        console.log('Request body:', body);
-      } catch (e) {
-        console.log('No body or invalid JSON, using defaults');
-      }
-      
-      const page = body.page || 1;
-      const perPage = body.per_page || 10;
-      
-      console.log(`Fetching users with page=${page}, perPage=${perPage}`);
-      
+    // Parse the request body
+    let requestBody;
+    try {
+      requestBody = await req.json();
+      console.log('Request body:', requestBody);
+    } catch (e) {
+      console.error('Error parsing request body:', e);
+      return new Response(JSON.stringify({ error: 'Invalid request body' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const action = requestBody.action;
+    console.log(`Processing action: ${action}`);
+
+    // Handle different actions
+    switch (action) {
+      case 'getUsers':
+        return await handleGetUsers(requestBody);
+      case 'createUser':
+        return await handleCreateUser(requestBody);
+      case 'updatePassword':
+        return await handleUpdatePassword(requestBody);
+      case 'deleteUser':
+        return await handleDeleteUser(requestBody);
+      default:
+        console.error('Unknown action:', action);
+        return new Response(JSON.stringify({ error: 'Unknown action' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
+  } catch (error) {
+    console.error('Error processing request:', error);
+    return new Response(JSON.stringify({ error: error.message || 'Internal server error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+
+  // Handler functions for each action
+  async function handleGetUsers(body) {
+    console.log('Processing GET users request');
+    
+    const page = body.page || 1;
+    const perPage = body.per_page || 10;
+    
+    console.log(`Fetching users with page=${page}, perPage=${perPage}`);
+    
+    try {
       // Fetch users using the Supabase Admin API
       const response = await fetch(
         `${supabaseUrl}/auth/v1/admin/users?page=${page}&per_page=${perPage}`,
@@ -101,7 +133,7 @@ serve(async (req) => {
             'Content-Type': 'application/json',
           },
         }
-      )
+      );
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -118,21 +150,28 @@ serve(async (req) => {
       return new Response(JSON.stringify(data), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
+      });
+    } catch (error) {
+      console.error('Error in handleGetUsers:', error);
+      return new Response(JSON.stringify({ error: error.message || 'Error fetching users' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+  }
+  
+  async function handleCreateUser(body) {
+    console.log('Processing CREATE user request');
+    const { email, password, user_metadata } = body;
+    
+    if (!email || !password) {
+      return new Response(JSON.stringify({ error: 'Email and password are required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
     
-    // Create user
-    if (req.method === 'POST') {
-      console.log('Processing POST request to create user');
-      const { email, password, user_metadata } = await req.json();
-      
-      if (!email || !password) {
-        return new Response(JSON.stringify({ error: 'Email and password are required' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
-      }
-      
+    try {
       // Create user using the Supabase Admin API
       const response = await fetch(
         `${supabaseUrl}/auth/v1/admin/users`,
@@ -150,7 +189,7 @@ serve(async (req) => {
             user_metadata
           }),
         }
-      )
+      );
       
       const data = await response.json();
       
@@ -159,28 +198,35 @@ serve(async (req) => {
         return new Response(JSON.stringify(data), {
           status: 201,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
+        });
       } else {
         console.error('Error creating user:', data);
         return new Response(JSON.stringify(data), {
           status: response.status,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
+        });
       }
+    } catch (error) {
+      console.error('Error in handleCreateUser:', error);
+      return new Response(JSON.stringify({ error: error.message || 'Error creating user' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+  }
+  
+  async function handleUpdatePassword(body) {
+    console.log('Processing UPDATE password request');
+    const { user_id, password } = body;
+    
+    if (!user_id || !password) {
+      return new Response(JSON.stringify({ error: 'User ID and password are required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
     
-    // Update user password
-    if (req.method === 'PATCH') {
-      console.log('Processing PATCH request to update user password');
-      const { user_id, password } = await req.json();
-      
-      if (!user_id || !password) {
-        return new Response(JSON.stringify({ error: 'User ID and password are required' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
-      }
-      
+    try {
       // Update user password using the Supabase Admin API
       const response = await fetch(
         `${supabaseUrl}/auth/v1/admin/users/${user_id}`,
@@ -195,7 +241,7 @@ serve(async (req) => {
             password
           }),
         }
-      )
+      );
       
       const data = await response.json();
       console.log('Password update response:', response.status);
@@ -203,21 +249,28 @@ serve(async (req) => {
       return new Response(JSON.stringify(data), {
         status: response.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
+      });
+    } catch (error) {
+      console.error('Error in handleUpdatePassword:', error);
+      return new Response(JSON.stringify({ error: error.message || 'Error updating password' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+  }
+  
+  async function handleDeleteUser(body) {
+    console.log('Processing DELETE user request');
+    const { user_id } = body;
+    
+    if (!user_id) {
+      return new Response(JSON.stringify({ error: 'User ID is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
     
-    // Delete user
-    if (req.method === 'DELETE') {
-      console.log('Processing DELETE request to remove a user');
-      const { user_id } = await req.json();
-      
-      if (!user_id) {
-        return new Response(JSON.stringify({ error: 'User ID is required' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
-      }
-      
+    try {
       // Delete user using the Supabase Admin API
       const response = await fetch(
         `${supabaseUrl}/auth/v1/admin/users/${user_id}`,
@@ -229,35 +282,28 @@ serve(async (req) => {
             'Content-Type': 'application/json',
           },
         }
-      )
+      );
       
       if (response.ok) {
         console.log('User deleted successfully');
         return new Response(JSON.stringify({ success: true, message: 'User deleted successfully' }), {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
+        });
       } else {
         const data = await response.json();
         console.error('Error deleting user:', data);
         return new Response(JSON.stringify(data), {
           status: response.status,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
+        });
       }
+    } catch (error) {
+      console.error('Error in handleDeleteUser:', error);
+      return new Response(JSON.stringify({ error: error.message || 'Error deleting user' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
-
-    // If no route matches
-    console.error('No matching route for method:', req.method);
-    return new Response(JSON.stringify({ error: 'Not found' }), {
-      status: 404,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    })
-  } catch (error) {
-    console.error('Error processing request:', error);
-    return new Response(JSON.stringify({ error: error.message || 'Internal server error' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    })
   }
 })

@@ -29,7 +29,8 @@ export function useAdminUsers() {
         .finally(() => setIsLoading(false));
     },
     refetchOnWindowFocus: false,
-    retry: 2,
+    retry: 1,
+    staleTime: 30000, // 30 seconds
   });
 
   const createUserMutation = useMutation({
@@ -41,7 +42,7 @@ export function useAdminUsers() {
         description: 'User has been successfully created',
       });
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       toast({
         title: 'Error creating user',
         description: error.message || 'Failed to create user',
@@ -58,7 +59,7 @@ export function useAdminUsers() {
         description: 'User password has been successfully updated',
       });
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       toast({
         title: 'Error updating password',
         description: error.message || 'Failed to update password',
@@ -76,7 +77,7 @@ export function useAdminUsers() {
         description: 'User has been successfully deleted',
       });
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       toast({
         title: 'Error deleting user',
         description: error.message || 'Failed to delete user',
@@ -85,14 +86,19 @@ export function useAdminUsers() {
     },
   });
 
+  const refreshUsers = () => {
+    queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
+  };
+
   return {
     users: usersQuery.data?.users || [],
     isLoading: usersQuery.isLoading || isLoading,
-    error: usersQuery.error ? (usersQuery.error as Error).message : null,
+    error: usersQuery.error ? (usersQuery.error as string) : null,
     currentPage,
     setCurrentPage,
     perPage,
     setPerPage,
+    refreshUsers,
     createUser: createUserMutation.mutate,
     isCreatingUser: createUserMutation.isPending,
     updatePassword: updatePasswordMutation.mutate,
