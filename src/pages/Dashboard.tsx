@@ -83,11 +83,14 @@ const Dashboard = () => {
 
     <div className="self-start mt-auto">
       <Button
-        className="bg-[#F9DA6F] text-black font-semibold px-5 py-2 rounded-full hover:brightness-110 transition"
-        onClick={() => navigate('/parent-profile')}
-      >
-        Edit Profile
-      </Button>
+  className="absolute right-4 top-4 sm:static sm:mt-auto sm:self-start bg-[#F9DA6F] text-black p-3 sm:px-5 sm:py-2 rounded-full hover:brightness-110 transition"
+  onClick={() => navigate('/parent-profile')}
+>
+  <span className="sm:hidden">
+    <Pencil className="w-5 h-5" />
+  </span>
+  <span className="hidden sm:inline">Edit Profile</span>
+</Button>
     </div>
   </div>
 </section>
