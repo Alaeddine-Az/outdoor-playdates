@@ -66,166 +66,169 @@ serve(async (req) => {
       })
     }
 
-    // Handle different endpoints based on the request URL and method
-    const url = new URL(req.url)
-    const path = url.pathname.split('/').pop()
+    // Parse request body
+    const requestBody = await req.json()
+    const { action } = requestBody
     
-    // List users
-    if (req.method === 'GET' && path === 'admin-users') {
-      // Get parameters from the request body
-      let body = {};
-      try {
-        body = await req.json();
-      } catch (e) {
-        // If body parsing fails, use default values
-        console.log('No body or invalid JSON, using defaults');
-      }
+    // Handle different actions based on the action parameter
+    if (req.method === 'POST') {
+      console.log('Handling action:', action)
       
-      const page = body.page || '1';
-      const perPage = body.per_page || '10';
-      
-      // Fetch users using the Supabase Admin API
-      const response = await fetch(
-        `${supabaseUrl}/auth/v1/admin/users?page=${page}&per_page=${perPage}`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-            'apikey': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-            'Content-Type': 'application/json',
-          },
+      // List users
+      if (action === 'list') {
+        const page = requestBody.page || 1
+        const perPage = requestBody.per_page || 10
+        
+        // Fetch users using the Supabase Admin API
+        const response = await fetch(
+          `${supabaseUrl}/auth/v1/admin/users?page=${page}&per_page=${perPage}`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+              'apikey': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+              'Content-Type': 'application/json',
+            },
+          }
+        )
+        
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error('Error fetching users:', errorText)
+          throw new Error(`Error fetching users: ${errorText}`)
         }
-      )
-      
-      const data = await response.json()
-      
-      return new Response(JSON.stringify(data), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
-    
-    // Create user
-    if (req.method === 'POST' && path === 'admin-users') {
-      const { email, password, user_metadata } = await req.json()
-      
-      if (!email || !password) {
-        return new Response(JSON.stringify({ error: 'Email and password are required' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
-      }
-      
-      // Create user using the Supabase Admin API
-      const response = await fetch(
-        `${supabaseUrl}/auth/v1/admin/users`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-            'apikey': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email,
-            password,
-            email_confirm: true,
-            user_metadata
-          }),
-        }
-      )
-      
-      const data = await response.json()
-      
-      if (response.ok) {
+        
+        const data = await response.json()
+        console.log('Retrieved users:', data.users?.length || 0)
+        
         return new Response(JSON.stringify(data), {
-          status: 201,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
-      } else {
-        return new Response(JSON.stringify(data), {
-          status: response.status,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
-      }
-    }
-    
-    // Update user password
-    if (req.method === 'PATCH' && path === 'admin-users') {
-      const { user_id, password } = await req.json()
-      
-      if (!user_id || !password) {
-        return new Response(JSON.stringify({ error: 'User ID and password are required' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
-      }
-      
-      // Update user password using the Supabase Admin API
-      const response = await fetch(
-        `${supabaseUrl}/auth/v1/admin/users/${user_id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-            'apikey': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            password
-          }),
-        }
-      )
-      
-      const data = await response.json()
-      
-      return new Response(JSON.stringify(data), {
-        status: response.status,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
-    
-    // Delete user
-    if (req.method === 'DELETE' && path === 'admin-users') {
-      const { user_id } = await req.json()
-      
-      if (!user_id) {
-        return new Response(JSON.stringify({ error: 'User ID is required' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
-      }
-      
-      // Delete user using the Supabase Admin API
-      const response = await fetch(
-        `${supabaseUrl}/auth/v1/admin/users/${user_id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-            'apikey': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-            'Content-Type': 'application/json',
-          },
-        }
-      )
-      
-      if (response.ok) {
-        return new Response(JSON.stringify({ success: true, message: 'User deleted successfully' }), {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         })
-      } else {
+      }
+      
+      // Create user
+      else if (action === 'create') {
+        const { email, password, user_metadata } = requestBody
+        
+        if (!email || !password) {
+          return new Response(JSON.stringify({ error: 'Email and password are required' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+        
+        // Create user using the Supabase Admin API
+        const response = await fetch(
+          `${supabaseUrl}/auth/v1/admin/users`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+              'apikey': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email,
+              password,
+              email_confirm: true,
+              user_metadata
+            }),
+          }
+        )
+        
         const data = await response.json()
+        
+        if (response.ok) {
+          return new Response(JSON.stringify(data), {
+            status: 201,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        } else {
+          return new Response(JSON.stringify(data), {
+            status: response.status,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+      }
+      
+      // Update user password
+      else if (action === 'update_password') {
+        const { user_id, password } = requestBody
+        
+        if (!user_id || !password) {
+          return new Response(JSON.stringify({ error: 'User ID and password are required' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+        
+        // Update user password using the Supabase Admin API
+        const response = await fetch(
+          `${supabaseUrl}/auth/v1/admin/users/${user_id}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+              'apikey': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              password
+            }),
+          }
+        )
+        
+        const data = await response.json()
+        
         return new Response(JSON.stringify(data), {
           status: response.status,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         })
       }
+      
+      // Delete user
+      else if (action === 'delete') {
+        const { user_id } = requestBody
+        
+        if (!user_id) {
+          return new Response(JSON.stringify({ error: 'User ID is required' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+        
+        // Delete user using the Supabase Admin API
+        const response = await fetch(
+          `${supabaseUrl}/auth/v1/admin/users/${user_id}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+              'apikey': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+              'Content-Type': 'application/json',
+            },
+          }
+        )
+        
+        if (response.ok) {
+          return new Response(JSON.stringify({ success: true, message: 'User deleted successfully' }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        } else {
+          const data = await response.json()
+          return new Response(JSON.stringify(data), {
+            status: response.status,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+      }
     }
 
-    // If no route matches
-    return new Response(JSON.stringify({ error: 'Not found' }), {
-      status: 404,
+    // If no action matches or method not supported
+    return new Response(JSON.stringify({ error: 'Invalid action or method' }), {
+      status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
   } catch (error) {
