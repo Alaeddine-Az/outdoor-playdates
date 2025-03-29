@@ -7,12 +7,12 @@ import PlaydatesList from '@/components/dashboard/PlaydatesList';
 import SuggestedConnections from '@/components/dashboard/SuggestedConnections';
 import NearbyEvents from '@/components/dashboard/NearbyEvents';
 import { useDashboard } from '@/hooks/useDashboard';
-import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
+import bearImg from '@/assets/mascot-bear.png'; // Cute bear illustration
+import heroBg from '@/assets/dashboard-hero-bg.svg'; // Optional background SVG
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const {
     loading,
     profile,
@@ -20,95 +20,78 @@ const Dashboard = () => {
     upcomingPlaydates,
     suggestedConnections,
     nearbyEvents,
-    error
+    error,
   } = useDashboard();
 
   useEffect(() => {
     if (error) {
       toast({
         title: 'Dashboard Error',
-        description: 'There was a problem loading your dashboard data. Please try again.',
+        description: 'There was a problem loading your dashboard. Please try again.',
         variant: 'destructive',
       });
     }
   }, [error]);
 
-  if (!user) return null;
-
-  const childrenWithAges = children?.map(child => ({
+  const childrenWithAges = children?.map((child) => ({
     name: child.name,
-    age: child.age
+    age: child.age,
   })) || [];
 
   const interests = profile?.interests || ['Arts & Crafts', 'Nature', 'STEM'];
 
   return (
-    <div className="relative animate-fade-in p-4 sm:p-6 lg:p-8">
-      {/* Playful Background Elements */}
-      <div className="absolute top-[10%] left-[5%] w-[20%] h-[20%] bg-play-orange/10 rounded-full filter blur-3xl z-0"></div>
-      <div className="absolute bottom-[10%] right-[5%] w-[25%] h-[25%] bg-play-blue/10 rounded-full filter blur-3xl z-0"></div>
-
-      {/* Bear Illustration */}
-      <div className="absolute top-4 right-4 z-10">
+    <div className="animate-fade-in p-4 md:p-6">
+      {/* Hero section */}
+      <div
+        className="relative rounded-3xl p-6 pb-20 overflow-hidden bg-gradient-to-b from-sky-100 to-sky-50 shadow-md mb-8"
+        style={{ backgroundImage: `url(${heroBg})`, backgroundSize: 'cover' }}
+      >
+        <div className="relative z-10 max-w-2xl">
+          <h1 className="text-3xl font-bold tracking-tight mb-2">
+            Welcome back, {profile?.parent_name?.split(' ')[0] || 'Explorer'}!
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Here’s what’s happening with your playdates and connections.
+          </p>
+        </div>
         <img
-          src="/images/bear-wave.png"
-          alt="Bear waving"
-          className="w-20 h-20"
+          src={bearImg}
+          alt="Friendly mascot bear"
+          className="absolute bottom-0 right-4 w-40 md:w-56 drop-shadow-md"
         />
       </div>
 
-      {/* Main Content */}
-      <div className="relative z-10">
-        {loading ? (
-          <div className="space-y-8">
-            <Skeleton className="h-9 w-64 mb-2" />
-            <Skeleton className="h-4 w-full max-w-md mb-8" />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2">
-                <Skeleton className="h-96 w-full" />
-              </div>
-              <div className="space-y-6">
-                <Skeleton className="h-64 w-full" />
-                <Skeleton className="h-80 w-full" />
-                <Skeleton className="h-48 w-full" />
-              </div>
-            </div>
+      {loading ? (
+        <div className="space-y-8">
+          <Skeleton className="h-9 w-64 mb-2" />
+          <Skeleton className="h-4 w-full max-w-md mb-8" />
+          <Skeleton className="h-96 w-full rounded-xl" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2 space-y-6">
+            <PlaydatesList
+              title="Upcoming Playdates"
+              playdates={upcomingPlaydates}
+              showNewButton={true}
+              viewAllLink="/playdates"
+            />
           </div>
-        ) : (
-          <>
-            <header className="mb-8">
-              <h1 className="text-3xl font-bold tracking-tight mb-2">
-                Welcome back, {profile?.parent_name?.split(' ')[0] || 'User'}!
-              </h1>
-              <p className="text-muted-foreground text-lg">
-                Here's what's happening with your playdates and connections.
-              </p>
-            </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2 space-y-6">
-                <PlaydatesList
-                  title="Upcoming Playdates"
-                  playdates={upcomingPlaydates}
-                  showNewButton={true}
-                  viewAllLink="/playdates"
-                />
-              </div>
+          <div className="space-y-6">
+            <ProfileSummary
+              name={profile?.parent_name || 'User'}
+              children={childrenWithAges}
+              interests={interests}
+            />
 
-              <div className="space-y-6">
-                <ProfileSummary
-                  name={profile?.parent_name || 'User'}
-                  children={childrenWithAges}
-                  interests={interests}
-                />
+            <SuggestedConnections connections={suggestedConnections} />
 
-                <SuggestedConnections connections={suggestedConnections} />
-                <NearbyEvents events={nearbyEvents} />
-              </div>
-            </div>
-          </>
-        )}
-      </div>
+            <NearbyEvents events={nearbyEvents} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
