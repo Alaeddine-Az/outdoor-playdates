@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { Button } from "@/components/ui/button";
@@ -78,7 +77,6 @@ const samplePlaydates = [{
   },
   children: "Charlotte (6) and Benjamin (8)"
 }];
-
 const Hero = () => {
   const [playdateIndex, setPlaydateIndex] = useState(0);
   const [playdate, setPlaydate] = useState(samplePlaydates[0]);
@@ -94,8 +92,10 @@ const Hero = () => {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
-
-  const { ref, isIntersecting } = useIntersectionObserver({
+  const {
+    ref,
+    isIntersecting
+  } = useIntersectionObserver({
     threshold: 0.1,
     triggerOnce: true
   });
@@ -106,15 +106,12 @@ const Hero = () => {
       behavior: 'smooth'
     });
   };
-
   const scrollToOnboarding = () => {
     document.getElementById('onboarding')?.scrollIntoView({
       behavior: 'smooth'
     });
   };
-
-  return (
-    <section ref={ref as React.RefObject<HTMLDivElement>} className="relative min-h-screen flex items-center px-6 pt-16 pb-20 overflow-hidden">
+  return <section ref={ref as React.RefObject<HTMLDivElement>} className="relative min-h-screen flex items-center px-6 pt-16 pb-20 overflow-hidden">
       {/* Background Elements - Updated with more playful, vibrant gradients */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-pink-50 via-blue-50 to-white my-0 py-0"></div>
@@ -124,8 +121,12 @@ const Hero = () => {
         
         {/* Decorative floating shapes for playful aesthetic */}
         <div className="absolute top-[15%] right-[15%] w-12 h-12 bg-yellow-200 rounded-full opacity-20 animate-bounce"></div>
-        <div className="absolute bottom-[25%] left-[10%] w-6 h-6 bg-green-300 rounded-full opacity-30 animate-ping" style={{animationDuration: '3s'}}></div>
-        <div className="absolute top-[40%] right-[30%] w-8 h-8 bg-purple-300 rounded-full opacity-20 animate-ping" style={{animationDuration: '4s'}}></div>
+        <div className="absolute bottom-[25%] left-[10%] w-6 h-6 bg-green-300 rounded-full opacity-30 animate-ping" style={{
+        animationDuration: '3s'
+      }}></div>
+        <div className="absolute top-[40%] right-[30%] w-8 h-8 bg-purple-300 rounded-full opacity-20 animate-ping" style={{
+        animationDuration: '4s'
+      }}></div>
       </div>
 
       <div className="container mx-auto relative z-10 -mt-12 my-0">
@@ -149,31 +150,20 @@ const Hero = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start">
-              <Button 
-                size="lg" 
-                className="button-glow bg-gradient-to-r from-primary to-secondary hover:opacity-90 shadow-md text-white rounded-xl transform transition-all duration-300 hover:scale-105" 
-                onClick={scrollToOnboarding}
-              >
+              <Button size="lg" className="button-glow bg-gradient-to-r from-primary to-secondary hover:opacity-90 shadow-md text-white rounded-xl transform transition-all duration-300 hover:scale-105" onClick={scrollToOnboarding}>
                 Get Invited - It's Free! <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="rounded-xl hover:bg-white hover:text-primary border-2 border-primary/30 shadow-sm transition-all duration-300 hover:scale-105 hover:border-primary" 
-                onClick={scrollToFeatures}
-              >
+              <Button size="lg" variant="outline" className="rounded-xl hover:bg-white hover:text-primary border-2 border-primary/30 shadow-sm transition-all duration-300 hover:scale-105 hover:border-primary" onClick={scrollToFeatures}>
                 Learn More
               </Button>
             </div>
             
             {/* Feature bubbles */}
             <div className="flex flex-wrap mt-10 gap-2">
-              {['Fun Adventures', 'Safe Environment', 'Make Friends', 'Great Memories'].map((feature, i) => (
-                <div key={i} className="flex items-center bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm shadow-sm">
+              {['Fun Adventures', 'Safe Environment', 'Make Friends', 'Great Memories'].map((feature, i) => <div key={i} className="flex items-center bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm shadow-sm">
                   <Check className="h-3.5 w-3.5 mr-1.5 text-green-500" />
                   <span>{feature}</span>
-                </div>
-              ))}
+                </div>)}
             </div>
           </div>
           
@@ -186,8 +176,8 @@ const Hero = () => {
               <div className="mt-5 space-y-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="font-semibold text-lg">{playdate.title}</h3>
-                    <p className="text-sm text-muted-foreground">{playdate.location}</p>
+                    <h3 className="font-semibold text-lg text-left">{playdate.title}</h3>
+                    <p className="text-sm text-muted-foreground text-left">{playdate.location}</p>
                   </div>
                   <div className="bg-gradient-to-r from-primary/10 to-secondary/10 text-primary font-medium px-3 py-1.5 rounded-full text-sm">
                     {playdate.time}
@@ -203,8 +193,8 @@ const Hero = () => {
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <span className="block text-sm font-semibold">{playdate.parent.name}</span>
-                      <span className="block text-xs text-muted-foreground">with {playdate.children}</span>
+                      <span className="block text-sm font-semibold text-left">{playdate.parent.name}</span>
+                      <span className="block text-xs text-muted-foreground text-left">with {playdate.children}</span>
                     </div>
                   </div>
                 </div>
@@ -219,12 +209,10 @@ const Hero = () => {
       </div>
       
       <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2">
-        <button onClick={scrollToFeatures} aria-label="Scroll to features" className="animate-bounce flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-lg transition-transform duration-300 hover:scale-110 my-0 py-0">
-          <ArrowRight className="h-5 w-5 text-primary transform rotate-90" />
+        <button onClick={scrollToFeatures} aria-label="Scroll to features" className="animate-bounce flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-lg transition-transform duration-300 hover:scale-110 text-justify my-0 py-0 text-base">
+          <ArrowRight className="h-5 w-5 text-primary transform rotate-90 py-0" />
         </button>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Hero;

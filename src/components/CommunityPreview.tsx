@@ -3,18 +3,15 @@ import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { cn } from '@/lib/utils';
 import { Users, Shield, MessageSquare, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
 const CommunityPreview = () => {
-  const { ref, isIntersecting } = useIntersectionObserver({
+  const {
+    ref,
+    isIntersecting
+  } = useIntersectionObserver({
     threshold: 0.1,
     triggerOnce: true
   });
-
-  return (
-    <section 
-      ref={ref as React.RefObject<HTMLDivElement>}
-      className="py-24 px-6 relative overflow-hidden"
-    >
+  return <section ref={ref as React.RefObject<HTMLDivElement>} className="py-24 px-6 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-[10%] right-[20%] w-[30%] h-[30%] rounded-full bg-play-purple/5 filter blur-3xl"></div>
         <div className="absolute bottom-[10%] left-[10%] w-[25%] h-[25%] rounded-full bg-primary/5 filter blur-3xl"></div>
@@ -24,10 +21,7 @@ const CommunityPreview = () => {
         <div className="flex flex-col lg:flex-row items-center gap-16">
           
           {/* Text on the left */}
-          <div className={cn(
-            "max-w-xl",
-            isIntersecting ? "animate-slide-in-left" : "opacity-0"
-          )}>
+          <div className={cn("max-w-xl", isIntersecting ? "animate-slide-in-left" : "opacity-0")}>
             <div className="inline-block rounded-full bg-play-purple/10 px-4 py-1.5 mb-4">
               <span className="text-sm font-medium text-play-purple">
                 Private Parent Community
@@ -37,38 +31,21 @@ const CommunityPreview = () => {
               Connect in Safe, <br />Interest-Based Groups
             </h2>
             <div className="space-y-6">
-              <FeaturePoint 
-                icon={<Users className="h-5 w-5 text-play-purple" />}
-                title="Interest-Based Groups"
-                description="Join communities based on your child's interests, like STEM Kids, Nature Explorers, or Arts & Sports Families."
-              />
-              <FeaturePoint 
-                icon={<Shield className="h-5 w-5 text-play-purple" />}
-                title="Trust & Safety Features"
-                description="Our verification system, reporting tools, and community guidelines ensure a safe environment for all families."
-              />
-              <FeaturePoint 
-                icon={<MessageSquare className="h-5 w-5 text-play-purple" />}
-                title="Private Messaging"
-                description="Only mutually connected parents can exchange messages, maintaining privacy and security."
-              />
+              <FeaturePoint icon={<Users className="h-5 w-5 text-play-purple" />} title="Interest-Based Groups" description="Join communities based on your child's interests, like STEM Kids, Nature Explorers, or Arts & Sports Families." />
+              <FeaturePoint icon={<Shield className="h-5 w-5 text-play-purple" />} title="Trust & Safety Features" description="Our verification system, reporting tools, and community guidelines ensure a safe environment for all families." />
+              <FeaturePoint icon={<MessageSquare className="h-5 w-5 text-play-purple" />} title="Private Messaging" description="Only mutually connected parents can exchange messages, maintaining privacy and security." />
             </div>
             <div className="mt-8">
-              <Button 
-                size="lg" 
-                className="button-glow bg-play-purple hover:bg-play-purple/90 text-white rounded-xl"
-                onClick={() => document.getElementById('onboarding')?.scrollIntoView({ behavior: 'smooth' })}
-              >
+              <Button size="lg" className="button-glow bg-play-purple hover:bg-play-purple/90 text-white rounded-xl" onClick={() => document.getElementById('onboarding')?.scrollIntoView({
+              behavior: 'smooth'
+            })}>
                 Join Our Community
               </Button>
             </div>
           </div>
 
           {/* Box on the right */}
-          <div className={cn(
-            "w-full max-w-xl",
-            isIntersecting ? "animate-slide-in-right" : "opacity-0"
-          )}>
+          <div className={cn("w-full max-w-xl", isIntersecting ? "animate-slide-in-right" : "opacity-0")}>
             <div className="bg-white rounded-2xl shadow-soft border border-muted p-6">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-medium">Parent Communities</h3>
@@ -79,24 +56,9 @@ const CommunityPreview = () => {
               </div>
               
               <div className="space-y-4">
-                <CommunityCard 
-                  name="STEM Explorers"
-                  members={42}
-                  description="Connect with parents who encourage scientific discovery and learning through play."
-                  active={true}
-                />
-                <CommunityCard 
-                  name="Nature Adventurers"
-                  members={37}
-                  description="For families who love hiking, exploring parks, and outdoor nature activities."
-                  active={false}
-                />
-                <CommunityCard 
-                  name="Creative Arts Club"
-                  members={28}
-                  description="Share ideas for art projects, music activities, and creative expression."
-                  active={false}
-                />
+                <CommunityCard name="STEM Explorers" members={42} description="Connect with parents who encourage scientific discovery and learning through play." active={true} />
+                <CommunityCard name="Nature Adventurers" members={37} description="For families who love hiking, exploring parks, and outdoor nature activities." active={false} />
+                <CommunityCard name="Creative Arts Club" members={28} description="Share ideas for art projects, music activities, and creative expression." active={false} />
               </div>
               
               <div className="mt-8 p-4 rounded-xl bg-muted/50 border border-muted">
@@ -105,8 +67,8 @@ const CommunityPreview = () => {
                     <Lock className="h-5 w-5 text-play-purple" />
                   </div>
                   <div className="ml-3">
-                    <h4 className="font-medium text-sm">Privacy Guaranteed</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <h4 className="font-medium text-sm text-left">Privacy Guaranteed</h4>
+                    <p className="text-sm text-muted-foreground mt-1 text-left">
                       All community groups are private. Only verified parents can join, and your information is never shared outside the platform.
                     </p>
                   </div>
@@ -122,58 +84,50 @@ const CommunityPreview = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 interface FeaturePointProps {
   icon: React.ReactNode;
   title: string;
   description: string;
 }
-
-const FeaturePoint = ({ icon, title, description }: FeaturePointProps) => (
-  <div className="flex">
+const FeaturePoint = ({
+  icon,
+  title,
+  description
+}: FeaturePointProps) => <div className="flex">
     <div className="mr-4 mt-1 flex-shrink-0 h-10 w-10 rounded-full bg-play-purple/10 flex items-center justify-center">
       {icon}
     </div>
     <div>
-      <h4 className="text-lg font-medium mb-1">{title}</h4>
-      <p className="text-muted-foreground">{description}</p>
+      <h4 className="text-lg font-medium mb-1 text-left">{title}</h4>
+      <p className="text-muted-foreground text-left">{description}</p>
     </div>
-  </div>
-);
-
+  </div>;
 interface CommunityCardProps {
   name: string;
   members: number;
   description: string;
   active: boolean;
 }
-
-const CommunityCard = ({ name, members, description, active }: CommunityCardProps) => (
-  <div className={cn(
-    "rounded-xl p-4 transition-colors border",
-    active ? "bg-play-purple/5 border-play-purple/20" : "bg-muted/50 border-muted hover:border-play-purple/20 hover:bg-play-purple/5"
-  )}>
+const CommunityCard = ({
+  name,
+  members,
+  description,
+  active
+}: CommunityCardProps) => <div className={cn("rounded-xl p-4 transition-colors border", active ? "bg-play-purple/5 border-play-purple/20" : "bg-muted/50 border-muted hover:border-play-purple/20 hover:bg-play-purple/5")}>
     <div className="flex justify-between items-start">
       <div>
-        <h4 className="font-medium">{name}</h4>
-        <p className="text-sm text-muted-foreground mt-1">{description}</p>
+        <h4 className="font-medium text-left">{name}</h4>
+        <p className="text-sm text-muted-foreground mt-1 text-left">{description}</p>
         <div className="flex items-center mt-2 text-sm text-muted-foreground">
           <Users className="h-4 w-4 mr-1" /> 
           <span>{members} members</span>
         </div>
       </div>
-      <Button 
-        size="sm" 
-        variant={active ? "default" : "outline"} 
-        className={active ? "bg-play-purple hover:bg-play-purple/90 text-white" : ""}
-      >
+      <Button size="sm" variant={active ? "default" : "outline"} className={active ? "bg-play-purple hover:bg-play-purple/90 text-white" : ""}>
         {active ? "View" : "Join"}
       </Button>
     </div>
-  </div>
-);
-
+  </div>;
 export default CommunityPreview;
