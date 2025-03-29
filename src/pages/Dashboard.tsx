@@ -57,17 +57,25 @@ const Dashboard = () => {
         className="relative bg-[#CEEBF0] rounded-3xl overflow-hidden mb-8"
         style={{ height: '280px', fontFamily: '"Baloo 2", cursive' }}
       >
-        {/* Sky Shape */}
+        {/* Sky Background */}
         <div className="absolute inset-0 bg-[#CEEBF0]">
+          {/* Clouds */}
           <div className="absolute w-24 h-16 bg-white rounded-full top-10 left-10 opacity-90 animate-cloud" />
-          <div className="absolute text-4xl top-8 right-8 animate-bounce-sun">☀️</div>
+          <div className="absolute w-16 h-10 bg-white rounded-full top-[60px] left-[100px] opacity-70 blur-sm" />
+          <div className="absolute w-20 h-12 bg-white rounded-full top-[90px] left-[200px] opacity-70 blur-sm" />
+
+          {/* Big Sun Emoji */}
+          <div className="absolute text-6xl top-4 right-6 animate-bounce-sun">☀️</div>
         </div>
 
-        {/* Green Hill */}
+        {/* Green Hills */}
         <div className="absolute bottom-0 w-full h-[80px] bg-[#73C770] rounded-t-[100%]" />
+        <div className="absolute bottom-0 left-[10%] w-[80px] h-[40px] bg-[#73C770] rounded-full opacity-80 blur-sm" />
+        <div className="absolute bottom-0 left-[40%] w-[100px] h-[50px] bg-[#73C770] rounded-full opacity-90 blur-sm" />
 
-        <div className="relative z-10 h-full px-6 py-8 flex flex-col justify-center">
-          <div className="text-left">
+        <div className="relative z-10 h-full px-6 py-8 flex flex-col justify-start">
+          {/* Lowered Text */}
+          <div className="mt-10 text-left">
             <h1 className="text-4xl font-extrabold text-black mb-2">
               Welcome back, {profile?.parent_name?.split(' ')[0] || 'there'}!
             </h1>
@@ -75,7 +83,9 @@ const Dashboard = () => {
               Here&apos;s what&apos;s happening with your playdates and connections.
             </p>
           </div>
-          <div className="text-right mt-4">
+
+          {/* Button - bottom right */}
+          <div className="absolute bottom-6 right-6">
             <Button
               className="bg-[#F9DA6F] text-black font-semibold px-5 py-2 rounded-full hover:brightness-110"
               onClick={() => navigate('/parent-profile')}
