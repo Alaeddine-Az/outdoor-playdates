@@ -10,7 +10,7 @@ import SuggestedConnections from '@/components/dashboard/SuggestedConnections';
 import NearbyEvents from '@/components/dashboard/NearbyEvents';
 import { useDashboard } from '@/hooks/useDashboard';
 import { toast } from '@/components/ui/use-toast';
-import BearCharacter from '@/components/characters/BearCharacter';
+import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -53,25 +53,49 @@ const Dashboard = () => {
 
   return (
     <div className="animate-fade-in px-4 pt-6 pb-10 md:px-8">
-      {/* Header Section with Bear */}
-      <header className="relative w-full rounded-3xl bg-[#FFFBEF] px-6 py-8 mb-6 overflow-hidden shadow-sm">
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <div className="absolute top-[10%] left-[0%] w-[30%] h-[30%] rounded-full bg-[#AEE8FF] filter blur-3xl opacity-20" />
-          <div className="absolute bottom-[10%] right-[5%] w-[25%] h-[25%] rounded-full bg-[#FFD580] filter blur-3xl opacity-20" />
-        </div>
-
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="text-center md:text-left space-y-2">
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
-              Welcome back, {profile?.parent_name?.split(' ')[0] || 'Friend'}!
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Here's what's happening with your playdates and connections.
-            </p>
+      {/* New Playful Hero Section */}
+      <header className="relative w-full rounded-3xl overflow-hidden mb-6">
+        <div className="bg-[#D8F1FF] p-6 md:p-8 rounded-3xl relative overflow-hidden">
+          {/* Wavy Background Elements */}
+          <div className="absolute inset-0 z-0 pointer-events-none">
+            <svg className="absolute top-0 left-0 w-full" viewBox="0 0 800 200" preserveAspectRatio="none">
+              <path
+                d="M0,100 C150,0 350,200 800,100 L800,0 L0,0 Z"
+                fill="#B6E5FF"
+                fillOpacity="0.6"
+              ></path>
+            </svg>
+            <div className="absolute top-10 right-10">
+              <svg width="100" height="100" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="#FFDD65" />
+                <path
+                  d="M25,50 Q50,20 75,50 Q50,80 25,50 Z"
+                  fill="white"
+                  fillOpacity="0.7"
+                ></path>
+              </svg>
+            </div>
+            <div className="absolute bottom-0 left-0 w-full h-16 bg-[#8DD35A] opacity-50 rounded-br-3xl rounded-bl-3xl"></div>
           </div>
 
-          <div className="flex-shrink-0 w-32 h-32 md:w-36 md:h-36">
-            <BearCharacter animation="wave" />
+          <div className="relative z-10 flex flex-col md:flex-row items-start gap-6">
+            <div className="space-y-2 max-w-2xl">
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[#333333]">
+                Welcome back, 
+                <span className="block">{profile?.parent_name?.split(' ')[0] || 'Friend'}!</span>
+              </h1>
+              <p className="text-[#333333] text-xl">
+                Here's what's happening with your playdates and connections.
+              </p>
+              
+              <div className="pt-4">
+                <Link to="/edit-profile">
+                  <Button className="rounded-full bg-[#FFD761] hover:bg-[#FFC530] text-[#333333] font-medium px-6 py-2 shadow-md">
+                    Edit Profile
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </header>
