@@ -14,22 +14,29 @@ export function useAuthSession() {
     let mounted = true;
 
     // First set up the auth state listener to handle changes in real-time
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      console.log('Auth state changed:', event, { sessionExists: !!newSession });
-      
-      if (!mounted) return;
-      
-      setSession(newSession);
-      setUser(newSession?.user ?? null);
-      
-      // Check admin status when session changes
-      if (newSession?.user) {
-        const isUserAdmin = await checkAdminStatus(newSession.user);
-        setIsAdmin(isUserAdmin);
-      } else {
-        setIsAdmin(false);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        console.log('Auth state changed:', event, { sessionExists: !!newSession });
+        
+        if (!mounted) return;
+        
+        // Update session and user state synchronously
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        
+        // Check admin status when session changes - do this in a setTimeout to avoid
+        // potential deadlocks with Supabase client
+        if (newSession?.user) {
+          setTimeout(async () => {
+            if (!mounted) return;
+            const isUserAdmin = await checkAdminStatus(newSession.user);
+            setIsAdmin(isUserAdmin);
+          }, 0);
+        } else {
+          setIsAdmin(false);
+        }
       }
-    });
+    );
 
     // Then check for an existing session
     const initSession = async () => {

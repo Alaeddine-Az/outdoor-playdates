@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -22,7 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate, Link, useNavigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const loginSchema = z.object({
@@ -34,7 +34,6 @@ const Auth = () => {
   const { user, signIn, loading: authLoading, isAdmin } = useAuth();
   const [authError, setAuthError] = useState<string | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
-  const navigate = useNavigate();
   
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),

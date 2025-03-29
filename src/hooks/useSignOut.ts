@@ -30,7 +30,6 @@ export function useSignOut() {
         description: "There was an error signing out. Please try again.",
         variant: "destructive"
       });
-      throw error;
     } finally {
       setLoading(false);
     }
