@@ -47,7 +47,7 @@ const PlaydatesList = ({
           </h2>
         </div>
         {showNewButton && (
-          <Link to="/playdates/new" className="self-start md:self-auto">
+          <Link to="/create-playdate" className="self-start md:self-auto">
             <button className="flex items-center gap-2 rounded-full bg-primary text-white px-5 py-2 text-sm hover:bg-primary/90">
               <Plus className="w-4 h-4" />
               <span>New Playdate</span>

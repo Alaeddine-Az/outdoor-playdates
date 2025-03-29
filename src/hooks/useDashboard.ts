@@ -11,7 +11,7 @@ interface PlaydateData {
   time: string;
   location: string;
   attendees: number;
-  families: number; // Add this property to match what PlaydatesList expects
+  families: number;
   status: 'upcoming' | 'pending' | 'completed';
 }
 
@@ -77,51 +77,76 @@ export const useDashboard = () => {
           // Transform playdates data to the format expected by the UI
           if (playdatesData) {
             const formattedPlaydates = playdatesData.map(playdate => {
-              // Calculate date and time strings from the timestamps
-              const startDate = new Date(playdate.start_time);
-              const endDate = new Date(playdate.end_time);
-              
-              const dateOptions: Intl.DateTimeFormatOptions = { 
-                weekday: 'short', 
-                month: 'short', 
-                day: 'numeric'
-              };
-              
-              const dateStr = startDate.toLocaleDateString('en-US', dateOptions);
-              const startTimeStr = startDate.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit', 
-                hour12: true 
-              });
-              const endTimeStr = endDate.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit', 
-                hour12: true 
-              });
-              
-              // Determine status based on dates
-              const now = new Date();
-              let status: 'upcoming' | 'pending' | 'completed' = 'pending';
-              
-              if (startDate > now) {
-                status = 'upcoming';
-              } else if (endDate < now) {
-                status = 'completed';
+              try {
+                // Safely parse dates - if these fail, use fallback values
+                const startDate = new Date(playdate.start_time);
+                const endDate = new Date(playdate.end_time);
+                const isValidDate = !isNaN(startDate.getTime()) && !isNaN(endDate.getTime());
+                
+                // Format date string safely
+                let dateStr = 'Date unavailable';
+                let startTimeStr = 'Time unavailable';
+                let endTimeStr = '';
+                
+                if (isValidDate) {
+                  const dateOptions: Intl.DateTimeFormatOptions = { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric'
+                  };
+                  
+                  dateStr = startDate.toLocaleDateString('en-US', dateOptions);
+                  startTimeStr = startDate.toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit', 
+                    hour12: true 
+                  });
+                  endTimeStr = endDate.toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit', 
+                    hour12: true 
+                  });
+                }
+                
+                // Determine status based on dates
+                const now = new Date();
+                let status: 'upcoming' | 'pending' | 'completed' = 'pending';
+                
+                if (isValidDate) {
+                  if (startDate > now) {
+                    status = 'upcoming';
+                  } else if (endDate < now) {
+                    status = 'completed';
+                  }
+                }
+                
+                // Count attendees (this would need to be updated if we implement real attendance tracking)
+                const attendees = 1; // Default to 1 (the creator)
+                
+                return {
+                  id: playdate.id,
+                  title: playdate.title || 'Untitled Playdate',
+                  date: dateStr,
+                  time: `${startTimeStr}${endTimeStr ? ` - ${endTimeStr}` : ''}`,
+                  location: playdate.location || 'Location not specified',
+                  attendees: attendees,
+                  families: attendees,
+                  status: status
+                };
+              } catch (err) {
+                console.error("Error processing playdate:", err, playdate);
+                // Return a safe fallback object if date processing fails
+                return {
+                  id: playdate.id || 'unknown-id',
+                  title: playdate.title || 'Untitled Playdate',
+                  date: 'Date processing error',
+                  time: 'Time unavailable',
+                  location: playdate.location || 'Location not specified',
+                  attendees: 1,
+                  families: 1,
+                  status: 'pending' as const
+                };
               }
-              
-              // Count attendees (this would need to be updated if we implement real attendance tracking)
-              const attendees = 1; // Default to 1 (the creator)
-              
-              return {
-                id: playdate.id,
-                title: playdate.title,
-                date: dateStr,
-                time: `${startTimeStr} - ${endTimeStr}`,
-                location: playdate.location,
-                attendees: attendees,
-                families: attendees, // Add families property with the same value as attendees
-                status: status
-              };
             });
             
             setUpcomingPlaydates(formattedPlaydates);
