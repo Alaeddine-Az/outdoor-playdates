@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,6 @@ import NearbyEvents from '@/components/dashboard/NearbyEvents';
 import { useDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
-import BearCharacter from '@/components/characters/BearCharacter';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -44,70 +42,72 @@ const Dashboard = () => {
 
   const interests = profile?.interests || ['Arts & Crafts', 'Nature', 'STEM'];
 
-  // Convert upcomingPlaydates to the format expected by PlaydatesList
-  const formattedPlaydates = upcomingPlaydates.map(playdate => ({
-    id: playdate.id,
-    title: playdate.title,
-    date: playdate.date,
-    time: playdate.time,
-    location: playdate.location,
-    families: playdate.attendees, // Map attendees to families
-    status: playdate.status
-  }));
-
-  if (loading) {
-    return (
-      <div className="space-y-8 p-4 sm:p-6 lg:p-8">
-        <Skeleton className="h-9 w-64 mb-2" />
-        <Skeleton className="h-4 w-full max-w-md mb-8" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2">
-            <Skeleton className="h-96 w-full" />
-          </div>
-          <div className="space-y-6">
-            <Skeleton className="h-64 w-full" />
-            <Skeleton className="h-80 w-full" />
-            <Skeleton className="h-48 w-full" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="animate-fade-in p-4 sm:p-6 lg:p-8">
-      <header className="mb-8 flex items-center">
-        <h1 className="text-3xl font-bold tracking-tight mb-2 mr-4">
-          Welcome back, {profile?.parent_name?.split(' ')[0] || 'User'}!
-        </h1>
-        <BearCharacter animation="wave" size="sm" className="hidden sm:block" />
-      </header>
-      
-      <p className="text-muted-foreground text-lg mb-8">
-        Here's what's happening with your playdates and connections.
-      </p>
+    <div className="relative animate-fade-in p-4 sm:p-6 lg:p-8">
+      {/* Playful Background Elements */}
+      <div className="absolute top-[10%] left-[5%] w-[20%] h-[20%] bg-play-orange/10 rounded-full filter blur-3xl z-0"></div>
+      <div className="absolute bottom-[10%] right-[5%] w-[25%] h-[25%] bg-play-blue/10 rounded-full filter blur-3xl z-0"></div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-6">
-          <PlaydatesList
-            title="Upcoming Playdates"
-            playdates={formattedPlaydates}
-            showNewButton={true}
-            viewAllLink="/playdates"
-          />
-        </div>
+      {/* Bear Illustration */}
+      <div className="absolute top-4 right-4 z-10">
+        <img
+          src="/images/bear-wave.png"
+          alt="Bear waving"
+          className="w-20 h-20"
+        />
+      </div>
 
-        <div className="space-y-6">
-          <ProfileSummary
-            name={profile?.parent_name || 'User'}
-            children={childrenWithAges}
-            interests={interests}
-          />
+      {/* Main Content */}
+      <div className="relative z-10">
+        {loading ? (
+          <div className="space-y-8">
+            <Skeleton className="h-9 w-64 mb-2" />
+            <Skeleton className="h-4 w-full max-w-md mb-8" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="md:col-span-2">
+                <Skeleton className="h-96 w-full" />
+              </div>
+              <div className="space-y-6">
+                <Skeleton className="h-64 w-full" />
+                <Skeleton className="h-80 w-full" />
+                <Skeleton className="h-48 w-full" />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <header className="mb-8">
+              <h1 className="text-3xl font-bold tracking-tight mb-2">
+                Welcome back, {profile?.parent_name?.split(' ')[0] || 'User'}!
+              </h1>
+              <p className="text-muted-foreground text-lg">
+                Here's what's happening with your playdates and connections.
+              </p>
+            </header>
 
-          <SuggestedConnections connections={suggestedConnections} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="md:col-span-2 space-y-6">
+                <PlaydatesList
+                  title="Upcoming Playdates"
+                  playdates={upcomingPlaydates}
+                  showNewButton={true}
+                  viewAllLink="/playdates"
+                />
+              </div>
 
-          <NearbyEvents events={nearbyEvents} />
-        </div>
+              <div className="space-y-6">
+                <ProfileSummary
+                  name={profile?.parent_name || 'User'}
+                  children={childrenWithAges}
+                  interests={interests}
+                />
+
+                <SuggestedConnections connections={suggestedConnections} />
+                <NearbyEvents events={nearbyEvents} />
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
