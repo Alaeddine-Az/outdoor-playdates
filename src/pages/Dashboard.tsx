@@ -54,43 +54,54 @@ const Dashboard = () => {
   return (
     <div className="animate-fade-in px-4 py-6 max-w-6xl mx-auto">
       {/* Hero Section */}
-      <section className="relative bg-[#CEEBF0] rounded-3xl overflow-hidden mb-8" style={{ height: '220px', fontFamily: '"Baloo 2", cursive' }}>
-        {/* Background elements */}
-        <div className="absolute inset-0 bg-[#CEEBF0]">
-          <div className="absolute w-24 h-16 bg-white rounded-full top-10 left-6 opacity-90 animate-cloud" />
-        </div>
+      <section
+  className="relative bg-[#CEEBF0] rounded-3xl overflow-hidden mb-8 px-6 py-8"
+  style={{ height: '240px', fontFamily: '"Baloo 2", cursive' }}
+>
+  {/* Sky */}
+  <div className="absolute inset-0 bg-[#CEEBF0]" />
 
-        {/* Sun Emoji */}
-        <div className="absolute top-8 right-6 text-4xl md:text-5xl animate-bounce">🌞</div>
+  {/* Sun Emoji */}
+  <div className="absolute top-6 right-6 text-4xl">🌞</div>
 
-        {/* Hills */}
-        <div className="absolute bottom-0 w-full h-[50px] bg-[#A5E6A3] rounded-t-[100%]" />
-        <div className="absolute bottom-0 w-full h-[70px] bg-[#73C770] rounded-t-[100%]" />
+  {/* Cloud */}
+  <div className="absolute top-8 left-8 w-24 h-24 bg-white rounded-full opacity-90" />
 
-        {/* Text & Button */}
-        <div className="relative z-10 h-full px-6 flex flex-col justify-center">
-          <div className="text-left mt-4 md:mt-0">
-            <h1 className="text-3xl md:text-4xl font-extrabold text-black mb-2">
-              Welcome back, {profile?.parent_name?.split(' ')[0] || 'Test'}!
-            </h1>
-            <p className="text-base md:text-lg text-black">
-              Here&apos;s what&apos;s happening with your playdates and connections.
-            </p>
-          </div>
-        </div>
+  {/* Parallax Hills */}
+  <div className="absolute bottom-0 w-full h-24 bg-[#AEE9A8] rounded-t-[100%]" />
+  <div className="absolute bottom-0 w-full h-20 bg-[#73C770] rounded-t-[100%]" />
 
-        {/* Edit Profile Button */}
-        <div className="absolute bottom-4 right-4 md:bottom-10 md:left-6 md:right-auto">
-          <Button
-            className="md:px-5 md:py-2 md:rounded-full bg-[#F9DA6F] text-black font-semibold px-3 py-3 rounded-full w-12 h-12 md:w-auto md:h-auto flex items-center justify-center"
-            onClick={() => navigate('/parent-profile')}
-          >
-            <span className="sr-only md:not-sr-only">Edit Profile</span>
-            <Pencil className="w-5 h-5 md:hidden" />
-            <span className="hidden md:inline">Edit Profile</span>
-          </Button>
-        </div>
-      </section>
+  {/* Text */}
+  <div className="relative z-10 text-left mt-4 md:mt-8">
+    <h1 className="text-3xl md:text-4xl font-extrabold text-black mb-2">
+      Welcome back, {profile?.parent_name?.split(' ')[0] || 'Test'}!
+    </h1>
+    <p className="text-md md:text-lg text-black">
+      Here&apos;s what&apos;s happening with your playdates and connections.
+    </p>
+  </div>
+
+  {/* Edit Profile Button - Mobile */}
+  <div className="absolute bottom-4 right-4 md:hidden">
+    <Button
+      size="icon"
+      className="bg-[#F9DA6F] text-black hover:brightness-110 w-12 h-12 rounded-full"
+      onClick={() => navigate('/parent-profile')}
+    >
+      <Pencil className="w-5 h-5" />
+    </Button>
+  </div>
+
+  {/* Edit Profile Button - Desktop */}
+  <div className="hidden md:block absolute bottom-6 left-6">
+    <Button
+      className="bg-[#F9DA6F] text-black font-semibold px-5 py-2 rounded-full hover:brightness-110"
+      onClick={() => navigate('/parent-profile')}
+    >
+      Edit Profile
+    </Button>
+  </div>
+</section>
 
       {/* Main Content */}
       {loading ? (
