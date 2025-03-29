@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -22,7 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useNavigate } from 'react-router-dom';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const loginSchema = z.object({
@@ -34,6 +34,7 @@ const Auth = () => {
   const { user, signIn, loading: authLoading, isAdmin } = useAuth();
   const [authError, setAuthError] = useState<string | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const navigate = useNavigate();
   
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -43,17 +44,19 @@ const Auth = () => {
     },
   });
 
-  // Redirect if already authenticated
-  if (user) {
-    return <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace />;
-  }
+  // Redirect if already authenticated - make sure admin users go to admin dashboard
+  useEffect(() => {
+    if (user) {
+      navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
+    }
+  }, [user, isAdmin, navigate]);
 
   const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
     setSubmitLoading(true);
     setAuthError(null);
     try {
       await signIn(values.email, values.password);
-      // The redirect is handled by the conditional return above
+      // The redirect is handled by the useEffect above
     } catch (error: any) {
       console.error('Login error:', error);
       setAuthError(error.message || 'Failed to sign in. Please check your credentials.');
@@ -61,6 +64,10 @@ const Auth = () => {
       setSubmitLoading(false);
     }
   };
+  
+  if (user) {
+    return <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace />;
+  }
   
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-muted/30">

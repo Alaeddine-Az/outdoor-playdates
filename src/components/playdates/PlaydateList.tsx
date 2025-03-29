@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,6 +15,20 @@ interface PlaydateListProps {
   emptyMessage: string;
   showCreateButton?: boolean;
 }
+
+const getPlaydateStatus = (playdate: any): "confirmed" | "upcoming" | "past" | "cancelled" => {
+  const now = new Date();
+  const startDate = new Date(playdate.start_time);
+  const endDate = new Date(playdate.end_time);
+  
+  if (endDate < now) {
+    return "past";
+  } else if (startDate > now) {
+    return "upcoming";
+  } else {
+    return "confirmed";
+  }
+};
 
 const PlaydateList = ({ 
   title, 
@@ -72,7 +85,7 @@ const PlaydateList = ({
               time={playdate.time}
               location={playdate.location}
               attendees={playdate.attendees}
-              status={playdate.status}
+              status={getPlaydateStatus(playdate)}
               onClick={() => navigate(`/playdate/${playdate.id}`)}
             />
           ))}
