@@ -8,6 +8,7 @@ import SuggestedConnections from '@/components/dashboard/SuggestedConnections';
 import NearbyEvents from '@/components/dashboard/NearbyEvents';
 import { useDashboard } from '@/hooks/useDashboard';
 import { toast } from '@/components/ui/use-toast';
+import { Pencil } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -53,47 +54,36 @@ const Dashboard = () => {
   return (
     <div className="animate-fade-in px-4 py-6 max-w-6xl mx-auto">
       {/* Hero Section */}
-     <section
-  className="relative bg-[#CEEBF0] rounded-3xl overflow-hidden mb-8 px-4 py-8 sm:px-6 sm:py-10"
-  style={{ fontFamily: '"Baloo 2", cursive', height: '200px' }}
->
-  {/* Sky */}
-  <div className="absolute inset-0">
-    {/* Sun */}
-    <div className="absolute text-5xl top-4 right-6 animate-bounce-sun">🌞</div>
+      <section className="relative bg-[#CEEBF0] rounded-3xl overflow-hidden mb-8" style={{ height: '220px', fontFamily: '"Baloo 2", cursive' }}>
+        {/* Background Elements */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute w-24 h-16 bg-white rounded-full top-8 left-6 opacity-90 animate-cloud" />
+          <div className="absolute text-4xl sm:text-6xl top-4 left-4">🌞</div>
+          <div className="absolute bottom-0 w-full h-[60px] bg-[#A8E6A1] rounded-t-[100%]" />
+          <div className="absolute bottom-0 w-full h-[40px] bg-[#73C770] rounded-t-[100%]" />
+        </div>
 
-    {/* Clouds */}
-    <div className="absolute w-24 h-12 bg-white rounded-full top-8 left-6 opacity-80 blur-sm" />
-    <div className="absolute w-20 h-10 bg-white rounded-full top-16 left-24 opacity-60 blur-sm" />
-  </div>
-
-  {/* Hills - lighter layers first */}
-  <div className="absolute bottom-0 w-full h-[60px] bg-[#D4F7D3] rounded-t-[100%] z-0" />
-  <div className="absolute bottom-0 w-full h-[55px] bg-[#A5E4A2] rounded-t-[100%] z-10 translate-y-[4px]" />
-  <div className="absolute bottom-0 w-full h-[50px] bg-[#73C770] rounded-t-[100%] z-20 translate-y-[8px]" />
-
-  {/* Content */}
-  <div className="relative z-30 flex flex-col items-start justify-center h-full text-left">
-    <h1 className="text-3xl sm:text-4xl font-extrabold text-black mb-1">
-      Welcome back, {profile?.parent_name?.split(' ')[0] || 'Test'}!
-    </h1>
-    <p className="text-base sm:text-lg text-black mb-3">
-      Here's what's happening with your playdates and connections.
-    </p>
-
-    <div className="self-start mt-auto">
-      <Button
-  className="absolute right-4 top-4 sm:static sm:mt-auto sm:self-start bg-[#F9DA6F] text-black p-3 sm:px-5 sm:py-2 rounded-full hover:brightness-110 transition"
-  onClick={() => navigate('/parent-profile')}
->
-  <span className="sm:hidden">
-    <Pencil className="w-5 h-5" />
-  </span>
-  <span className="hidden sm:inline">Edit Profile</span>
-</Button>
-    </div>
-  </div>
-</section>
+        {/* Text & Button */}
+        <div className="relative z-10 h-full flex flex-col justify-center text-left px-6 pt-10">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-black mb-1">
+            Welcome back, {profile?.parent_name?.split(' ')[0] || 'Test'}!
+          </h1>
+          <p className="text-base sm:text-lg text-black mb-3">
+            Here's what's happening with your playdates and connections.
+          </p>
+          <div className="absolute right-4 bottom-4 sm:static sm:mt-auto sm:self-start">
+            <Button
+              className="bg-[#F9DA6F] text-black p-3 sm:px-5 sm:py-2 rounded-full hover:brightness-110 transition"
+              onClick={() => navigate('/parent-profile')}
+            >
+              <span className="sm:hidden">
+                <Pencil className="w-5 h-5" />
+              </span>
+              <span className="hidden sm:inline">Edit Profile</span>
+            </Button>
+          </div>
+        </div>
+      </section>
 
       {/* Main Content */}
       {loading ? (
