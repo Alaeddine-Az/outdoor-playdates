@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -13,6 +12,7 @@ interface PlaydateData {
   attendees: number;
   families: number;
   status: 'upcoming' | 'pending' | 'completed';
+  host?: string;
 }
 
 interface ConnectionData {
@@ -39,14 +39,12 @@ export const useDashboard = () => {
   const [nearbyEvents, setNearbyEvents] = useState<EventData[]>([]);
 
   useEffect(() => {
-    // If there's a profile error, propagate it
     if (profileError) {
       setError(profileError);
       setLoading(false);
       return;
     }
 
-    // If profile is still loading, we're still loading
     if (profileLoading) {
       setLoading(true);
       return;
@@ -57,14 +55,12 @@ export const useDashboard = () => {
         console.log("Loading dashboard data for user:", user?.id);
         console.log("Profile data:", profile);
         
-        // Simulate loading
         setLoading(true);
         
-        // Fetch real playdates from Supabase
         if (user) {
           const { data: playdatesData, error: playdatesError } = await supabase
             .from('playdates')
-            .select('*, playdate_participants(*)') 
+            .select('*, playdate_participants(*), profiles:creator_id(parent_name)') 
             .order('created_at', { ascending: false });
 
           if (playdatesError) {
@@ -74,16 +70,13 @@ export const useDashboard = () => {
 
           console.log("Fetched playdates:", playdatesData);
 
-          // Transform playdates data to the format expected by the UI
           if (playdatesData) {
             const formattedPlaydates = playdatesData.map(playdate => {
               try {
-                // Safely parse dates - if these fail, use fallback values
                 const startDate = new Date(playdate.start_time);
                 const endDate = new Date(playdate.end_time);
                 const isValidDate = !isNaN(startDate.getTime()) && !isNaN(endDate.getTime());
                 
-                // Format date string safely
                 let dateStr = 'Date unavailable';
                 let startTimeStr = 'Time unavailable';
                 let endTimeStr = '';
@@ -108,7 +101,6 @@ export const useDashboard = () => {
                   });
                 }
                 
-                // Determine status based on dates
                 const now = new Date();
                 let status: 'upcoming' | 'pending' | 'completed' = 'pending';
                 
@@ -120,8 +112,8 @@ export const useDashboard = () => {
                   }
                 }
                 
-                // Count attendees (this would need to be updated if we implement real attendance tracking)
-                const attendees = 1; // Default to 1 (the creator)
+                const attendees = 1;
+                const hostName = playdate.profiles?.parent_name || 'Unknown Host';
                 
                 return {
                   id: playdate.id,
@@ -131,11 +123,11 @@ export const useDashboard = () => {
                   location: playdate.location || 'Location not specified',
                   attendees: attendees,
                   families: attendees,
-                  status: status
+                  status: status,
+                  host: hostName
                 };
               } catch (err) {
                 console.error("Error processing playdate:", err, playdate);
-                // Return a safe fallback object if date processing fails
                 return {
                   id: playdate.id || 'unknown-id',
                   title: playdate.title || 'Untitled Playdate',
@@ -144,7 +136,8 @@ export const useDashboard = () => {
                   location: playdate.location || 'Location not specified',
                   attendees: 1,
                   families: 1,
-                  status: 'pending' as const
+                  status: 'pending' as const,
+                  host: playdate.profiles?.parent_name || 'Unknown Host'
                 };
               }
             });
@@ -153,7 +146,6 @@ export const useDashboard = () => {
           }
         }
         
-        // Mock suggested connections
         setSuggestedConnections([
           {
             id: '1',
@@ -178,7 +170,6 @@ export const useDashboard = () => {
           }
         ]);
         
-        // Mock nearby events
         setNearbyEvents([
           {
             title: 'Community Playground Day',
