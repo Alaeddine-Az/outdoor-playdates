@@ -2,7 +2,11 @@
 import React from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import AdminLayout from '@/components/layout/AdminLayout';
 import AdminDashboard from '@/pages/AdminDashboard';
+import AdminUsers from '@/pages/admin/AdminUsers';
+import AdminSignups from '@/pages/admin/AdminSignups';
+import AdminLogs from '@/pages/admin/AdminLogs';
 
 // Reusable component for admin routes
 interface AdminRouteContentProps {
@@ -35,24 +39,17 @@ export const AdminRouteContent: React.FC<AdminRouteContentProps> = ({ children }
 
 const AdminRoutes = () => {
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <AdminRouteContent>
-            <AdminDashboard />
-          </AdminRouteContent>
-        }
-      />
-      <Route
-        path="*"
-        element={
-          <AdminRouteContent>
-            <AdminDashboard />
-          </AdminRouteContent>
-        }
-      />
-    </Routes>
+    <AdminRouteContent>
+      <AdminLayout>
+        <Routes>
+          <Route path="/" element={<AdminDashboard />} />
+          <Route path="/users" element={<AdminUsers />} />
+          <Route path="/signups" element={<AdminSignups />} />
+          <Route path="/logs" element={<AdminLogs />} />
+          <Route path="*" element={<Navigate to="/admin" replace />} />
+        </Routes>
+      </AdminLayout>
+    </AdminRouteContent>
   );
 };
 

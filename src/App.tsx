@@ -42,6 +42,9 @@ function AppRoutes() {
       <Route path="/terms" element={<Terms />} />
       <Route path="/contact" element={<Contact />} />
 
+      {/* Admin routes */}
+      <Route path="/admin/*" element={<AdminRoutes />} />
+
       {/* Main Layout with protected routes */}
       <Route element={<MainLayout />}>
         {/* App Layout for protected app pages */}
@@ -62,9 +65,6 @@ function AppRoutes() {
           <Route path="/playdate/*" element={<ProtectedRoutes />} />
           <Route path="/group/*" element={<ProtectedRoutes />} />
         </Route>
-
-        {/* Admin routes */}
-        <Route path="/admin/*" element={<AdminRoutes />} />
       </Route>
 
       {/* Catch-all route */}

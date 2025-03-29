@@ -1,0 +1,61 @@
+
+import React from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Users,
+  ClipboardList,
+  FileBarChart2,
+  LogOut,
+} from 'lucide-react';
+import { SidebarLink } from '@/components/SidebarLink';
+import { useAuth } from '@/contexts/AuthContext';
+
+const AdminLayout: React.FC = () => {
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (err) {
+      console.error('Admin sidebar sign out failed:', err);
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen w-full">
+      {/* Admin Sidebar */}
+      <div className="hidden border-r bg-muted/40 md:block w-64">
+        <div className="flex h-full max-h-screen flex-col gap-2">
+          <div className="flex h-14 items-center border-b px-4">
+            <h2 className="text-lg font-semibold text-primary">Admin Portal</h2>
+          </div>
+          <div className="flex-1">
+            <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+              <SidebarLink to="/admin" label="Dashboard" icon={LayoutDashboard} />
+              <SidebarLink to="/admin/users" label="Manage Users" icon={Users} />
+              <SidebarLink to="/admin/signups" label="Early Signups" icon={ClipboardList} />
+              <SidebarLink to="/admin/logs" label="System Logs" icon={FileBarChart2} />
+              <button
+                onClick={handleSignOut}
+                className="flex w-full items-center gap-3 rounded-md px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 mt-4"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex flex-1 flex-col px-6 pt-6">
+        <Outlet />
+      </div>
+    </div>
+  );
+};
+
+export default AdminLayout;
