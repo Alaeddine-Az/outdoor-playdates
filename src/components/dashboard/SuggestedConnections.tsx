@@ -17,22 +17,39 @@ interface SuggestedConnectionProps {
 const ConnectionCard = ({ id, name, childName, interests, distance }: SuggestedConnectionProps) => {
   const navigate = useNavigate();
   
+  // Generate a color based on the name
+  const getColor = (name: string) => {
+    const colors = ['pink', 'blue', 'green', 'purple', 'teal'];
+    const nameSum = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return colors[nameSum % colors.length];
+  };
+  
+  const colorMap = {
+    pink: 'bg-pink-500 text-white',
+    blue: 'bg-play-blue text-white',
+    green: 'bg-play-lime text-green-700',
+    purple: 'bg-purple-500 text-white',
+    teal: 'bg-teal-500 text-white'
+  };
+  
+  const colorClass = colorMap[getColor(name) as keyof typeof colorMap];
+  
   return (
     <motion.div 
-      className="p-4 rounded-xl bg-white border border-muted/30 hover:border-primary/20 transition-all duration-300 group shadow-sm hover:shadow-md"
+      className="p-4 rounded-2xl bg-white border border-play-beige hover:border-play-orange/20 transition-all duration-300 group shadow-sm hover:shadow-md"
       whileHover={{ y: -4 }}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <div 
-            className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center text-purple-600 font-medium cursor-pointer shadow-sm group-hover:shadow-md transition-all"
+            className={`w-12 h-12 rounded-2xl ${colorClass} flex items-center justify-center text-xl font-bold cursor-pointer shadow-sm group-hover:shadow-md transition-all`}
             onClick={() => navigate(`/parent/${id}`)}
           >
             {name.charAt(0)}
           </div>
           <div className="ml-3">
             <h4 
-              className="font-medium text-sm cursor-pointer hover:text-primary transition-colors flex items-center gap-1.5"
+              className="font-bold text-base cursor-pointer hover:text-play-orange transition-colors flex items-center gap-1.5"
               onClick={() => navigate(`/parent/${id}`)}
             >
               {name}
@@ -52,9 +69,9 @@ const ConnectionCard = ({ id, name, childName, interests, distance }: SuggestedC
         </div>
         <Button 
           size="sm" 
-          className="h-8 px-3 bg-white hover:bg-primary/5 text-primary border border-primary/30 rounded-lg shadow-sm"
+          className="h-9 w-9 p-0 bg-play-beige hover:bg-play-orange/10 text-play-orange border border-play-orange/30 rounded-full shadow-sm"
         >
-          <UserPlus className="h-3.5 w-3.5" />
+          <UserPlus className="h-4 w-4" />
         </Button>
       </div>
       
@@ -62,7 +79,7 @@ const ConnectionCard = ({ id, name, childName, interests, distance }: SuggestedC
         {interests.map((interest, index) => (
           <span 
             key={index} 
-            className="text-xs px-2 py-1 rounded-full bg-purple-50 text-purple-700 font-medium"
+            className="text-xs px-2 py-1 rounded-full bg-play-lime/30 text-green-700 font-medium"
           >
             {interest}
           </span>
@@ -95,16 +112,16 @@ const SuggestedConnections = ({ connections }: SuggestedConnectionsProps) => {
   };
   
   return (
-    <Card className="rounded-2xl overflow-hidden border border-muted/30 shadow-md">
-      <CardHeader className="border-b border-muted/30 bg-gradient-to-r from-white to-muted/20 pb-3">
+    <Card className="rounded-3xl overflow-hidden border-none shadow-md">
+      <CardHeader className="border-b border-muted/30 bg-gradient-to-r from-play-purple/20 to-purple-100 pb-3">
         <CardTitle className="text-lg font-semibold flex items-center">
-          <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-3">
-            <Users className="h-4 w-4 text-purple-600" />
+          <div className="w-10 h-10 rounded-full bg-play-purple/20 flex items-center justify-center mr-3 text-purple-600">
+            <Users className="h-5 w-5" />
           </div>
           Suggested Connections
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className="p-4 bg-white">
         <motion.div 
           className="space-y-3"
           variants={container}
@@ -121,7 +138,7 @@ const SuggestedConnections = ({ connections }: SuggestedConnectionsProps) => {
         <div className="mt-4">
           <Button 
             variant="outline" 
-            className="w-full rounded-xl border-2 border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 transition-all duration-300 font-medium"
+            className="w-full rounded-full border-2 border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300 transition-all duration-300 font-medium"
             onClick={() => navigate('/connections')}
           >
             Explore All Connections

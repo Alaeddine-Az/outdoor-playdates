@@ -1,11 +1,10 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 210 33% 98%;
+    --background: 45 70% 97%;
     --foreground: 210 24% 16%;
 
     --card: 0 0% 100%;
@@ -14,17 +13,17 @@
     --popover: 0 0% 100%;
     --popover-foreground: 210 24% 16%;
 
-    --primary: 210 92% 45%;
+    --primary: 20 100% 63%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 25 95% 60%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 45 100% 62%;
+    --secondary-foreground: 0 0% 20%;
 
-    --muted: 210 20% 92%;
+    --muted: 45 30% 92%;
     --muted-foreground: 210 15% 50%;
 
-    --accent: 262 83% 58%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 138 58% 70%;
+    --accent-foreground: 0 0% 20%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
@@ -33,11 +32,11 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 210 92% 45%;
 
-    --radius: 1rem;
+    --radius: 1.5rem;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 262 83% 58%;
+    --sidebar-primary: 20 100% 63%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
@@ -139,19 +138,15 @@
   }
   
   .playful-card {
-    @apply rounded-2xl bg-white shadow-md border border-muted/30 transition-all duration-300 overflow-hidden;
-  }
-  
-  .playful-card:hover {
-    @apply shadow-lg transform-gpu -translate-y-1 border-primary/20;
+    @apply rounded-3xl bg-white shadow-md border border-muted/30 transition-all duration-300 overflow-hidden hover:shadow-lg hover:border-primary/20;
   }
   
   .playful-icon-container {
-    @apply flex items-center justify-center w-10 h-10 rounded-xl transition-colors duration-300;
+    @apply flex items-center justify-center w-12 h-12 rounded-xl transition-colors duration-300;
   }
   
   .playful-button {
-    @apply flex items-center justify-center gap-2 font-medium rounded-xl px-4 py-2 transition-all duration-300 transform hover:scale-105;
+    @apply flex items-center justify-center gap-2 font-medium rounded-full px-4 py-2 transition-all duration-300 transform hover:scale-105 shadow-sm;
   }
   
   .playful-gradient-text {
@@ -160,6 +155,27 @@
   
   .playful-input {
     @apply rounded-xl border-2 border-muted/50 focus:border-primary/30 focus:ring-primary/20 transition-all duration-300;
+  }
+
+  .playful-pill {
+    @apply rounded-full px-4 py-2 text-sm font-medium;
+  }
+  
+  .playful-badge {
+    @apply rounded-full py-1.5 px-3 text-xs font-medium transition-all duration-300;
+  }
+  
+  .wavy-border {
+    @apply relative;
+  }
+  
+  .wavy-border::after {
+    @apply content-[''] absolute left-0 bottom-0 w-full h-2 bg-accent/40;
+    mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 20" xmlns="http://www.w3.org/2000/svg"><path d="M0,10 C30,20 70,0 100,10 L100,20 L0,20 Z" /></svg>');
+  }
+  
+  .character-container {
+    @apply relative inline-block animate-float cursor-pointer transition-transform duration-300 hover:scale-110;
   }
   
   @keyframes button-glow {
@@ -238,6 +254,100 @@
   
   .wiggle-hover:hover {
     animation: wiggle 0.5s ease;
+  }
+
+  /* Custom bubble shape for chat and comment boxes */
+  .bubble-shape {
+    @apply rounded-2xl rounded-bl-none relative;
+  }
+  
+  .bubble-shape::after {
+    content: '';
+    @apply absolute -bottom-3 left-4 w-4 h-4 bg-inherit transform rotate-45;
+  }
+  
+  /* Playful tag styles */
+  .playful-tag {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-play-beige text-play-orange shadow-sm transition-transform duration-300 hover:scale-105;
+  }
+
+  /* Bear character style */
+  .bear-character {
+    @apply inline-block relative;
+    width: 80px;
+    height: 80px;
+  }
+  
+  .bear-head {
+    @apply absolute rounded-full bg-play-orange;
+    width: 60px;
+    height: 60px;
+    top: 0;
+    left: 10px;
+  }
+  
+  .bear-ear {
+    @apply absolute rounded-full bg-play-orange;
+    width: 20px;
+    height: 20px;
+  }
+  
+  .bear-ear-left {
+    top: -5px;
+    left: 5px;
+  }
+  
+  .bear-ear-right {
+    top: -5px;
+    right: 5px;
+  }
+  
+  .bear-eye {
+    @apply absolute rounded-full bg-white;
+    width: 16px;
+    height: 16px;
+  }
+  
+  .bear-eye-left {
+    top: 15px;
+    left: 12px;
+  }
+  
+  .bear-eye-right {
+    top: 15px;
+    right: 12px;
+  }
+  
+  .bear-pupil {
+    @apply absolute rounded-full bg-black;
+    width: 8px;
+    height: 8px;
+    top: 4px;
+    left: 4px;
+  }
+  
+  .bear-nose {
+    @apply absolute rounded-full bg-play-coral;
+    width: 12px;
+    height: 8px;
+    top: 30px;
+    left: 24px;
+  }
+  
+  .bear-mouth {
+    @apply absolute bg-play-coral rounded-full;
+    width: 20px;
+    height: 10px;
+    top: 40px;
+    left: 20px;
+  }
+  
+  .bear-body {
+    @apply absolute rounded-full bg-play-orange;
+    width: 50px;
+    height: 30px;
+    top: 55px;
+    left: 15px;
   }
 }
 

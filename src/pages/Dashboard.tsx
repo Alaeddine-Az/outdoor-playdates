@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Sun, CalendarHeart, MapPin, Party } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProfileSummary from '@/components/dashboard/ProfileSummary';
@@ -9,6 +10,7 @@ import SuggestedConnections from '@/components/dashboard/SuggestedConnections';
 import NearbyEvents from '@/components/dashboard/NearbyEvents';
 import { useDashboard } from '@/hooks/useDashboard';
 import { toast } from '@/components/ui/use-toast';
+import BearCharacter from '@/components/characters/BearCharacter';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -70,14 +72,22 @@ const Dashboard = () => {
         </div>
       ) : (
         <>
-          <header className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight mb-2">
-              Welcome back, {profile?.parent_name?.split(' ')[0] || 'User'}!
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Here's what's happening with your playdates and connections.
-            </p>
-          </header>
+          <div className="relative mb-8 overflow-hidden rounded-3xl bg-play-lightBlue shadow-md">
+            <div className="absolute inset-0 bg-wave-pattern bg-cover bg-bottom opacity-30"></div>
+            <div className="relative flex items-center justify-between p-6 md:p-8">
+              <div className="max-w-lg">
+                <h1 className="text-3xl font-bold tracking-tight mb-2">
+                  Welcome back, {profile?.parent_name?.split(' ')[0] || 'Friend'}!
+                </h1>
+                <p className="text-blue-800/70 text-lg">
+                  Here's what's happening with your playdates and connections.
+                </p>
+              </div>
+              <div className="hidden md:block">
+                <BearCharacter size="lg" animation="wave" />
+              </div>
+            </div>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-6">

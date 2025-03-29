@@ -11,24 +11,57 @@ interface EventCardProps {
 }
 
 const EventCard = ({ title, date, location }: EventCardProps) => {
+  const getEventIcon = (title: string) => {
+    const lowerTitle = title.toLowerCase();
+    
+    if (lowerTitle.includes('nature') || lowerTitle.includes('walk') || lowerTitle.includes('park')) {
+      return (
+        <span className="text-xl mr-2">🌿</span>
+      );
+    } else if (lowerTitle.includes('science') || lowerTitle.includes('stem')) {
+      return (
+        <span className="text-xl mr-2">🔬</span>
+      );
+    } else if (lowerTitle.includes('art') || lowerTitle.includes('craft')) {
+      return (
+        <span className="text-xl mr-2">🎨</span>
+      );
+    } else if (lowerTitle.includes('music') || lowerTitle.includes('sing')) {
+      return (
+        <span className="text-xl mr-2">🎵</span>
+      );
+    } else if (lowerTitle.includes('read') || lowerTitle.includes('book')) {
+      return (
+        <span className="text-xl mr-2">📚</span>
+      );
+    } else {
+      return (
+        <span className="text-xl mr-2">🎪</span>
+      );
+    }
+  };
+  
   return (
     <motion.div 
-      className="p-4 rounded-xl border border-muted/30 bg-white hover:border-primary/20 hover:bg-muted/5 transition-all duration-300 group shadow-sm hover:shadow-md"
+      className="p-4 rounded-xl border border-play-beige bg-white hover:border-play-lime/50 hover:bg-play-lime/5 transition-all duration-300 group shadow-sm hover:shadow-md"
       whileHover={{ y: -4 }}
     >
       <div className="flex justify-between">
-        <h4 className="font-medium text-sm">{title}</h4>
+        <h4 className="font-medium text-base flex items-center">
+          {getEventIcon(title)}
+          {title}
+        </h4>
         <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
       <div className="flex flex-wrap items-center text-xs text-muted-foreground mt-2 gap-3">
         <div className="flex items-center">
-          <div className="w-5 h-5 rounded-full bg-muted/50 flex items-center justify-center mr-1.5">
+          <div className="w-5 h-5 rounded-full bg-play-beige flex items-center justify-center mr-1.5">
             <Calendar className="h-3 w-3" /> 
           </div>
           <span>{date}</span>
         </div>
         <div className="flex items-center">
-          <div className="w-5 h-5 rounded-full bg-muted/50 flex items-center justify-center mr-1.5">
+          <div className="w-5 h-5 rounded-full bg-play-beige flex items-center justify-center mr-1.5">
             <MapPin className="h-3 w-3" /> 
           </div>
           <span>{location}</span>
@@ -59,16 +92,16 @@ const NearbyEvents = ({ events }: NearbyEventsProps) => {
   };
 
   return (
-    <Card className="rounded-2xl border border-muted/30 shadow-md overflow-hidden">
-      <CardHeader className="border-b border-muted/30 bg-gradient-to-r from-white to-muted/20 pb-3">
+    <Card className="rounded-3xl border-none shadow-md overflow-hidden">
+      <CardHeader className="border-b border-muted/30 bg-gradient-to-r from-play-lime/30 to-green-100 pb-3">
         <CardTitle className="text-lg font-semibold flex items-center">
-          <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
-            <Calendar className="h-4 w-4 text-green-600" />
+          <div className="w-10 h-10 rounded-full bg-play-lime flex items-center justify-center mr-3">
+            <Calendar className="h-5 w-5 text-green-700" />
           </div>
           Nearby Events
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className="p-4 bg-white">
         <motion.div 
           className="space-y-3"
           variants={container}
