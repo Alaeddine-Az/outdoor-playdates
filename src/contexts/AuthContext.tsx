@@ -1,13 +1,13 @@
 
 import React, { createContext, useContext } from 'react';
-import { Session, User } from '@supabase/supabase-js';
+import { Session, User, AuthResponse } from '@supabase/supabase-js';
 import { useAuthProvider } from '@/hooks/useAuthProvider';
 
 type AuthContextType = {
   session: Session | null;
   user: User | null;
   signUp: (email: string, password: string, metadata: any) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<AuthResponse>;
   signOut: () => Promise<void>;
   loading: boolean;
   isAdmin: boolean;

@@ -4,34 +4,35 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { checkAdminStatus } from '@/utils/authUtils';
+import { AuthResponse } from '@supabase/supabase-js';
 
 export function useSignIn() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<AuthResponse> => {
     try {
       setLoading(true);
       
       const lowerEmail = email.toLowerCase();
       
       // Handle login
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const response = await supabase.auth.signInWithPassword({
         email: lowerEmail,
         password
       });
 
-      if (error) {
-        console.error('Supabase sign in error:', error);
-        throw error;
+      if (response.error) {
+        console.error('Supabase sign in error:', response.error);
+        throw response.error;
       }
       
-      if (!data.user) {
+      if (!response.data.user) {
         throw new Error('No user data returned from authentication');
       }
       
       // Check if user is admin
-      const isAdmin = await checkAdminStatus(data.user);
+      const isAdmin = await checkAdminStatus(response.data.user);
       
       toast({
         title: "Sign in successful",
@@ -45,7 +46,7 @@ export function useSignIn() {
         navigate('/dashboard');
       }
       
-      return data;
+      return response;
     } catch (error: any) {
       toast({
         title: "Sign in failed",

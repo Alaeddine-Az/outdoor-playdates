@@ -53,6 +53,7 @@ const Auth = () => {
     setAuthError(null);
     try {
       await signIn(values.email, values.password);
+      // No need to navigate here as the signIn function already handles navigation
     } catch (error: any) {
       console.error('Login error:', error);
       setAuthError(error.message || 'Failed to sign in. Please check your credentials.');
