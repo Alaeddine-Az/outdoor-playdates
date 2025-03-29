@@ -7,6 +7,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import HeaderLogo from './header/HeaderLogo';
 import DesktopNav from './header/DesktopNav';
 import MobileMenu from './header/MobileMenu';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -80,41 +81,66 @@ const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full backdrop-blur-sm border-b bg-white/90 border-muted">
-        <div className="container flex h-14 sm:h-16 items-center justify-between">
+      <header className="sticky top-0 z-50 w-full backdrop-blur-sm border-b bg-white/95 border-muted">
+        <div className="container flex h-16 sm:h-18 items-center justify-between">
           <HeaderLogo />
           <DesktopNav user={user} scrollToSection={scrollToSection} />
-          <button
-            className="block md:hidden p-2 rounded-full hover:bg-muted/50 transition-colors"
+          <motion.button
+            className="block md:hidden p-3 rounded-full bg-muted/30 hover:bg-muted/60 transition-colors"
             onClick={toggleMenu}
             aria-label="Toggle navigation menu"
             data-menu-toggle
+            whileTap={{ scale: 0.9 }}
           >
-            {isMenuOpen ? (
-              <X className="h-5 w-5 text-primary" data-menu-toggle />
-            ) : (
-              <Menu className="h-5 w-5" data-menu-toggle />
-            )}
-          </button>
+            <AnimatePresence initial={false} mode="wait">
+              {isMenuOpen ? (
+                <motion.div
+                  key="close"
+                  initial={{ opacity: 0, rotate: -90 }}
+                  animate={{ opacity: 1, rotate: 0 }}
+                  exit={{ opacity: 0, rotate: 90 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <X className="h-5 w-5 text-primary" data-menu-toggle />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="menu"
+                  initial={{ opacity: 0, rotate: 90 }}
+                  animate={{ opacity: 1, rotate: 0 }}
+                  exit={{ opacity: 0, rotate: -90 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Menu className="h-5 w-5" data-menu-toggle />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.button>
         </div>
       </header>
 
-      {isMenuOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden animate-fade-in"
-            aria-hidden="true"
-            onClick={() => setIsMenuOpen(false)}
-          />
-          <MobileMenu
-            isOpen={isMenuOpen}
-            user={user}
-            scrollToSection={scrollToSection}
-            handleSignOut={handleSignOut}
-            closeMenu={() => setIsMenuOpen(false)}
-          />
-        </>
-      )}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm md:hidden"
+              aria-hidden="true"
+              onClick={() => setIsMenuOpen(false)}
+            />
+            <MobileMenu
+              isOpen={isMenuOpen}
+              user={user}
+              scrollToSection={scrollToSection}
+              handleSignOut={handleSignOut}
+              closeMenu={() => setIsMenuOpen(false)}
+            />
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 };
