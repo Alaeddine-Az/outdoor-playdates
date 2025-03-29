@@ -68,9 +68,8 @@ const Dashboard = () => {
   <div className="absolute top-8 left-8 w-24 h-24 bg-white rounded-full opacity-90" />
 
   {/* Parallax Hills */}
-  <div className="absolute bottom-0 w-full h-[80px] bg-[#D4F7D3] rounded-t-[100%] z-0" />
-  <div className="absolute bottom-0 w-full h-[70px] bg-[#A5E4A2] rounded-t-[100%] z-10 translate-y-[8px]" />
-  <div className="absolute bottom-0 w-full h-[60px] bg-[#73C770] rounded-t-[100%] z-20 translate-y-[16px]" />
+  <div className="absolute bottom-0 w-full h-24 bg-[#AEE9A8] rounded-t-[100%]" />
+  <div className="absolute bottom-0 w-full h-20 bg-[#73C770] rounded-t-[100%]" />
 
   {/* Text */}
   <div className="relative z-10 text-left mt-4 md:mt-8">
