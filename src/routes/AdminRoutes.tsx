@@ -37,7 +37,15 @@ const AdminRoutes = () => {
   return (
     <Routes>
       <Route
-        path="/admin"
+        path="/"
+        element={
+          <AdminRouteContent>
+            <AdminDashboard />
+          </AdminRouteContent>
+        }
+      />
+      <Route
+        path="*"
         element={
           <AdminRouteContent>
             <AdminDashboard />

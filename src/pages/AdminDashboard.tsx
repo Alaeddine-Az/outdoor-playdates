@@ -8,6 +8,7 @@ import SignupCardGrid from '@/components/admin/SignupCardGrid';
 import EarlySignupList from '@/components/admin/EarlySignupList';
 import AccountCreationModal from '@/components/admin/AccountCreationModal';
 import { useAdminSignups } from '@/hooks/useAdminSignups';
+import UserManagement from '@/components/admin/UserManagement';
 
 const AdminDashboard = () => {
   const {
@@ -61,6 +62,7 @@ const AdminDashboard = () => {
           <TabsList>
             <TabsTrigger value="early-signups">Early Signups</TabsTrigger>
             <TabsTrigger value="approval-requests">Approval Requests</TabsTrigger>
+            <TabsTrigger value="user-management">User Management</TabsTrigger>
           </TabsList>
           
           <TabsContent value="early-signups" className="mt-6">
@@ -85,6 +87,10 @@ const AdminDashboard = () => {
                 onReject={handleRejectRequest}
               />
             )}
+          </TabsContent>
+          
+          <TabsContent value="user-management" className="mt-6">
+            <UserManagement />
           </TabsContent>
         </Tabs>
       </main>
