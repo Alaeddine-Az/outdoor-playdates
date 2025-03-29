@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,6 +59,7 @@ const Auth = () => {
     setAuthError(null);
     try {
       await signIn(values.email, values.password);
+      // Redirection is handled by the effect hook above
     } catch (error: any) {
       console.error('Login error:', error);
       setAuthError(error.message || 'Failed to sign in. Please check your credentials.');

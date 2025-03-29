@@ -1,9 +1,9 @@
+
 import React from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 // Import pages
-import Dashboard from '@/pages/Dashboard';
 import UserProfile from '@/pages/UserProfile';
 import ChildProfile from '@/pages/ChildProfile';
 import AddChild from '@/pages/AddChild';
@@ -38,7 +38,6 @@ const ProtectedRoutes = () => {
 
   return (
     <Routes>
-      <Route index element={<Playdates />} />
       <Route path="/parent/:id" element={<UserProfile />} />
       <Route path="/parent-profile" element={<UserProfile />} />
       <Route path="/child/:id" element={<ChildProfile />} />

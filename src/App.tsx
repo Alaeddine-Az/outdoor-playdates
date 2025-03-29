@@ -47,18 +47,7 @@ function AppRoutes() {
           {/* Protected routes */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/connections" element={<ConnectionsPage />} />
-          <Route path="/parent/*" element={<ProtectedRoutes />} />
-          <Route path="/parent-profile" element={<ProtectedRoutes />} />
-          <Route path="/child/*" element={<ProtectedRoutes />} />
-          <Route path="/add-child" element={<ProtectedRoutes />} />
-          <Route path="/messages/*" element={<ProtectedRoutes />} />
-          <Route path="/events" element={<ProtectedRoutes />} />
-          <Route path="/create-event" element={<ProtectedRoutes />} />
-          <Route path="/event/*" element={<ProtectedRoutes />} />
-          <Route path="/playdates" element={<ProtectedRoutes />} />
-          <Route path="/create-playdate" element={<ProtectedRoutes />} />
-          <Route path="/playdate/*" element={<ProtectedRoutes />} />
-          <Route path="/group/*" element={<ProtectedRoutes />} />
+          <Route path="/*" element={<ProtectedRoutes />} />
         </Route>
       </Route>
 

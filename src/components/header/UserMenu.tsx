@@ -25,8 +25,6 @@ const UserMenu = () => {
         title: "Signed out successfully",
         description: "You have been signed out of your account.",
       });
-      // Force navigation to home page
-      window.location.href = '/';
     } catch (error) {
       console.error('Error signing out:', error);
       toast({
