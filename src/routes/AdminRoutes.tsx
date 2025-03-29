@@ -7,6 +7,7 @@ import AdminDashboard from '@/pages/AdminDashboard';
 import AdminUsers from '@/pages/admin/AdminUsers';
 import AdminSignups from '@/pages/admin/AdminSignups';
 import AdminLogs from '@/pages/admin/AdminLogs';
+import CreateAdmin from '@/pages/admin/CreateAdmin';
 
 // Reusable component for admin routes
 interface AdminRouteContentProps {
@@ -46,6 +47,7 @@ const AdminRoutes = () => {
           <Route path="/users" element={<AdminUsers />} />
           <Route path="/signups" element={<AdminSignups />} />
           <Route path="/logs" element={<AdminLogs />} />
+          <Route path="/create-admin" element={<CreateAdmin />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
       </AdminLayout>

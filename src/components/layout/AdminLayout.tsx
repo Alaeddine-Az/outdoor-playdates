@@ -7,6 +7,7 @@ import {
   ClipboardList,
   FileBarChart2,
   LogOut,
+  UserPlus,
 } from 'lucide-react';
 import { SidebarLink } from '@/components/SidebarLink';
 import { useAuth } from '@/contexts/AuthContext';
@@ -42,6 +43,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               <SidebarLink to="/admin/users" label="Manage Users" icon={Users} />
               <SidebarLink to="/admin/signups" label="Early Signups" icon={ClipboardList} />
               <SidebarLink to="/admin/logs" label="System Logs" icon={FileBarChart2} />
+              <SidebarLink to="/admin/create-admin" label="Create Admin" icon={UserPlus} />
               <button
                 onClick={handleSignOut}
                 className="flex w-full items-center gap-3 rounded-md px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 mt-4"
