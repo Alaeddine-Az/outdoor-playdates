@@ -48,7 +48,7 @@ function AppRoutes() {
           {/* Protected routes */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/connections" element={<ConnectionsPage />} />
-          <Route path="/playdate/:playdateId" element={<PlaydateDetail />} />
+          <Route path="/playdate/:id" element={<PlaydateDetail />} />
           <Route path="/*" element={<ProtectedRoutes />} />
         </Route>
       </Route>
