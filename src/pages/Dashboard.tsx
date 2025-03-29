@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -67,11 +68,11 @@ const Dashboard = () => {
         </div>
 
         <div className="relative z-10 max-w-4xl">
-          <h1 className="text-4xl md:text-5xl font-bold font-["Baloo 2",cursive] text-black mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold font-baloo text-black mb-4">
             Welcome back, {profile?.parent_name?.split(' ')[0] || 'there'}!
           </h1>
-          <p className="text-lg md:text-xl text-black font-["Baloo 2",cursive]">
-            Here’s what’s happening with your playdates and connections.
+          <p className="text-lg md:text-xl text-black font-baloo">
+            Here's what's happening with your playdates and connections.
           </p>
 
           <div className="absolute bottom-6 right-6">

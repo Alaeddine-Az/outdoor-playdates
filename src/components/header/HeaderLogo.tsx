@@ -14,7 +14,7 @@ const HeaderLogo = () => {
         <span className="text-white font-bold">GP</span>
       </motion.div>
       <motion.span 
-        className="font-bold text-2xl text-play-orange"
+        className="font-bold text-2xl text-play-orange font-baloo"
         whileHover={{ scale: 1.05 }}
       >
         GoPlayNow
