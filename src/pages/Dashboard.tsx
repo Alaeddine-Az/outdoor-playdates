@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -65,12 +66,12 @@ const Dashboard = () => {
               Welcome back, {profile?.parent_name?.split(' ')[0] || 'Friend'}!
             </h1>
             <p className="text-muted-foreground text-lg">
-              Here’s what’s happening with your playdates and connections.
+              Here's what's happening with your playdates and connections.
             </p>
           </div>
 
           <div className="flex-shrink-0 w-32 h-32 md:w-36 md:h-36">
-            <BearCharacter />
+            <BearCharacter animation="wave" />
           </div>
         </div>
       </header>

@@ -50,10 +50,10 @@ const BearCharacter: React.FC<BearCharacterProps> = ({
     }
   };
 
-  // Animation variants - properly structured for framer-motion
+  // Animation variants 
   const waveVariants: Variants = {
-    initial: {},
-    animate: {
+    initial: { rotate: 0 },
+    animate: { 
       rotate: [0, 20, 0, 20, 0],
       transition: {
         duration: 1.5,
@@ -65,7 +65,7 @@ const BearCharacter: React.FC<BearCharacterProps> = ({
   };
 
   const bounceVariants: Variants = {
-    initial: {},
+    initial: { y: 0 },
     animate: {
       y: [0, -10, 0],
       transition: {
@@ -78,7 +78,7 @@ const BearCharacter: React.FC<BearCharacterProps> = ({
   };
 
   const wiggleVariants: Variants = {
-    initial: {},
+    initial: { rotate: 0 },
     animate: {
       rotate: [0, 5, 0, -5, 0],
       transition: {
@@ -97,25 +97,30 @@ const BearCharacter: React.FC<BearCharacterProps> = ({
 
   // Select the appropriate animation variants
   let containerVariants: Variants;
-  let armVariants: Variants;
+  let rightArmVariants: Variants;
+  let leftArmVariants: Variants;
   
   // Configure animation variants based on the selected animation
   switch (animation) {
     case 'wave':
       containerVariants = staticVariants;
-      armVariants = waveVariants;
+      rightArmVariants = waveVariants;
+      leftArmVariants = staticVariants;
       break;
     case 'bounce':
       containerVariants = bounceVariants;
-      armVariants = staticVariants;
+      rightArmVariants = staticVariants;
+      leftArmVariants = staticVariants;
       break;
     case 'wiggle':
       containerVariants = wiggleVariants;
-      armVariants = staticVariants;
+      rightArmVariants = staticVariants;
+      leftArmVariants = staticVariants;
       break;
     default: // static
       containerVariants = staticVariants;
-      armVariants = staticVariants;
+      rightArmVariants = staticVariants;
+      leftArmVariants = staticVariants;
   }
 
   const selectedSize = sizes[size];
@@ -124,8 +129,8 @@ const BearCharacter: React.FC<BearCharacterProps> = ({
     <motion.div 
       className={`relative ${selectedSize.container} ${className}`}
       variants={containerVariants}
-      animate="animate"
       initial="initial"
+      animate="animate"
     >
       {/* Bear head */}
       <div className={`absolute ${selectedSize.head} bg-play-orange rounded-full left-1/2 transform -translate-x-1/2 top-0`}>
@@ -154,15 +159,15 @@ const BearCharacter: React.FC<BearCharacterProps> = ({
       {/* Arms */}
       <motion.div 
         className={`absolute w-1/4 h-1/5 bg-play-orange rounded-full left-[20%] top-3/4 transform -translate-y-1/4`}
-        variants={armVariants}
-        animate="animate"
+        variants={leftArmVariants}
         initial="initial"
+        animate="animate"
       />
       <motion.div 
-        className={`absolute w-1/4 h-1/5 bg-play-orange rounded-full right-[20%] top-3/4 transform -translate-y-1/4`}
-        variants={armVariants}
-        animate="animate"
+        className={`absolute w-1/4 h-1/5 bg-play-orange rounded-full right-[20%] top-3/4 transform -translate-y-1/4 origin-top`}
+        variants={rightArmVariants}
         initial="initial"
+        animate="animate"
       />
     </motion.div>
   );
