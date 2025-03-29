@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { motion, Variant, Variants } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 
 type BearSize = 'sm' | 'md' | 'lg';
 type BearAnimation = 'wave' | 'bounce' | 'wiggle' | 'static';
@@ -50,73 +50,81 @@ const BearCharacter: React.FC<BearCharacterProps> = ({
     }
   };
 
-  // Animation variants
+  // Animation variants - properly structured for framer-motion
   const waveVariants: Variants = {
-    container: {},
-    arm: {
-      animate: {
-        rotate: [0, 20, 0, 20, 0],
-        transition: {
-          duration: 1.5,
-          repeat: Infinity,
-          repeatType: "loop" as const,
-          ease: "easeInOut"
-        }
+    initial: {},
+    animate: {
+      rotate: [0, 20, 0, 20, 0],
+      transition: {
+        duration: 1.5,
+        repeat: Infinity,
+        repeatType: "loop",
+        ease: "easeInOut"
       }
     }
   };
 
   const bounceVariants: Variants = {
-    container: {
-      animate: {
-        y: [0, -10, 0],
-        transition: {
-          duration: 1.2,
-          repeat: Infinity,
-          repeatType: "loop" as const,
-          ease: "easeInOut"
-        }
+    initial: {},
+    animate: {
+      y: [0, -10, 0],
+      transition: {
+        duration: 1.2,
+        repeat: Infinity,
+        repeatType: "loop",
+        ease: "easeInOut"
       }
-    },
-    arm: {}
+    }
   };
 
   const wiggleVariants: Variants = {
-    container: {
-      animate: {
-        rotate: [0, 5, 0, -5, 0],
-        transition: {
-          duration: 0.8,
-          repeat: Infinity,
-          repeatType: "loop" as const,
-          ease: "easeInOut"
-        }
+    initial: {},
+    animate: {
+      rotate: [0, 5, 0, -5, 0],
+      transition: {
+        duration: 0.8,
+        repeat: Infinity,
+        repeatType: "loop",
+        ease: "easeInOut"
       }
-    },
-    arm: {}
+    }
   };
 
   const staticVariants: Variants = {
-    container: {},
-    arm: {}
+    initial: {},
+    animate: {}
   };
 
   // Select the appropriate animation variants
-  const animationVariants = {
-    wave: waveVariants,
-    bounce: bounceVariants,
-    wiggle: wiggleVariants,
-    static: staticVariants
-  };
+  let containerVariants: Variants;
+  let armVariants: Variants;
+  
+  // Configure animation variants based on the selected animation
+  switch (animation) {
+    case 'wave':
+      containerVariants = staticVariants;
+      armVariants = waveVariants;
+      break;
+    case 'bounce':
+      containerVariants = bounceVariants;
+      armVariants = staticVariants;
+      break;
+    case 'wiggle':
+      containerVariants = wiggleVariants;
+      armVariants = staticVariants;
+      break;
+    default: // static
+      containerVariants = staticVariants;
+      armVariants = staticVariants;
+  }
 
   const selectedSize = sizes[size];
-  const selectedAnimation = animationVariants[animation];
 
   return (
     <motion.div 
       className={`relative ${selectedSize.container} ${className}`}
-      variants={selectedAnimation.container}
-      animate={selectedAnimation.container.animate ? "animate" : undefined}
+      variants={containerVariants}
+      animate="animate"
       initial="initial"
     >
       {/* Bear head */}
@@ -146,13 +154,15 @@ const BearCharacter: React.FC<BearCharacterProps> = ({
       {/* Arms */}
       <motion.div 
         className={`absolute w-1/4 h-1/5 bg-play-orange rounded-full left-[20%] top-3/4 transform -translate-y-1/4`}
-        variants={selectedAnimation.arm}
-        animate={selectedAnimation.arm.animate ? "animate" : undefined}
+        variants={armVariants}
+        animate="animate"
+        initial="initial"
       />
       <motion.div 
         className={`absolute w-1/4 h-1/5 bg-play-orange rounded-full right-[20%] top-3/4 transform -translate-y-1/4`}
-        variants={selectedAnimation.arm}
-        animate={selectedAnimation.arm.animate ? "animate" : undefined}
+        variants={armVariants}
+        animate="animate"
+        initial="initial"
       />
     </motion.div>
   );

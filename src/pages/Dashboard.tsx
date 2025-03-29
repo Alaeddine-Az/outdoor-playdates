@@ -10,6 +10,7 @@ import NearbyEvents from '@/components/dashboard/NearbyEvents';
 import { useDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
+import BearCharacter from '@/components/characters/BearCharacter';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -43,6 +44,17 @@ const Dashboard = () => {
 
   const interests = profile?.interests || ['Arts & Crafts', 'Nature', 'STEM'];
 
+  // Convert upcomingPlaydates to the format expected by PlaydatesList
+  const formattedPlaydates = upcomingPlaydates.map(playdate => ({
+    id: playdate.id,
+    title: playdate.title,
+    date: playdate.date,
+    time: playdate.time,
+    location: playdate.location,
+    families: playdate.attendees, // Map attendees to families
+    status: playdate.status
+  }));
+
   if (loading) {
     return (
       <div className="space-y-8 p-4 sm:p-6 lg:p-8">
@@ -64,20 +76,22 @@ const Dashboard = () => {
 
   return (
     <div className="animate-fade-in p-4 sm:p-6 lg:p-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">
+      <header className="mb-8 flex items-center">
+        <h1 className="text-3xl font-bold tracking-tight mb-2 mr-4">
           Welcome back, {profile?.parent_name?.split(' ')[0] || 'User'}!
         </h1>
-        <p className="text-muted-foreground text-lg">
-          Here's what's happening with your playdates and connections.
-        </p>
+        <BearCharacter animation="wave" size="sm" className="hidden sm:block" />
       </header>
+      
+      <p className="text-muted-foreground text-lg mb-8">
+        Here's what's happening with your playdates and connections.
+      </p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
           <PlaydatesList
             title="Upcoming Playdates"
-            playdates={upcomingPlaydates}
+            playdates={formattedPlaydates}
             showNewButton={true}
             viewAllLink="/playdates"
           />
