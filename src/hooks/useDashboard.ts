@@ -11,6 +11,7 @@ interface PlaydateData {
   time: string;
   location: string;
   attendees: number;
+  families: number; // Add this property to match what PlaydatesList expects
   status: 'upcoming' | 'pending' | 'completed';
 }
 
@@ -118,6 +119,7 @@ export const useDashboard = () => {
                 time: `${startTimeStr} - ${endTimeStr}`,
                 location: playdate.location,
                 attendees: attendees,
+                families: attendees, // Add families property with the same value as attendees
                 status: status
               };
             });

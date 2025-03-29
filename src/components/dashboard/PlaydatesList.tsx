@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Plus } from 'lucide-react';
@@ -11,6 +10,7 @@ interface Playdate {
   time: string;
   location: string;
   families: number;
+  attendees?: number;
   status?: 'upcoming' | 'past' | 'confirmed' | 'pending' | 'completed';
 }
 
