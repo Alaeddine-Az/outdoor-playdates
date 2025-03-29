@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variant, Variants } from 'framer-motion';
 
 type BearSize = 'sm' | 'md' | 'lg';
 type BearAnimation = 'wave' | 'bounce' | 'wiggle' | 'static';
@@ -51,61 +51,73 @@ const BearCharacter: React.FC<BearCharacterProps> = ({
   };
 
   // Animation variants
-  const animations = {
-    wave: {
-      container: {},
-      arm: {
-        animate: {
-          rotate: [0, 20, 0, 20, 0],
-          transition: {
-            duration: 1.5,
-            repeat: Infinity,
-            repeatType: "loop",
-            ease: "easeInOut"
-          }
+  const waveVariants: Variants = {
+    container: {},
+    arm: {
+      animate: {
+        rotate: [0, 20, 0, 20, 0],
+        transition: {
+          duration: 1.5,
+          repeat: Infinity,
+          repeatType: "loop" as const,
+          ease: "easeInOut"
         }
       }
-    },
-    bounce: {
-      container: {
-        animate: {
-          y: [0, -10, 0],
-          transition: {
-            duration: 1.2,
-            repeat: Infinity,
-            repeatType: "loop",
-            ease: "easeInOut"
-          }
-        }
-      }
-    },
-    wiggle: {
-      container: {
-        animate: {
-          rotate: [0, 5, 0, -5, 0],
-          transition: {
-            duration: 0.8,
-            repeat: Infinity,
-            repeatType: "loop",
-            ease: "easeInOut"
-          }
-        }
-      }
-    },
-    static: {
-      container: {},
-      arm: {}
     }
   };
 
+  const bounceVariants: Variants = {
+    container: {
+      animate: {
+        y: [0, -10, 0],
+        transition: {
+          duration: 1.2,
+          repeat: Infinity,
+          repeatType: "loop" as const,
+          ease: "easeInOut"
+        }
+      }
+    },
+    arm: {}
+  };
+
+  const wiggleVariants: Variants = {
+    container: {
+      animate: {
+        rotate: [0, 5, 0, -5, 0],
+        transition: {
+          duration: 0.8,
+          repeat: Infinity,
+          repeatType: "loop" as const,
+          ease: "easeInOut"
+        }
+      }
+    },
+    arm: {}
+  };
+
+  const staticVariants: Variants = {
+    container: {},
+    arm: {}
+  };
+
+  // Select the appropriate animation variants
+  const animationVariants = {
+    wave: waveVariants,
+    bounce: bounceVariants,
+    wiggle: wiggleVariants,
+    static: staticVariants
+  };
+
   const selectedSize = sizes[size];
-  const selectedAnimation = animations[animation];
+  const selectedAnimation = animationVariants[animation];
 
   return (
     <motion.div 
       className={`relative ${selectedSize.container} ${className}`}
       variants={selectedAnimation.container}
-      animate={selectedAnimation.container.animate}
+      animate={selectedAnimation.container.animate ? "animate" : undefined}
+      initial="initial"
     >
       {/* Bear head */}
       <div className={`absolute ${selectedSize.head} bg-play-orange rounded-full left-1/2 transform -translate-x-1/2 top-0`}>
@@ -135,12 +147,12 @@ const BearCharacter: React.FC<BearCharacterProps> = ({
       <motion.div 
         className={`absolute w-1/4 h-1/5 bg-play-orange rounded-full left-[20%] top-3/4 transform -translate-y-1/4`}
         variants={selectedAnimation.arm}
-        animate={selectedAnimation.arm.animate}
+        animate={selectedAnimation.arm.animate ? "animate" : undefined}
       />
       <motion.div 
         className={`absolute w-1/4 h-1/5 bg-play-orange rounded-full right-[20%] top-3/4 transform -translate-y-1/4`}
         variants={selectedAnimation.arm}
-        animate={selectedAnimation.arm.animate}
+        animate={selectedAnimation.arm.animate ? "animate" : undefined}
       />
     </motion.div>
   );
