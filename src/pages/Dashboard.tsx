@@ -1,24 +1,23 @@
 import React, { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Skeleton } from '@/components/ui/skeleton';
-import ProfileSummary from '@/components/dashboard/ProfileSummary';
+import { Button } from '@/components/ui/button';
+import { useDashboard } from '@/hooks/useDashboard';
 import PlaydatesList from '@/components/dashboard/PlaydatesList';
+import ProfileSummary from '@/components/dashboard/ProfileSummary';
 import SuggestedConnections from '@/components/dashboard/SuggestedConnections';
 import NearbyEvents from '@/components/dashboard/NearbyEvents';
-import { useDashboard } from '@/hooks/useDashboard';
 import { toast } from '@/components/ui/use-toast';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { 
-    loading, 
-    profile, 
-    children, 
-    upcomingPlaydates, 
-    suggestedConnections, 
+  const {
+    loading,
+    profile,
+    children,
+    upcomingPlaydates,
+    suggestedConnections,
     nearbyEvents,
-    error 
+    error
   } = useDashboard();
 
   useEffect(() => {
@@ -31,84 +30,77 @@ const Dashboard = () => {
     }
   }, [error]);
 
-  if (error) {
-    return (
-      <div className="animate-fade-in min-h-[60vh] flex flex-col items-center justify-center">
-        <h2 className="text-2xl font-bold mb-4">Unable to load dashboard</h2>
-        <p className="text-muted-foreground mb-6">There was a problem retrieving your information.</p>
-        <Button onClick={() => window.location.reload()}>Try Again</Button>
-      </div>
-    );
-  }
+  const childrenWithAges = children?.map(child => ({
+    name: child.name,
+    age: child.age
+  })) || [];
 
-  const childrenWithAges = children?.map(child => ({ name: child.name, age: child.age })) || [];
   const interests = profile?.interests || ['Arts & Crafts', 'Nature', 'STEM'];
 
   return (
-    <div className="p-4 md:p-6 lg:p-10">
-      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-b from-sky-100 to-green-100 mb-10 shadow-md">
-        <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute top-0 left-0 w-full h-[200px] bg-sky-200 rounded-b-[80%]"></div>
-          <div className="absolute bottom-0 left-0 w-full h-[120px] bg-green-300 rounded-t-[70%]"></div>
-          <div className="absolute top-6 right-6 w-16 h-16 bg-yellow-300 rounded-full shadow-md"></div>
-          <div className="absolute top-12 right-24 w-16 h-8 bg-white rounded-full animate-float-slow"></div>
-          <div className="absolute top-16 left-10 w-24 h-10 bg-white rounded-full animate-float-medium"></div>
+    <div className="space-y-10">
+      {/* Playful Hero Header */}
+      <section className="relative rounded-3xl px-6 pt-10 pb-20 md:px-12 overflow-hidden bg-[#CEEBF0] min-h-[320px] md:min-h-[420px]">
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
+          <svg
+            className="absolute top-4 right-4 w-16 h-16 animate-[pulse_6s_infinite]"
+            viewBox="0 0 100 100"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="50" cy="50" r="40" fill="#F9DA6F" />
+          </svg>
+          <svg
+            className="absolute top-10 left-8 w-28 h-12 animate-[float_6s_ease-in-out_infinite]"
+            viewBox="0 0 120 60"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <ellipse cx="60" cy="30" rx="50" ry="20" fill="white" />
+          </svg>
+          <svg
+            className="absolute top-20 right-20 w-24 h-10 animate-[float_8s_ease-in-out_infinite]"
+            viewBox="0 0 120 60"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <ellipse cx="60" cy="30" rx="45" ry="18" fill="white" />
+          </svg>
+          <div className="absolute bottom-0 left-0 w-full h-[120px] md:h-[160px] bg-[#73C770] rounded-t-[80%]" />
         </div>
 
-        <div className="relative z-10 px-6 md:px-10 py-12">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-foreground font-playful mb-2">
-            Welcome back, {profile?.parent_name?.split(' ')[0] || 'Friend'}!
+        <div className="relative z-10 max-w-4xl">
+          <h1 className="text-4xl md:text-5xl font-bold font-["Baloo 2",cursive] text-black mb-4">
+            Welcome back, {profile?.parent_name?.split(' ')[0] || 'there'}!
           </h1>
-          <p className="text-lg text-muted-foreground font-playful">
+          <p className="text-lg md:text-xl text-black font-["Baloo 2",cursive]">
             Here’s what’s happening with your playdates and connections.
           </p>
+
           <div className="absolute bottom-6 right-6">
-            <Button
-              className="rounded-full bg-yellow-300 hover:bg-yellow-400 text-black font-semibold shadow-md"
-              onClick={() => navigate('/parent-profile')}
-            >
+            <Button onClick={() => navigate('/parent-profile')} className="bg-[#F9DA6F] text-black font-semibold px-5 py-2 rounded-full text-sm">
               Edit Profile
             </Button>
           </div>
         </div>
-      </div>
+      </section>
 
-      {loading ? (
-        <div className="space-y-8">
-          <Skeleton className="h-9 w-64 mb-2" />
-          <Skeleton className="h-4 w-full max-w-md mb-8" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2">
-              <Skeleton className="h-96 w-full" />
-            </div>
-            <div className="space-y-6">
-              <Skeleton className="h-64 w-full" />
-              <Skeleton className="h-80 w-full" />
-              <Skeleton className="h-48 w-full" />
-            </div>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <PlaydatesList
+            title="Upcoming Playdates"
+            playdates={upcomingPlaydates}
+            showNewButton={true}
+            viewAllLink="/playdates"
+          />
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-6">
-            <PlaydatesList 
-              title="Upcoming Playdates"
-              playdates={upcomingPlaydates}
-              showNewButton={true}
-              viewAllLink="/playdates"
-            />
-          </div>
-          <div className="space-y-6">
-            <ProfileSummary 
-              name={profile?.parent_name || 'User'}
-              children={childrenWithAges}
-              interests={interests}
-            />
-            <SuggestedConnections connections={suggestedConnections} />
-            <NearbyEvents events={nearbyEvents} />
-          </div>
+        <div className="space-y-6">
+          <ProfileSummary
+            name={profile?.parent_name || 'User'}
+            children={childrenWithAges}
+            interests={interests}
+          />
+          <SuggestedConnections connections={suggestedConnections} />
+          <NearbyEvents events={nearbyEvents} />
         </div>
-      )}
+      </div>
     </div>
   );
 };
