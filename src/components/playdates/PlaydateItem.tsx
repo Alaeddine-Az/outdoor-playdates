@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { Calendar, Clock, MapPin, Users } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface PlaydateItemProps {
   title: string;
@@ -12,48 +12,70 @@ interface PlaydateItemProps {
   onClick: () => void;
 }
 
-const PlaydateItem = ({ title, date, time, location, attendees, status, onClick }: PlaydateItemProps) => {
-  const statusColors = {
-    pending: 'text-muted-foreground',
-    confirmed: 'text-primary',
-    completed: 'text-secondary'
-  };
-  
-  const statusLabels = {
-    pending: 'Pending',
-    confirmed: 'Confirmed',
-    completed: 'Completed'
-  };
-  
+const statusColors = {
+  pending: 'bg-amber-500 text-white',
+  confirmed: 'bg-blue-500 text-white',
+  completed: 'bg-green-500 text-white',
+};
+
+const statusLabels = {
+  pending: 'Pending',
+  confirmed: 'Confirmed',
+  completed: 'Completed',
+};
+
+const PlaydateItem: React.FC<PlaydateItemProps> = ({
+  title,
+  date,
+  time,
+  location,
+  attendees,
+  status,
+  onClick,
+}) => {
+  const statusClass = statusColors[status] || 'bg-muted text-muted-foreground';
+
   return (
-    <div 
-      className="flex items-start p-4 rounded-lg border border-muted bg-muted/10 hover:bg-muted/30 transition-colors cursor-pointer"
+    <div
       onClick={onClick}
+      className="rounded-xl border border-muted bg-white p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
     >
-      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex flex-col items-center justify-center text-primary">
-        <Calendar className="h-6 w-6" />
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1">
+        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+        <span
+          className={cn(
+            'px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap mt-1 sm:mt-0',
+            statusClass
+          )}
+        >
+          {statusLabels[status]}
+        </span>
       </div>
-      <div className="ml-4 flex-grow">
-        <div className="flex justify-between">
-          <h3 className="font-medium">{title}</h3>
-          <div className="flex items-center space-x-1">
-            <div className={`w-2 h-2 rounded-full bg-${status === 'pending' ? 'muted-foreground' : (status === 'confirmed' ? 'primary' : 'secondary')}`}></div>
-            <span className={`text-xs capitalize ${statusColors[status]}`}>{statusLabels[status]}</span>
+
+      {/* Info Items */}
+      <div className="grid gap-3 text-sm text-muted-foreground">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <div className="flex items-center gap-2 bg-muted px-2 py-1 rounded-md">
+            <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
+            <span>{date}</span>
+          </div>
+          <div className="flex items-center gap-2 bg-muted px-2 py-1 rounded-md">
+            <Clock className="w-4 h-4 text-primary flex-shrink-0" />
+            <span>{time}</span>
           </div>
         </div>
-        <div className="flex flex-wrap gap-3 mt-2 text-sm text-muted-foreground">
-          <div className="flex items-center">
-            <Clock className="h-4 w-4 mr-1" /> 
-            {date}, {time}
-          </div>
-          <div className="flex items-center">
-            <MapPin className="h-4 w-4 mr-1" /> 
-            {location}
-          </div>
-          <div className="flex items-center">
-            <Users className="h-4 w-4 mr-1" /> 
+
+        <div className="flex items-center gap-2">
+          <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+          <p className="line-clamp-1">{location}</p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Users className="w-4 h-4 text-primary flex-shrink-0" />
+          <p>
             {attendees} {attendees === 1 ? 'family' : 'families'}
-          </div>
+          </p>
         </div>
       </div>
     </div>
