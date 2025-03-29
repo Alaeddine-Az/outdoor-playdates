@@ -54,47 +54,47 @@ const Dashboard = () => {
     <div className="animate-fade-in px-4 py-6 max-w-6xl mx-auto">
       {/* Hero Section */}
       <section
-        className="relative bg-[#CEEBF0] rounded-3xl overflow-hidden mb-8"
-        style={{ height: '210px', fontFamily: '"Baloo 2", cursive' }} // reduced height
+  className="relative bg-[#CEEBF0] rounded-3xl overflow-hidden mb-8"
+  style={{ height: '210px', fontFamily: '"Baloo 2", cursive' }}
+>
+  {/* Sky Background */}
+  <div className="absolute inset-0 bg-[#CEEBF0]">
+    {/* Clouds */}
+    <div className="absolute w-24 h-16 bg-white rounded-full top-10 left-10 opacity-90 animate-cloud" />
+    <div className="absolute w-16 h-10 bg-white rounded-full top-[60px] left-[100px] opacity-70 blur-sm" />
+    <div className="absolute w-20 h-12 bg-white rounded-full top-[90px] left-[200px] opacity-70 blur-sm" />
+
+    {/* Sun Emoji */}
+    <div className="absolute text-6xl top-12 right-16 animate-bounce-sun">☀️</div>
+  </div>
+
+  {/* Parallax Hills */}
+  <div className="absolute bottom-0 w-full h-[80px] bg-[#D4F7D3] rounded-t-[100%] z-0" />
+  <div className="absolute bottom-0 w-full h-[70px] bg-[#A5E4A2] rounded-t-[100%] z-10 translate-y-[8px]" />
+  <div className="absolute bottom-0 w-full h-[60px] bg-[#73C770] rounded-t-[100%] z-20 translate-y-[16px]" />
+
+  {/* Content */}
+  <div className="relative z-30 h-full px-6 py-6 flex flex-col justify-center">
+    <div className="text-left">
+      <h1 className="text-4xl font-extrabold text-black mb-2">
+        Welcome back, {profile?.parent_name?.split(' ')[0] || 'there'}!
+      </h1>
+      <p className="text-lg text-black">
+        Here&apos;s what&apos;s happening with your playdates and connections.
+      </p>
+    </div>
+
+    {/* Edit Button */}
+    <div className="absolute bottom-4 right-6">
+      <Button
+        className="bg-[#F9DA6F] text-black font-semibold px-5 py-2 rounded-full hover:brightness-110"
+        onClick={() => navigate('/parent-profile')}
       >
-        {/* Sky Background */}
-        <div className="absolute inset-0 bg-[#CEEBF0]">
-          {/* Clouds */}
-          <div className="absolute w-24 h-16 bg-white rounded-full top-10 left-10 opacity-90 animate-cloud" />
-          <div className="absolute w-16 h-10 bg-white rounded-full top-[60px] left-[100px] opacity-70 blur-sm" />
-          <div className="absolute w-20 h-12 bg-white rounded-full top-[90px] left-[200px] opacity-70 blur-sm" />
-
-          {/* Moved Sun Emoji slightly down and to the left */}
-          <div className="absolute text-6xl top-12 right-16 animate-bounce-sun">☀️</div>
-        </div>
-
-        {/* Green Hills */}
-        <div className="absolute bottom-0 w-full h-[80px] bg-[#73C770] rounded-t-[100%]" />
-        <div className="absolute bottom-0 left-[10%] w-[80px] h-[40px] bg-[#73C770] rounded-full opacity-80 blur-sm" />
-        <div className="absolute bottom-0 left-[40%] w-[100px] h-[50px] bg-[#73C770] rounded-full opacity-90 blur-sm" />
-
-        {/* Centered Text and Button */}
-        <div className="relative z-10 h-full px-6 py-6 flex flex-col justify-center">
-          <div className="text-left">
-            <h1 className="text-4xl font-extrabold text-black mb-2">
-              Welcome back, {profile?.parent_name?.split(' ')[0] || 'there'}!
-            </h1>
-            <p className="text-lg text-black">
-              Here&apos;s what&apos;s happening with your playdates and connections.
-            </p>
-          </div>
-
-          {/* Button bottom-right */}
-          <div className="absolute bottom-4 right-6">
-            <Button
-              className="bg-[#F9DA6F] text-black font-semibold px-5 py-2 rounded-full hover:brightness-110"
-              onClick={() => navigate('/parent-profile')}
-            >
-              Edit Profile
-            </Button>
-          </div>
-        </div>
-      </section>
+        Edit Profile
+      </Button>
+    </div>
+  </div>
+</section>
 
       {/* Main Content */}
       {loading ? (
