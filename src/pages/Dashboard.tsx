@@ -54,32 +54,37 @@ const Dashboard = () => {
   return (
     <div className="animate-fade-in px-4 py-6 max-w-6xl mx-auto">
       {/* Hero Section */}
-      <section className="relative bg-[#CEEBF0] rounded-3xl overflow-hidden mb-8" style={{ height: '220px', fontFamily: '"Baloo 2", cursive' }}>
-        {/* Background Elements */}
-        <div className="absolute inset-0 z-0">
+      <section className="relative bg-[#CEEBF0] rounded-3xl overflow-hidden mb-8" style={{ height: '200px', fontFamily: '"Baloo 2", cursive' }}>
+        {/* Sky Shape */}
+        <div className="absolute inset-0 bg-[#CEEBF0]">
           <div className="absolute w-24 h-16 bg-white rounded-full top-8 left-6 opacity-90 animate-cloud" />
-          <div className="absolute text-4xl sm:text-6xl top-4 left-4">🌞</div>
-          <div className="absolute bottom-0 w-full h-[60px] bg-[#A8E6A1] rounded-t-[100%]" />
-          <div className="absolute bottom-0 w-full h-[40px] bg-[#73C770] rounded-t-[100%]" />
+          <div className="absolute text-4xl md:text-6xl top-4 left-8 md:left-auto md:right-12 animate-bounce-sun">
+            ☀️
+          </div>
         </div>
 
-        {/* Text & Button */}
-        <div className="relative z-10 h-full flex flex-col justify-center text-left px-6 pt-10">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-black mb-1">
-            Welcome back, {profile?.parent_name?.split(' ')[0] || 'Test'}!
-          </h1>
-          <p className="text-base sm:text-lg text-black mb-3">
-            Here's what's happening with your playdates and connections.
-          </p>
-          <div className="absolute right-4 bottom-4 sm:static sm:mt-auto sm:self-start">
+        {/* Green Hills */}
+        <div className="absolute bottom-0 w-full h-[60px] bg-[#73C770] rounded-t-[100%]" />
+        <div className="absolute bottom-4 w-full h-[60px] bg-[#B2E8A6] rounded-t-[100%]" />
+
+        <div className="relative z-10 h-full px-6 py-6 flex flex-col justify-center md:justify-end">
+          <div className="text-left md:mb-6">
+            <h1 className="text-3xl md:text-4xl font-extrabold text-black mb-1">
+              Welcome back, {profile?.parent_name?.split(' ')[0] || 'there'}!
+            </h1>
+            <p className="text-md md:text-lg text-black">
+              Here&apos;s what&apos;s happening with your playdates and connections.
+            </p>
+          </div>
+          <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6">
             <Button
-              className="bg-[#F9DA6F] text-black p-3 sm:px-5 sm:py-2 rounded-full hover:brightness-110 transition"
+              className="md:px-6 md:py-2 bg-[#F9DA6F] text-black font-semibold rounded-full hover:brightness-110 w-12 h-12 md:w-auto md:h-auto p-0 md:p-4 flex items-center justify-center"
               onClick={() => navigate('/parent-profile')}
             >
-              <span className="sm:hidden">
+              <span className="block md:hidden">
                 <Pencil className="w-5 h-5" />
               </span>
-              <span className="hidden sm:inline">Edit Profile</span>
+              <span className="hidden md:block">Edit Profile</span>
             </Button>
           </div>
         </div>
