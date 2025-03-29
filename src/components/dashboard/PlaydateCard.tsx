@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Calendar, MapPin, Users } from 'lucide-react';
 import { format } from 'date-fns';
@@ -9,13 +10,15 @@ interface PlaydateCardProps {
   time: string;
   location: string;
   families: number;
-  status?: 'upcoming' | 'past' | 'confirmed';
+  status?: 'upcoming' | 'past' | 'confirmed' | 'pending' | 'completed';
 }
 
 const statusColors = {
   upcoming: 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white',
   confirmed: 'bg-blue-500 text-white',
   past: 'bg-muted text-muted-foreground',
+  pending: 'bg-amber-500 text-white',
+  completed: 'bg-green-500 text-white',
 };
 
 const PlaydateCard: React.FC<PlaydateCardProps> = ({
