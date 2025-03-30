@@ -90,11 +90,22 @@ export function useAdminUsers() {
     queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
   };
 
+  // Fixed error handling by ensuring we extract error message correctly
+  let errorMessage: string | null = null;
+  if (usersQuery.error) {
+    if (typeof usersQuery.error === 'string') {
+      errorMessage = usersQuery.error;
+    } else if (usersQuery.error instanceof Error) {
+      errorMessage = usersQuery.error.message;
+    } else {
+      errorMessage = 'An unknown error occurred';
+    }
+  }
+
   return {
     users: usersQuery.data?.users || [],
     isLoading: usersQuery.isLoading || isLoading,
-    error: usersQuery.error ? (typeof usersQuery.error === 'string' ? usersQuery.error : 
-           (usersQuery.error instanceof Error ? usersQuery.error.message : 'An unknown error occurred')) : null,
+    error: errorMessage,
     currentPage,
     setCurrentPage,
     perPage,
