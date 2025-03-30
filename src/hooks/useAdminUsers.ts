@@ -93,10 +93,11 @@ export function useAdminUsers() {
   // Fixed error handling by ensuring we extract error message correctly
   let errorMessage: string | null = null;
   if (usersQuery.error) {
-    if (typeof usersQuery.error === 'string') {
-      errorMessage = usersQuery.error;
-    } else if (usersQuery.error instanceof Error) {
-      errorMessage = usersQuery.error.message;
+    const error = usersQuery.error as unknown;
+    if (typeof error === 'string') {
+      errorMessage = error;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
     } else {
       errorMessage = 'An unknown error occurred';
     }
