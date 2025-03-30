@@ -1,7 +1,6 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 
-// CORS headers for browser access
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -32,7 +31,7 @@ serve(async (req) => {
       })
     }
 
-    // ✅ Decode the JWT manually
+    // ✅ Decode JWT manually to extract user ID
     const jwt = authHeader.replace('Bearer ', '');
     let userId;
     try {
@@ -46,14 +45,7 @@ serve(async (req) => {
       });
     }
 
-    if (!userId) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    // ✅ Call the is_admin function securely
+    // ✅ Use service role to check admin status
     const { data: isAdmin, error: adminCheckError } = await supabaseAdmin.rpc('is_admin', {
       user_id: userId
     });
@@ -62,22 +54,21 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Unauthorized - Admin access required' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
+      });
     }
 
-    // Parse body
-    const body = await req.json();
-    const action = body.action;
+    const requestBody = await req.json();
+    const action = requestBody.action;
 
     switch (action) {
       case 'getUsers':
-        return await handleGetUsers(body);
+        return await handleGetUsers(requestBody);
       case 'createUser':
-        return await handleCreateUser(body);
+        return await handleCreateUser(requestBody);
       case 'updatePassword':
-        return await handleUpdatePassword(body);
+        return await handleUpdatePassword(requestBody);
       case 'deleteUser':
-        return await handleDeleteUser(body);
+        return await handleDeleteUser(requestBody);
       default:
         return new Response(JSON.stringify({ error: 'Unknown action' }), {
           status: 400,
@@ -85,30 +76,25 @@ serve(async (req) => {
         });
     }
   } catch (error) {
-    console.error('Error in admin-users:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
 
-  // --- Handlers below ---
-
   async function handleGetUsers(body) {
     const page = body.page || 1;
     const perPage = body.per_page || 10;
 
-    const response = await fetch(
-      `${supabaseUrl}/auth/v1/admin/users?page=${page}&per_page=${perPage}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-          'apikey': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const response = await fetch(`${supabaseUrl}/auth/v1/admin/users?page=${page}&per_page=${perPage}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+        apikey: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+        'Content-Type': 'application/json',
+      },
+    });
+
     const data = await response.json();
     return new Response(JSON.stringify(data), {
       status: response.status,
@@ -118,19 +104,16 @@ serve(async (req) => {
 
   async function handleCreateUser(body) {
     const { email, password, user_metadata } = body;
+    const response = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+        apikey: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password, email_confirm: true, user_metadata }),
+    });
 
-    const response = await fetch(
-      `${supabaseUrl}/auth/v1/admin/users`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-          'apikey': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, email_confirm: true, user_metadata }),
-      }
-    );
     const data = await response.json();
     return new Response(JSON.stringify(data), {
       status: response.status,
@@ -140,19 +123,16 @@ serve(async (req) => {
 
   async function handleUpdatePassword(body) {
     const { user_id, password } = body;
+    const response = await fetch(`${supabaseUrl}/auth/v1/admin/users/${user_id}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+        apikey: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ password }),
+    });
 
-    const response = await fetch(
-      `${supabaseUrl}/auth/v1/admin/users/${user_id}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-          'apikey': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ password }),
-      }
-    );
     const data = await response.json();
     return new Response(JSON.stringify(data), {
       status: response.status,
@@ -162,19 +142,17 @@ serve(async (req) => {
 
   async function handleDeleteUser(body) {
     const { user_id } = body;
+    const response = await fetch(`${supabaseUrl}/auth/v1/admin/users/${user_id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+        apikey: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+        'Content-Type': 'application/json',
+      },
+    });
 
-    const response = await fetch(
-      `${supabaseUrl}/auth/v1/admin/users/${user_id}`,
-      {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-          'apikey': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    return new Response(await response.text(), {
+    const data = await response.json();
+    return new Response(JSON.stringify(data), {
       status: response.status,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
