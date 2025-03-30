@@ -1,5 +1,3 @@
-// src/utils/uploadAvatar.ts
-
 import { supabase } from '@/integrations/supabase/client';
 
 export const uploadAvatar = async (file: File, userId: string) => {
@@ -10,7 +8,7 @@ export const uploadAvatar = async (file: File, userId: string) => {
   const filePath = `avatars/${fileName}`;
 
   const { data, error } = await supabase.storage
-    .from('profiles') // this is your storage bucket name
+    .from('profiles')
     .upload(filePath, file, {
       cacheControl: '3600',
       upsert: false,
