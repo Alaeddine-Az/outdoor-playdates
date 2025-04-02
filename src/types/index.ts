@@ -67,8 +67,8 @@ export interface EventParticipant {
 export interface PlaydateParticipant {
   id: string;
   playdate_id: string;
-  child_id: string;
-  parent_id?: string; // Adding parent_id as optional
+  child_ids: string[]; // Updated to support multiple children
+  parent_id: string;
   status: string;
   created_at: string;
   updated_at: string;

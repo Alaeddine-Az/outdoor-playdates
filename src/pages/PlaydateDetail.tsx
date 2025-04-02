@@ -10,6 +10,7 @@ import { CalendarClock, MapPin, Users, Clock, ArrowLeft, User } from 'lucide-rea
 import { format } from 'date-fns';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ChildProfile, PlaydateParticipant } from '@/types';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const PlaydateDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,12 +23,14 @@ const PlaydateDetail = () => {
     [key: string]: { parent: any; child: ChildProfile | null }
   }>({});
   const [userChildren, setUserChildren] = useState<any[]>([]);
-  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+  const [selectedChildIds, setSelectedChildIds] = useState<string[]>([]); // Updated to array for multiple selection
   const [isLoading, setIsLoading] = useState(true);
   const [isJoining, setIsJoining] = useState(false);
 
-  // Check if user is already a participant
-  const userParticipation = participants.find(p => p.child_id && user && p.child_id === selectedChildId);
+  // Check if user is already a participant with any of their children
+  const userParticipation = participants.find(p => 
+    p.child_ids?.some(childId => selectedChildIds.includes(childId))
+  );
   const isParticipant = !!userParticipation;
 
   useEffect(() => {
@@ -72,27 +75,32 @@ const PlaydateDetail = () => {
           const participantDetailsObj: { [key: string]: { parent: any; child: ChildProfile | null } } = {};
           
           for (const participant of participantsData) {
-            // Fetch child details
-            if (participant.child_id) {
-              const { data: childData, error: childError } = await supabase
-                .from('children')
-                .select('*')
-                .eq('id', participant.child_id)
-                .single();
-              
-              if (!childError && childData) {
-                // Fetch parent details using parent_id from child
-                const { data: parentData, error: parentError } = await supabase
-                  .from('profiles')
+            // For each child in the participant's child_ids array
+            if (participant.child_ids && participant.child_ids.length > 0) {
+              for (const childId of participant.child_ids) {
+                // Fetch child details
+                const { data: childData, error: childError } = await supabase
+                  .from('children')
                   .select('*')
-                  .eq('id', childData.parent_id)
+                  .eq('id', childId)
                   .single();
                 
-                if (!parentError && parentData) {
-                  participantDetailsObj[participant.id] = {
-                    parent: parentData,
-                    child: childData
-                  };
+                if (!childError && childData) {
+                  // Fetch parent details using parent_id from child
+                  const { data: parentData, error: parentError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', childData.parent_id)
+                    .single();
+                  
+                  if (!parentError && parentData) {
+                    // Create a unique key combining participant ID and child ID
+                    const detailKey = `${participant.id}_${childId}`;
+                    participantDetailsObj[detailKey] = {
+                      parent: parentData,
+                      child: childData
+                    };
+                  }
                 }
               }
             }
@@ -110,9 +118,6 @@ const PlaydateDetail = () => {
 
           if (!childrenError && childrenData) {
             setUserChildren(childrenData);
-            if (childrenData.length > 0 && !selectedChildId) {
-              setSelectedChildId(childrenData[0].id);
-            }
           }
         }
       } catch (error) {
@@ -128,13 +133,23 @@ const PlaydateDetail = () => {
     };
 
     fetchPlaydateDetails();
-  }, [id, user, selectedChildId]);
+  }, [id, user]);
+
+  const handleChildSelection = (childId: string) => {
+    setSelectedChildIds(prev => {
+      if (prev.includes(childId)) {
+        return prev.filter(id => id !== childId);
+      } else {
+        return [...prev, childId];
+      }
+    });
+  };
 
   const handleJoinPlaydate = async () => {
-    if (!user || !selectedChildId || !id) {
+    if (!user || selectedChildIds.length === 0 || !id) {
       toast({
         title: 'Error',
-        description: 'Please select a child to join this playdate.',
+        description: 'Please select at least one child to join this playdate.',
         variant: 'destructive',
       });
       return;
@@ -142,12 +157,13 @@ const PlaydateDetail = () => {
 
     setIsJoining(true);
     try {
-      // Insert participant record
+      // Insert participant record with multiple children
       const { error } = await supabase
         .from('playdate_participants')
         .insert({
           playdate_id: id,
-          child_id: selectedChildId,
+          child_ids: selectedChildIds,
+          parent_id: user.id,
           status: 'pending'
         });
 
@@ -276,10 +292,9 @@ const PlaydateDetail = () => {
             <CardContent>
               {participants.length > 0 ? (
                 <ul className="space-y-3">
-                  {participants.map((participant) => {
-                    const details = participantDetails[participant.id];
+                  {Object.entries(participantDetails).map(([key, details]) => {
                     return (
-                      <li key={participant.id} className="flex items-start gap-3 p-3 rounded-lg border">
+                      <li key={key} className="flex items-start gap-3 p-3 rounded-lg border">
                         <Avatar className="h-10 w-10">
                           <AvatarFallback className="bg-primary/10">
                             {details?.child?.name?.[0] || 'C'}
@@ -296,7 +311,7 @@ const PlaydateDetail = () => {
                                   {details.child?.age} years
                                 </span>
                                 <span className="ml-1 text-xs px-2 py-0.5 rounded-full bg-muted">
-                                  {participant.status}
+                                  {key.split('_')[0] && participants.find(p => p.id === key.split('_')[0])?.status}
                                 </span>
                               </div>
                               <div className="text-sm text-muted-foreground mt-1 flex items-center">
@@ -333,23 +348,29 @@ const PlaydateDetail = () => {
                   {userChildren.length > 0 ? (
                     <>
                       <div className="mb-4">
-                        <label className="block text-sm font-medium mb-2">Select a child:</label>
-                        <select 
-                          className="w-full p-2 border rounded-md"
-                          value={selectedChildId || ''}
-                          onChange={(e) => setSelectedChildId(e.target.value)}
-                        >
+                        <label className="block text-sm font-medium mb-2">Select children:</label>
+                        <div className="space-y-2">
                           {userChildren.map(child => (
-                            <option key={child.id} value={child.id}>
-                              {child.name} ({child.age})
-                            </option>
+                            <div key={child.id} className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={`child-${child.id}`} 
+                                checked={selectedChildIds.includes(child.id)} 
+                                onCheckedChange={() => handleChildSelection(child.id)}
+                              />
+                              <label 
+                                htmlFor={`child-${child.id}`} 
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                              >
+                                {child.name} ({child.age})
+                              </label>
+                            </div>
                           ))}
-                        </select>
+                        </div>
                       </div>
                       
                       <Button
                         className="w-full"
-                        disabled={isJoining || isParticipant}
+                        disabled={isJoining || isParticipant || selectedChildIds.length === 0}
                         onClick={handleJoinPlaydate}
                       >
                         {isJoining ? 'Joining...' : isParticipant ? 'Already Joined' : 'Join Playdate'}
