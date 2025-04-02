@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
@@ -39,7 +38,6 @@ serve(async (req) => {
       return jsonError('Invalid token', 401);
     }
 
-    // ✅ Check if the user is an admin
     const { data: isAdmin, error: adminCheckError } = await supabaseAdmin.rpc('is_admin', {
       user_id: userId,
     });
@@ -56,13 +54,19 @@ serve(async (req) => {
 
     let body;
     try {
-      body = await req.json();
+      const text = await req.text();
+      if (!text) {
+        body = {}; // Empty body
+      } else {
+        body = JSON.parse(text);
+      }
     } catch (err) {
       console.error('❌ Failed to parse request body:', err);
       return jsonError('Invalid JSON in request body', 400);
     }
 
-    switch (body.action) {
+    const action = body?.action || '';
+    switch (action) {
       case 'getUsers':
         return await handleGetUsers(body);
       case 'createUser':
@@ -72,8 +76,8 @@ serve(async (req) => {
       case 'deleteUser':
         return await handleDeleteUser(body);
       default:
-        console.warn('❓ Unknown action:', body.action);
-        return jsonError('Unknown action', 400);
+        console.warn('❓ Unknown action:', action);
+        return jsonError(`Unknown or missing action: ${action}`, 400);
     }
 
   } catch (error) {
@@ -82,7 +86,6 @@ serve(async (req) => {
   }
 });
 
-// Utility: JSON error response
 function jsonError(message: string, status = 500): Response {
   return new Response(JSON.stringify({ error: message }), {
     status,
@@ -95,6 +98,7 @@ async function handleGetUsers(body: any) {
   const perPage = body.per_page || 10;
 
   try {
+    console.log(`📋 Fetching users page=${page}, perPage=${perPage}`);
     const res = await fetch(`${supabaseUrl}/auth/v1/admin/users?page=${page}&per_page=${perPage}`, {
       method: 'GET',
       headers: {
@@ -105,6 +109,7 @@ async function handleGetUsers(body: any) {
     });
 
     const data = await res.json();
+    console.log(`✅ Users fetched successfully, count: ${data?.users?.length || 0}`);
     return new Response(JSON.stringify(data), {
       status: res.status,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
