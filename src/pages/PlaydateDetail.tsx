@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,14 +22,16 @@ const PlaydateDetail = () => {
     [key: string]: { parent: any; child: ChildProfile | null }
   }>({});
   const [userChildren, setUserChildren] = useState<any[]>([]);
-  const [selectedChildIds, setSelectedChildIds] = useState<string[]>([]); // Updated to array for multiple selection
+  const [selectedChildIds, setSelectedChildIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isJoining, setIsJoining] = useState(false);
 
-  // Check if user is already a participant with any of their children
-  const userParticipation = participants.find(p => 
-    p.child_ids?.some(childId => selectedChildIds.includes(childId))
-  );
+  const userParticipation = participants.find(p => {
+    if (p.child_ids && p.child_ids.length > 0) {
+      return p.child_ids.some(childId => selectedChildIds.includes(childId));
+    }
+    return selectedChildIds.includes(p.child_id);
+  });
   const isParticipant = !!userParticipation;
 
   useEffect(() => {
@@ -38,7 +39,6 @@ const PlaydateDetail = () => {
       try {
         if (!id) return;
 
-        // Fetch playdate details
         const { data: playdateData, error: playdateError } = await supabase
           .from('playdates')
           .select('*')
@@ -48,7 +48,6 @@ const PlaydateDetail = () => {
         if (playdateError) throw playdateError;
         setPlaydate(playdateData);
 
-        // Fetch creator profile
         if (playdateData.creator_id) {
           const { data: creatorData, error: creatorError } = await supabase
             .from('profiles')
@@ -61,46 +60,51 @@ const PlaydateDetail = () => {
           }
         }
 
-        // Fetch participants
         const { data: participantsData, error: participantsError } = await supabase
           .from('playdate_participants')
           .select('*')
           .eq('playdate_id', id);
 
         if (participantsError) throw participantsError;
-        setParticipants(participantsData || []);
+        
+        const adaptedParticipants = participantsData ? participantsData.map(p => ({
+          ...p,
+          child_ids: p.child_ids && p.child_ids.length > 0 ? p.child_ids : [p.child_id],
+          parent_id: p.parent_id || user?.id || ''
+        })) : [];
+        
+        setParticipants(adaptedParticipants);
 
-        // Fetch detailed information for each participant
-        if (participantsData && participantsData.length > 0) {
+        if (adaptedParticipants && adaptedParticipants.length > 0) {
           const participantDetailsObj: { [key: string]: { parent: any; child: ChildProfile | null } } = {};
           
-          for (const participant of participantsData) {
-            // For each child in the participant's child_ids array
-            if (participant.child_ids && participant.child_ids.length > 0) {
-              for (const childId of participant.child_ids) {
-                // Fetch child details
-                const { data: childData, error: childError } = await supabase
-                  .from('children')
+          for (const participant of adaptedParticipants) {
+            const childIdsToProcess = participant.child_ids && participant.child_ids.length > 0 
+              ? participant.child_ids 
+              : [participant.child_id];
+            
+            for (const childId of childIdsToProcess) {
+              if (!childId) continue;
+              
+              const { data: childData, error: childError } = await supabase
+                .from('children')
+                .select('*')
+                .eq('id', childId)
+                .single();
+              
+              if (!childError && childData) {
+                const { data: parentData, error: parentError } = await supabase
+                  .from('profiles')
                   .select('*')
-                  .eq('id', childId)
+                  .eq('id', childData.parent_id)
                   .single();
                 
-                if (!childError && childData) {
-                  // Fetch parent details using parent_id from child
-                  const { data: parentData, error: parentError } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', childData.parent_id)
-                    .single();
-                  
-                  if (!parentError && parentData) {
-                    // Create a unique key combining participant ID and child ID
-                    const detailKey = `${participant.id}_${childId}`;
-                    participantDetailsObj[detailKey] = {
-                      parent: parentData,
-                      child: childData
-                    };
-                  }
+                if (!parentError && parentData) {
+                  const detailKey = `${participant.id}_${childId}`;
+                  participantDetailsObj[detailKey] = {
+                    parent: parentData,
+                    child: childData
+                  };
                 }
               }
             }
@@ -109,7 +113,6 @@ const PlaydateDetail = () => {
           setParticipantDetails(participantDetailsObj);
         }
 
-        // Fetch user's children if logged in
         if (user) {
           const { data: childrenData, error: childrenError } = await supabase
             .from('children')
@@ -157,11 +160,11 @@ const PlaydateDetail = () => {
 
     setIsJoining(true);
     try {
-      // Insert participant record with multiple children
       const { error } = await supabase
         .from('playdate_participants')
         .insert({
           playdate_id: id,
+          child_id: selectedChildIds[0],
           child_ids: selectedChildIds,
           parent_id: user.id,
           status: 'pending'
@@ -169,14 +172,20 @@ const PlaydateDetail = () => {
 
       if (error) throw error;
 
-      // Refetch participants
       const { data: updatedParticipants, error: fetchError } = await supabase
         .from('playdate_participants')
         .select('*')
         .eq('playdate_id', id);
 
       if (fetchError) throw fetchError;
-      setParticipants(updatedParticipants || []);
+      
+      const adaptedParticipants = updatedParticipants ? updatedParticipants.map(p => ({
+        ...p,
+        child_ids: p.child_ids && p.child_ids.length > 0 ? p.child_ids : [p.child_id],
+        parent_id: p.parent_id || user.id || ''
+      })) : [];
+      
+      setParticipants(adaptedParticipants);
 
       toast({
         title: 'Success',

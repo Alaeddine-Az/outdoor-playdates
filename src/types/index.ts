@@ -1,3 +1,4 @@
+
 export interface ParentProfile {
   id: string;
   parent_name: string;
@@ -63,11 +64,13 @@ export interface EventParticipant {
   joined_at: string;
 }
 
+// Update the PlaydateParticipant interface to match the database structure
 export interface PlaydateParticipant {
   id: string;
   playdate_id: string;
-  child_ids: string[]; // Updated to support multiple children
-  parent_id: string;
+  child_id: string; // Keep this for backward compatibility
+  child_ids?: string[]; // Optional array of child IDs
+  parent_id?: string; // Optional parent ID
   status: string;
   created_at: string;
   updated_at: string;
