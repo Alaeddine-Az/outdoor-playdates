@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -304,7 +303,8 @@ const PlaydateDetail = () => {
                 <div className="flex items-center">
                   <Users className="h-5 w-5 mr-2" />
                   Participants ({Object.keys(participantDetails).length})
-                </CardTitle>
+                </div>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {participants.length > 0 ? (
