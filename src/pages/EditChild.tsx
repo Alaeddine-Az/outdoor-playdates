@@ -7,6 +7,7 @@ import { ArrowLeft, Save } from 'lucide-react';
 import ChildBasicInfoForm from '@/components/child/ChildBasicInfoForm';
 import ChildInterestsForm from '@/components/child/ChildInterestsForm';
 import { useChildProfile } from '@/hooks/useChildProfile';
+import { toast } from '@/components/ui/use-toast';
 
 const EditChild = () => {
   const navigate = useNavigate();

@@ -19,6 +19,7 @@ import GroupDetail from '@/pages/GroupDetail';
 import NotFound from '@/pages/NotFound';
 import EditProfile from '@/pages/EditProfile';
 import ParentProfile from '@/pages/ParentProfile';
+import EditChild from '@/pages/EditChild';
 
 const ProtectedRoutes = () => {
   const { user, loading } = useAuth();
@@ -43,6 +44,7 @@ const ProtectedRoutes = () => {
       <Route path="/parent-profile" element={<ParentProfile />} />
       <Route path="/child/:id" element={<ChildProfile />} />
       <Route path="/add-child" element={<AddChild />} />
+      <Route path="/edit-child/:id" element={<EditChild />} />
       <Route path="/connections" element={<Connections />} />
       <Route path="/messages/:id" element={<Messages />} />
       <Route path="/events" element={<Events />} />
