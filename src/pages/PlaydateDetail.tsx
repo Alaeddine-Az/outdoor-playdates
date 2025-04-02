@@ -1,13 +1,15 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
-import { CalendarClock, MapPin, Users, Clock, ArrowLeft } from 'lucide-react';
+import { CalendarClock, MapPin, Users, Clock, ArrowLeft, User } from 'lucide-react';
 import { format } from 'date-fns';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ChildProfile, PlaydateParticipant } from '@/types';
 
 const PlaydateDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,7 +17,10 @@ const PlaydateDetail = () => {
   const { user } = useAuth();
   const [playdate, setPlaydate] = useState<any>(null);
   const [creator, setCreator] = useState<any>(null);
-  const [participants, setParticipants] = useState<any[]>([]);
+  const [participants, setParticipants] = useState<PlaydateParticipant[]>([]);
+  const [participantDetails, setParticipantDetails] = useState<{
+    [key: string]: { parent: any; child: ChildProfile | null }
+  }>({});
   const [userChildren, setUserChildren] = useState<any[]>([]);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -61,6 +66,40 @@ const PlaydateDetail = () => {
 
         if (participantsError) throw participantsError;
         setParticipants(participantsData || []);
+
+        // Fetch detailed information for each participant
+        if (participantsData && participantsData.length > 0) {
+          const participantDetailsObj: { [key: string]: { parent: any; child: ChildProfile | null } } = {};
+          
+          for (const participant of participantsData) {
+            // Fetch child details
+            if (participant.child_id) {
+              const { data: childData, error: childError } = await supabase
+                .from('children')
+                .select('*')
+                .eq('id', participant.child_id)
+                .single();
+              
+              if (!childError && childData) {
+                // Fetch parent details using parent_id from child
+                const { data: parentData, error: parentError } = await supabase
+                  .from('profiles')
+                  .select('*')
+                  .eq('id', childData.parent_id)
+                  .single();
+                
+                if (!parentError && parentData) {
+                  participantDetailsObj[participant.id] = {
+                    parent: parentData,
+                    child: childData
+                  };
+                }
+              }
+            }
+          }
+          
+          setParticipantDetails(participantDetailsObj);
+        }
 
         // Fetch user's children if logged in
         if (user) {
@@ -212,7 +251,11 @@ const PlaydateDetail = () => {
                       {creator.parent_name?.[0] || 'H'}
                     </div>
                     <div>
-                      <p className="font-medium">{creator.parent_name}</p>
+                      <p className="font-medium">
+                        <Link to={`/parent/${creator.id}`} className="hover:underline">
+                          {creator.parent_name}
+                        </Link>
+                      </p>
                       <p className="text-sm text-muted-foreground">{creator.location}</p>
                     </div>
                   </div>
@@ -233,19 +276,44 @@ const PlaydateDetail = () => {
             <CardContent>
               {participants.length > 0 ? (
                 <ul className="space-y-3">
-                  {participants.map((participant) => (
-                    <li key={participant.id} className="flex items-center gap-3 p-3 rounded-lg border">
-                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm">
-                        {participant.child_id?.[0] || 'C'}
-                      </div>
-                      <div>
-                        <span className="font-medium">{participant.child_id}</span>
-                        <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-muted">
-                          {participant.status}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
+                  {participants.map((participant) => {
+                    const details = participantDetails[participant.id];
+                    return (
+                      <li key={participant.id} className="flex items-start gap-3 p-3 rounded-lg border">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-primary/10">
+                            {details?.child?.name?.[0] || 'C'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          {details ? (
+                            <>
+                              <div className="flex items-center gap-2">
+                                <Link to={`/child/${details.child?.id}`} className="font-medium hover:text-primary">
+                                  {details.child?.name}
+                                </Link>
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-muted">
+                                  {details.child?.age} years
+                                </span>
+                                <span className="ml-1 text-xs px-2 py-0.5 rounded-full bg-muted">
+                                  {participant.status}
+                                </span>
+                              </div>
+                              <div className="text-sm text-muted-foreground mt-1 flex items-center">
+                                <User className="h-3 w-3 mr-1" />
+                                <span>Parent: </span>
+                                <Link to={`/parent/${details.parent?.id}`} className="ml-1 hover:underline">
+                                  {details.parent?.parent_name}
+                                </Link>
+                              </div>
+                            </>
+                          ) : (
+                            <span className="text-muted-foreground">Loading participant details...</span>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : (
                 <p className="text-muted-foreground">No participants yet. Be the first to join!</p>
