@@ -376,24 +376,30 @@ export type Database = {
       playdate_participants: {
         Row: {
           child_id: string
+          child_ids: string[]
           created_at: string
           id: string
+          parent_id: string
           playdate_id: string
           status: string
           updated_at: string
         }
         Insert: {
           child_id: string
+          child_ids?: string[]
           created_at?: string
           id?: string
+          parent_id?: string
           playdate_id: string
           status?: string
           updated_at?: string
         }
         Update: {
           child_id?: string
+          child_ids?: string[]
           created_at?: string
           id?: string
+          parent_id?: string
           playdate_id?: string
           status?: string
           updated_at?: string
