@@ -77,7 +77,7 @@ const UserManagement: React.FC = () => {
         <Alert variant="destructive">
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
-            {error instanceof Error ? error.message : 'Failed to load users'}
+            {typeof error === 'string' ? error : 'Failed to load users'}
           </AlertDescription>
         </Alert>
       )}

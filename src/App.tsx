@@ -19,8 +19,13 @@ import ConnectionsPage from './pages/Connections';
 import ScrollToTop from './components/ScrollToTop';
 import { useEffect } from 'react';
 import { ensureAdminUser } from './utils/adminInitializer';
+import PlaydateDetail from './pages/PlaydateDetail';
+import { useAuth } from '@/contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
 
 function AppRoutes() {
+  const { user, isAdmin, loading } = useAuth();
+  
   // Initialize admin user
   useEffect(() => {
     ensureAdminUser();
@@ -37,16 +42,37 @@ function AppRoutes() {
       <Route path="/terms" element={<Terms />} />
       <Route path="/contact" element={<Contact />} />
 
-      {/* Admin routes */}
-      <Route path="/admin/*" element={<AdminRoutes />} />
+      {/* Admin routes - redirects non-admin users to dashboard */}
+      <Route path="/admin/*" element={
+        loading ? (
+          <div className="flex items-center justify-center h-screen">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : isAdmin ? (
+          <AdminRoutes />
+        ) : (
+          <Navigate to="/dashboard" replace />
+        )
+      } />
 
-      {/* Main Layout with protected routes */}
-      <Route element={<MainLayout />}>
+      {/* Main Layout with protected routes - redirects admin users to admin dashboard */}
+      <Route element={
+        loading ? (
+          <div className="flex items-center justify-center h-screen">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : isAdmin ? (
+          <Navigate to="/admin" replace />
+        ) : (
+          <MainLayout />
+        )
+      }>
         {/* App Layout for protected app pages */}
         <Route element={<AppLayout />}>
           {/* Protected routes */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/connections" element={<ConnectionsPage />} />
+          <Route path="/playdate/:id" element={<PlaydateDetail />} />
           <Route path="/*" element={<ProtectedRoutes />} />
         </Route>
       </Route>

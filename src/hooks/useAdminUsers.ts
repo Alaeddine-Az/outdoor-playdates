@@ -16,10 +16,21 @@ export function useAdminUsers() {
     queryKey: ['adminUsers', currentPage, perPage],
     queryFn: () => {
       setIsLoading(true);
+      console.log(`Fetching users with page=${currentPage}, perPage=${perPage}`);
       return fetchUsers(currentPage, perPage)
+        .then(result => {
+          console.log('Fetched users:', result);
+          return result;
+        })
+        .catch(error => {
+          console.error('Error in useAdminUsers query:', error);
+          throw error;
+        })
         .finally(() => setIsLoading(false));
     },
     refetchOnWindowFocus: false,
+    retry: 1,
+    staleTime: 30000, // 30 seconds
   });
 
   const createUserMutation = useMutation({
@@ -31,10 +42,10 @@ export function useAdminUsers() {
         description: 'User has been successfully created',
       });
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       toast({
         title: 'Error creating user',
-        description: error.message,
+        description: error.message || 'Failed to create user',
         variant: 'destructive',
       });
     },
@@ -48,10 +59,10 @@ export function useAdminUsers() {
         description: 'User password has been successfully updated',
       });
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       toast({
         title: 'Error updating password',
-        description: error.message,
+        description: error.message || 'Failed to update password',
         variant: 'destructive',
       });
     },
@@ -66,23 +77,41 @@ export function useAdminUsers() {
         description: 'User has been successfully deleted',
       });
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       toast({
         title: 'Error deleting user',
-        description: error.message,
+        description: error.message || 'Failed to delete user',
         variant: 'destructive',
       });
     },
   });
 
+  const refreshUsers = () => {
+    queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
+  };
+
+  // Fixed error handling by ensuring we extract error message correctly
+  let errorMessage: string | null = null;
+  if (usersQuery.error) {
+    const error = usersQuery.error as unknown;
+    if (typeof error === 'string') {
+      errorMessage = error;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    } else {
+      errorMessage = 'An unknown error occurred';
+    }
+  }
+
   return {
     users: usersQuery.data?.users || [],
     isLoading: usersQuery.isLoading || isLoading,
-    error: usersQuery.error,
+    error: errorMessage,
     currentPage,
     setCurrentPage,
     perPage,
     setPerPage,
+    refreshUsers,
     createUser: createUserMutation.mutate,
     isCreatingUser: createUserMutation.isPending,
     updatePassword: updatePasswordMutation.mutate,

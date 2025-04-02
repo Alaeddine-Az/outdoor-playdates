@@ -1,6 +1,8 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Calendar, Clock, MapPin, Users } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface PlaydateItemProps {
   title: string;
@@ -8,52 +10,71 @@ interface PlaydateItemProps {
   time: string;
   location: string;
   attendees: number;
-  status: 'pending' | 'confirmed' | 'completed';
-  onClick: () => void;
+  status?: 'upcoming' | 'confirmed' | 'past' | 'cancelled';
+  onClick?: () => void;
+  id: string;
 }
 
-const PlaydateItem = ({ title, date, time, location, attendees, status, onClick }: PlaydateItemProps) => {
-  const statusColors = {
-    pending: 'text-muted-foreground',
-    confirmed: 'text-primary',
-    completed: 'text-secondary'
-  };
+const statusColors = {
+  upcoming: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
+  confirmed: 'bg-green-100 text-green-800 hover:bg-green-200',
+  past: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
+  cancelled: 'bg-red-100 text-red-800 hover:bg-red-200',
+};
+
+const PlaydateItem = ({
+  id,
+  title,
+  date,
+  time,
+  location,
+  attendees,
+  status = 'upcoming',
+  onClick
+}: PlaydateItemProps) => {
+  const navigate = useNavigate();
   
-  const statusLabels = {
-    pending: 'Pending',
-    confirmed: 'Confirmed',
-    completed: 'Completed'
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      navigate(`/playdate/${id}`);
+    }
   };
   
   return (
-    <div 
-      className="flex items-start p-4 rounded-lg border border-muted bg-muted/10 hover:bg-muted/30 transition-colors cursor-pointer"
-      onClick={onClick}
+    <div
+      className="bg-white rounded-lg border border-muted p-4 hover:shadow-md transition-all cursor-pointer"
+      onClick={handleClick}
     >
-      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex flex-col items-center justify-center text-primary">
-        <Calendar className="h-6 w-6" />
+      <div className="flex justify-between items-start mb-2">
+        <h3 className="font-medium">{title}</h3>
+        <Badge className={statusColors[status] || 'bg-gray-100 text-gray-800'}>
+          {status.charAt(0).toUpperCase() + status.slice(1)}
+        </Badge>
       </div>
-      <div className="ml-4 flex-grow">
-        <div className="flex justify-between">
-          <h3 className="font-medium">{title}</h3>
-          <div className="flex items-center space-x-1">
-            <div className={`w-2 h-2 rounded-full bg-${status === 'pending' ? 'muted-foreground' : (status === 'confirmed' ? 'primary' : 'secondary')}`}></div>
-            <span className={`text-xs capitalize ${statusColors[status]}`}>{statusLabels[status]}</span>
-          </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-primary flex-shrink-0" />
+          <span>{date}</span>
         </div>
-        <div className="flex flex-wrap gap-3 mt-2 text-sm text-muted-foreground">
-          <div className="flex items-center">
-            <Clock className="h-4 w-4 mr-1" /> 
-            {date}, {time}
-          </div>
-          <div className="flex items-center">
-            <MapPin className="h-4 w-4 mr-1" /> 
-            {location}
-          </div>
-          <div className="flex items-center">
-            <Users className="h-4 w-4 mr-1" /> 
+        
+        <div className="flex items-center gap-2">
+          <Clock className="h-4 w-4 text-primary flex-shrink-0" />
+          <span>{time}</span>
+        </div>
+        
+        <div className="flex items-center gap-2 md:col-span-2">
+          <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+          <span className="truncate">{location}</span>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Users className="h-4 w-4 text-primary flex-shrink-0" />
+          <span>
             {attendees} {attendees === 1 ? 'family' : 'families'}
-          </div>
+          </span>
         </div>
       </div>
     </div>

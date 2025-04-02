@@ -31,27 +31,36 @@ export const fetchUsers = async (currentPage: number, perPage: number): Promise<
     const token = await getAuthToken();
     if (!token) throw new Error('Not authenticated');
 
-    const response = await supabase.functions.invoke('admin-users', {
-      method: 'GET',
+    console.log(`Fetching users with page=${currentPage}, perPage=${perPage}`);
+    
+    // Make the request to the edge function
+    const { data, error } = await supabase.functions.invoke('admin-users', {
+      method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
       body: { 
+        action: 'getUsers',
         page: currentPage,
         per_page: perPage
       }
     });
 
-    if (response.error) throw new Error(response.error.message);
-    return response.data;
-  } catch (error) {
+    if (error) {
+      console.error('Error invoking admin-users function:', error);
+      throw new Error(error.message || 'Failed to fetch users');
+    }
+    
+    console.log('Fetched user data:', data);
+    return data || { users: [] };
+  } catch (error: any) {
     console.error('Error fetching users:', error);
     toast({
       title: 'Error fetching users',
-      description: error.message,
+      description: error.message || 'Failed to send a request to the edge function',
       variant: 'destructive',
     });
-    throw error;
+    throw error.message || 'Failed to fetch users';
   }
 };
 
@@ -61,12 +70,13 @@ export const createUser = async (userData: CreateUserData): Promise<any> => {
     const token = await getAuthToken();
     if (!token) throw new Error('Not authenticated');
 
-    const response = await supabase.functions.invoke('admin-users', {
+    const { data, error } = await supabase.functions.invoke('admin-users', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
       body: {
+        action: 'createUser',
         email: userData.email,
         password: userData.password,
         user_metadata: {
@@ -75,11 +85,11 @@ export const createUser = async (userData: CreateUserData): Promise<any> => {
       },
     });
 
-    if (response.error) throw new Error(response.error.message);
-    return response.data;
-  } catch (error) {
+    if (error) throw new Error(error.message || 'Failed to create user');
+    return data;
+  } catch (error: any) {
     console.error('Error creating user:', error);
-    throw error;
+    throw error.message || 'Failed to create user';
   }
 };
 
@@ -89,22 +99,23 @@ export const updateUserPassword = async ({ userId, password }: { userId: string;
     const token = await getAuthToken();
     if (!token) throw new Error('Not authenticated');
 
-    const response = await supabase.functions.invoke('admin-users', {
-      method: 'PATCH',
+    const { data, error } = await supabase.functions.invoke('admin-users', {
+      method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
       body: {
+        action: 'updatePassword',
         user_id: userId,
         password,
       },
     });
 
-    if (response.error) throw new Error(response.error.message);
-    return response.data;
-  } catch (error) {
+    if (error) throw new Error(error.message || 'Failed to update user password');
+    return data;
+  } catch (error: any) {
     console.error('Error updating user password:', error);
-    throw error;
+    throw error.message || 'Failed to update user password';
   }
 };
 
@@ -114,20 +125,21 @@ export const deleteUser = async (userId: string): Promise<any> => {
     const token = await getAuthToken();
     if (!token) throw new Error('Not authenticated');
 
-    const response = await supabase.functions.invoke('admin-users', {
-      method: 'DELETE',
+    const { data, error } = await supabase.functions.invoke('admin-users', {
+      method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
       body: {
+        action: 'deleteUser',
         user_id: userId,
       },
     });
 
-    if (response.error) throw new Error(response.error.message);
-    return response.data;
-  } catch (error) {
+    if (error) throw new Error(error.message || 'Failed to delete user');
+    return data;
+  } catch (error: any) {
     console.error('Error deleting user:', error);
-    throw error;
+    throw error.message || 'Failed to delete user';
   }
 };

@@ -39,7 +39,7 @@ export function useSignIn() {
         description: isAdmin ? "Welcome to the admin dashboard." : "Welcome to GoPlayNow!",
       });
       
-      // Redirect based on admin status
+      // Redirect based on admin status - always redirect to admin for admins
       if (isAdmin) {
         navigate('/admin');
       } else {

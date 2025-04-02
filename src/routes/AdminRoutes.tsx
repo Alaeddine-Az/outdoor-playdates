@@ -9,12 +9,7 @@ import AdminSignups from '@/pages/admin/AdminSignups';
 import AdminLogs from '@/pages/admin/AdminLogs';
 import CreateAdmin from '@/pages/admin/CreateAdmin';
 
-// Reusable component for admin routes
-interface AdminRouteContentProps {
-  children: React.ReactNode;
-}
-
-export const AdminRouteContent: React.FC<AdminRouteContentProps> = ({ children }) => {
+const AdminRoutes = () => {
   const { user, loading, isAdmin } = useAuth();
   
   if (loading) {
@@ -35,23 +30,17 @@ export const AdminRouteContent: React.FC<AdminRouteContentProps> = ({ children }
     return <Navigate to="/dashboard" replace />;
   }
   
-  return <>{children}</>;
-};
-
-const AdminRoutes = () => {
   return (
-    <AdminRouteContent>
-      <AdminLayout>
-        <Routes>
-          <Route path="/" element={<AdminDashboard />} />
-          <Route path="/users" element={<AdminUsers />} />
-          <Route path="/signups" element={<AdminSignups />} />
-          <Route path="/logs" element={<AdminLogs />} />
-          <Route path="/create-admin" element={<CreateAdmin />} />
-          <Route path="*" element={<Navigate to="/admin" replace />} />
-        </Routes>
-      </AdminLayout>
-    </AdminRouteContent>
+    <AdminLayout>
+      <Routes>
+        <Route path="/" element={<AdminDashboard />} />
+        <Route path="/users" element={<AdminUsers />} />
+        <Route path="/signups" element={<AdminSignups />} />
+        <Route path="/logs" element={<AdminLogs />} />
+        <Route path="/create-admin" element={<CreateAdmin />} />
+        <Route path="*" element={<Navigate to="/admin" replace />} />
+      </Routes>
+    </AdminLayout>
   );
 };
 

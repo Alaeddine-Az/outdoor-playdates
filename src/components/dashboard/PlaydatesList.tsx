@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CalendarDays, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -33,7 +32,7 @@ const PlaydatesList = ({
   return (
     <div
       className={cn(
-        'rounded-3xl bg-[#FFF9E9] px-4 py-6 md:px-6 md:py-8 space-y-6',
+        'rounded-3xl bg-[#FFF9E9] px-4 py-6 md:px-6 md:py-8 space-y-6 shadow-md',
         className
       )}
     >
