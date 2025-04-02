@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -5,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
-import { CalendarClock, MapPin, Users, Clock, ArrowLeft, User } from 'lucide-react';
+import { CalendarClock, MapPin, Users, Clock, ArrowLeft, User, Crown } from 'lucide-react';
 import { format } from 'date-fns';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ChildProfile, PlaydateParticipant } from '@/types';
@@ -269,19 +270,27 @@ const PlaydateDetail = () => {
               )}
 
               {creator && (
-                <div className="pt-2">
-                  <h3 className="text-lg font-medium mb-2">Hosted by</h3>
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      {creator.parent_name?.[0] || 'H'}
-                    </div>
+                <div className="pt-2 mt-4 border-t border-muted">
+                  <h3 className="text-lg font-medium mb-2 flex items-center">
+                    <Crown className="h-5 w-5 mr-2 text-amber-500" />
+                    Hosted by
+                  </h3>
+                  <div className="flex items-center gap-3 p-3 rounded-lg border border-amber-200 bg-amber-50">
+                    <Avatar className="h-12 w-12">
+                      <AvatarFallback className="bg-amber-500 text-white">
+                        {creator.parent_name?.[0] || 'H'}
+                      </AvatarFallback>
+                    </Avatar>
                     <div>
-                      <p className="font-medium">
-                        <Link to={`/parent/${creator.id}`} className="hover:underline">
+                      <p className="font-medium text-lg">
+                        <Link to={`/parent/${creator.id}`} className="hover:underline text-primary">
                           {creator.parent_name}
                         </Link>
                       </p>
                       <p className="text-sm text-muted-foreground">{creator.location}</p>
+                      {creator.description && (
+                        <p className="text-sm mt-1 line-clamp-2">{creator.description}</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -294,18 +303,21 @@ const PlaydateDetail = () => {
               <CardTitle className="text-xl">
                 <div className="flex items-center">
                   <Users className="h-5 w-5 mr-2" />
-                  Participants
-                </div>
-              </CardTitle>
+                  Participants ({Object.keys(participantDetails).length})
+                </CardTitle>
             </CardHeader>
             <CardContent>
               {participants.length > 0 ? (
                 <ul className="space-y-3">
                   {Object.entries(participantDetails).map(([key, details]) => {
+                    const participantId = key.split('_')[0];
+                    const participant = participants.find(p => p.id === participantId);
+                    const isCreatorChild = details.parent?.id === playdate.creator_id;
+                    
                     return (
-                      <li key={key} className="flex items-start gap-3 p-3 rounded-lg border">
+                      <li key={key} className={`flex items-start gap-3 p-3 rounded-lg border ${isCreatorChild ? 'border-amber-200 bg-amber-50' : ''}`}>
                         <Avatar className="h-10 w-10">
-                          <AvatarFallback className="bg-primary/10">
+                          <AvatarFallback className={isCreatorChild ? "bg-amber-500 text-white" : "bg-primary/10"}>
                             {details?.child?.name?.[0] || 'C'}
                           </AvatarFallback>
                         </Avatar>
@@ -319,8 +331,13 @@ const PlaydateDetail = () => {
                                 <span className="text-xs px-2 py-0.5 rounded-full bg-muted">
                                   {details.child?.age} years
                                 </span>
+                                {isCreatorChild && (
+                                  <span className="ml-1 text-xs px-2 py-0.5 rounded-full bg-amber-200 text-amber-800 flex items-center">
+                                    <Crown className="h-3 w-3 mr-1" /> Host's child
+                                  </span>
+                                )}
                                 <span className="ml-1 text-xs px-2 py-0.5 rounded-full bg-muted">
-                                  {key.split('_')[0] && participants.find(p => p.id === key.split('_')[0])?.status}
+                                  {participant?.status}
                                 </span>
                               </div>
                               <div className="text-sm text-muted-foreground mt-1 flex items-center">
