@@ -75,8 +75,3 @@ export interface PlaydateParticipant {
   created_at: string;
   updated_at: string;
 }
-
-// Extended profile type that includes children data
-export interface ProfileWithChildren extends ParentProfile {
-  childrenData: ChildProfile[];
-}

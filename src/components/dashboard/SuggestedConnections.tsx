@@ -2,34 +2,117 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users } from 'lucide-react';
+import { Users, MapPin, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useConnections } from '@/hooks/useConnections';
-import ConnectionCard, { ProfileWithChildren } from '@/components/dashboard/ConnectionCard';
-import ConnectionSkeleton from '@/components/dashboard/ConnectionSkeleton';
-import { containerAnimation, itemAnimation } from '@/components/dashboard/animations';
 
-interface SuggestedConnectionsProps {
-  profiles: ProfileWithChildren[];
-  loading?: boolean;
+interface SuggestedConnectionProps {
+  id: string;
+  name: string;
+  childName: string;
+  interests: string[];
+  distance: string;
 }
 
-const SuggestedConnections = ({ profiles = [], loading = false }: SuggestedConnectionsProps) => {
+const ConnectionCard = ({ id, name, childName, interests, distance }: SuggestedConnectionProps) => {
   const navigate = useNavigate();
-  const { loading: connectionsLoading } = useConnections();
   
-  // Check if loading state or if profiles is undefined
-  const isLoading = loading || connectionsLoading;
-  const hasProfiles = profiles && Array.isArray(profiles) && profiles.length > 0;
+  // Generate a color based on the name
+  const getColor = (name: string) => {
+    const colors = ['pink', 'blue', 'green', 'purple', 'teal'];
+    const nameSum = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return colors[nameSum % colors.length];
+  };
   
-  // Return skeleton during loading
-  if (isLoading) {
-    return <ConnectionSkeleton />;
-  }
+  const colorMap = {
+    pink: 'bg-pink-500 text-white',
+    blue: 'bg-play-blue text-white',
+    green: 'bg-play-lime text-green-700',
+    purple: 'bg-purple-500 text-white',
+    teal: 'bg-teal-500 text-white'
+  };
+  
+  const colorClass = colorMap[getColor(name) as keyof typeof colorMap];
   
   return (
-    <Card className="rounded-3xl overflow-hidden border-none shadow-md h-full">
+    <motion.div 
+      className="p-4 rounded-2xl bg-white border border-play-beige hover:border-play-orange/20 transition-all duration-300 group shadow-sm hover:shadow-md"
+      whileHover={{ y: -4 }}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <div 
+            className={`w-12 h-12 rounded-2xl ${colorClass} flex items-center justify-center text-xl font-bold cursor-pointer shadow-sm group-hover:shadow-md transition-all`}
+            onClick={() => navigate(`/parent/${id}`)}
+          >
+            {name.charAt(0)}
+          </div>
+          <div className="ml-3">
+            <h4 
+              className="font-bold text-base cursor-pointer hover:text-play-orange transition-colors flex items-center gap-1.5"
+              onClick={() => navigate(`/parent/${id}`)}
+            >
+              {name}
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400 group-hover:animate-pulse"></div>
+            </h4>
+            <div className="flex items-center text-xs text-muted-foreground mt-0.5 flex-wrap gap-x-3">
+              <div className="flex items-center">
+                <Users className="h-3 w-3 mr-1" /> 
+                <span>{childName}</span>
+              </div>
+              <div className="flex items-center">
+                <MapPin className="h-3 w-3 mr-1" /> 
+                <span>{distance}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Button 
+          size="sm" 
+          className="h-9 w-9 p-0 bg-play-beige hover:bg-play-orange/10 text-play-orange border border-play-orange/30 rounded-full shadow-sm"
+        >
+          <UserPlus className="h-4 w-4" />
+        </Button>
+      </div>
+      
+      <div className="flex mt-3 flex-wrap gap-1.5">
+        {interests.map((interest, index) => (
+          <span 
+            key={index} 
+            className="text-xs px-2 py-1 rounded-full bg-play-lime/30 text-green-700 font-medium"
+          >
+            {interest}
+          </span>
+        ))}
+      </div>
+    </motion.div>
+  );
+};
+
+interface SuggestedConnectionsProps {
+  connections: SuggestedConnectionProps[];
+}
+
+const SuggestedConnections = ({ connections }: SuggestedConnectionsProps) => {
+  const navigate = useNavigate();
+  
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+  
+  const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 }
+  };
+  
+  return (
+    <Card className="rounded-3xl overflow-hidden border-none shadow-md">
       <CardHeader className="border-b border-muted/30 bg-gradient-to-r from-play-purple/20 to-purple-100 pb-3">
         <CardTitle className="text-lg font-semibold flex items-center">
           <div className="w-10 h-10 rounded-full bg-play-purple/20 flex items-center justify-center mr-3 text-purple-600">
@@ -39,25 +122,18 @@ const SuggestedConnections = ({ profiles = [], loading = false }: SuggestedConne
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4 bg-white">
-        {!hasProfiles ? (
-          <div className="text-center p-6 text-muted-foreground">
-            <p>No suggested connections available right now.</p>
-            <p className="text-sm mt-2">Check back later for new connections!</p>
-          </div>
-        ) : (
-          <motion.div 
-            className="space-y-3"
-            variants={containerAnimation}
-            initial="hidden"
-            animate="show"
-          >
-            {profiles.map((profile) => (
-              <motion.div key={profile.id} variants={itemAnimation}>
-                <ConnectionCard profile={profile} />
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
+        <motion.div 
+          className="space-y-3"
+          variants={container}
+          initial="hidden"
+          animate="show"
+        >
+          {connections.map((connection, index) => (
+            <motion.div key={connection.id} variants={item}>
+              <ConnectionCard {...connection} />
+            </motion.div>
+          ))}
+        </motion.div>
         
         <div className="mt-4">
           <Button 
