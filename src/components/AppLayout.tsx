@@ -13,7 +13,7 @@ export interface AppLayoutProps {
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {
-  const { signOut, isAdmin } = useAuth(); // ← Added isAdmin
+  const { signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -25,14 +25,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
   };
 
   return (
-    <div className="flex min-h-screen w-full">
-      {/* Sidebar */}
-      <div className="hidden border-r bg-muted/40 md:block w-64">
-        <div className="flex h-full max-h-screen flex-col gap-2">
+    <div className="flex h-screen overflow-hidden">
+      {/* Fixed Sidebar */}
+      <div className="hidden md:block fixed left-0 top-0 h-full w-64 border-r bg-muted/40">
+        <div className="flex h-full flex-col gap-2">
           <div className="flex h-14 items-center px-4 text-lg font-semibold">
             GoPlayNow
           </div>
-          <div className="flex-1">
+          <div className="flex-1 overflow-y-auto">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
               <SidebarLink to="/dashboard" label="Dashboard" icon={LayoutDashboard} />
               <SidebarLink to="/playdates" label="My Playdates" icon={CalendarCheck} />
@@ -59,7 +59,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col px-6 pt-6">
+      <div className="ml-0 md:ml-64 flex-1 flex flex-col overflow-y-auto px-6 pt-6">
         {children || <Outlet />}
       </div>
     </div>
