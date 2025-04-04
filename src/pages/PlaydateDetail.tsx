@@ -254,10 +254,25 @@ const PlaydateDetail = () => {
                 </div>
               </div>
 
-              <div className="flex items-start gap-2">
-                <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="font-medium">{playdate.location}</p>
+              <div className="flex flex-col gap-4">
+                <div className="flex items-start gap-2">
+                  <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="font-medium">{playdate.location}</p>
+                  </div>
+                </div>
+              
+                <div className="w-full h-64 rounded-lg overflow-hidden border border-muted">
+                  <iframe
+                    title="Playdate Location Map"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    allowFullScreen
+                    referrerPolicy="no-referrer-when-downgrade"
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent(playdate.location)}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                  />
                 </div>
               </div>
 
