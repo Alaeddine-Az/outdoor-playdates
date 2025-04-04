@@ -96,6 +96,13 @@ export function useConnections() {
       } catch (e: any) {
         console.error('Error loading connections:', e);
         setError(e.message || 'Failed to load connections');
+        
+        // Still continue with empty values rather than breaking the UI
+        setPendingRequests([]);
+        setSentRequests([]);
+        setConnections([]);
+        setConnectionProfiles({});
+        
         toast({
           title: 'Error loading connections',
           description: e.message || 'Failed to load connections',
@@ -210,6 +217,8 @@ export function useConnections() {
   };
 
   const isConnected = (profileId: string): boolean => {
+    if (!user || !profileId) return false;
+    
     return connections.some(c => 
       (c.requester_id === profileId && c.recipient_id === user?.id) || 
       (c.recipient_id === profileId && c.requester_id === user?.id)
@@ -217,6 +226,8 @@ export function useConnections() {
   };
 
   const hasPendingRequest = (profileId: string): boolean => {
+    if (!user || !profileId) return false;
+    
     return sentRequests.some(c => c.recipient_id === profileId);
   };
 
