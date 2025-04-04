@@ -6,19 +6,21 @@ import { Users, MapPin, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useConnections } from '@/hooks/useConnections';
-import { ParentProfile } from '@/types';
+import { ParentProfile, ChildProfile } from '@/types';
+
+// Extended profile type that includes children data
+interface ProfileWithChildren extends ParentProfile {
+  childrenData: ChildProfile[];
+}
 
 // Component that displays a single connection card
 const ConnectionCard = ({ 
-  profile, 
-  children, 
-  onConnect 
+  profile 
 }: { 
-  profile: ParentProfile;
-  children: { name: string, age: string }[];
-  onConnect: (profileId: string) => void;
+  profile: ProfileWithChildren;
 }) => {
   const navigate = useNavigate();
+  const { sendConnectionRequest } = useConnections();
   
   // Generate a color based on the name
   const getColor = (name: string) => {
@@ -36,9 +38,21 @@ const ConnectionCard = ({
   };
   
   const colorClass = colorMap[getColor(profile.parent_name) as keyof typeof colorMap];
-  const childDisplay = children.length > 0 
-    ? `${children[0].name} (${children[0].age})${children.length > 1 ? ' & others' : ''}` 
+  
+  // Format children display text
+  const childDisplay = profile.childrenData && profile.childrenData.length > 0 
+    ? `${profile.childrenData[0].name} (${profile.childrenData[0].age})${profile.childrenData.length > 1 ? ' & others' : ''}` 
     : 'No children';
+  
+  const handleConnect = async () => {
+    try {
+      await sendConnectionRequest(profile.id);
+      // You could show a toast here to indicate success
+    } catch (error) {
+      console.error("Error sending connection request:", error);
+      // You could show an error toast here
+    }
+  };
   
   return (
     <motion.div 
@@ -78,7 +92,7 @@ const ConnectionCard = ({
         <Button 
           size="sm" 
           className="h-9 w-9 p-0 bg-play-beige hover:bg-play-orange/10 text-play-orange border border-play-orange/30 rounded-full shadow-sm"
-          onClick={() => onConnect(profile.id)}
+          onClick={handleConnect}
         >
           <UserPlus className="h-4 w-4" />
         </Button>
@@ -101,22 +115,12 @@ const ConnectionCard = ({
 };
 
 interface SuggestedConnectionsProps {
-  profiles: ParentProfile[];
+  profiles: ProfileWithChildren[];
 }
 
 const SuggestedConnections = ({ profiles = [] }: SuggestedConnectionsProps) => {
   const navigate = useNavigate();
-  const { loading, sendConnectionRequest } = useConnections();
-  
-  const handleConnect = async (profileId: string) => {
-    try {
-      await sendConnectionRequest(profileId);
-      // You could show a toast here to indicate success
-    } catch (error) {
-      console.error("Error sending connection request:", error);
-      // You could show an error toast here
-    }
-  };
+  const { loading } = useConnections();
   
   const container = {
     hidden: { opacity: 0 },
@@ -188,11 +192,7 @@ const SuggestedConnections = ({ profiles = [] }: SuggestedConnectionsProps) => {
           >
             {profiles.map((profile) => (
               <motion.div key={profile.id} variants={item}>
-                <ConnectionCard 
-                  profile={profile} 
-                  children={profile.children || []} 
-                  onConnect={handleConnect}
-                />
+                <ConnectionCard profile={profile} />
               </motion.div>
             ))}
           </motion.div>

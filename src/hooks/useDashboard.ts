@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { useConnections } from '@/hooks/useConnections';
+import { ParentProfile, ChildProfile } from '@/types';
 
 interface PlaydateData {
   id: string;
@@ -32,6 +33,11 @@ interface EventData {
   location: string;
 }
 
+// Define a type for the profile with children
+interface ProfileWithChildren extends ParentProfile {
+  childrenData: ChildProfile[];
+}
+
 export const useDashboard = () => {
   const { user } = useAuth();
   const { profile, children, loading: profileLoading, error: profileError } = useProfile();
@@ -40,7 +46,7 @@ export const useDashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [upcomingPlaydates, setUpcomingPlaydates] = useState<PlaydateData[]>([]);
   const [nearbyEvents, setNearbyEvents] = useState<EventData[]>([]);
-  const [suggestedProfiles, setSuggestedProfiles] = useState<any[]>([]);
+  const [suggestedProfiles, setSuggestedProfiles] = useState<ProfileWithChildren[]>([]);
 
   useEffect(() => {
     if (profileError) {
@@ -171,17 +177,24 @@ export const useDashboard = () => {
               return !isConnected(profile.id) && !hasPendingRequest(profile.id);
             });
             
+            // Create an array to hold profiles with their children
+            const profilesWithChildren: ProfileWithChildren[] = [];
+            
             // Fetch children for each profile
             for (const profile of filteredProfiles) {
               const { data: childrenData } = await supabase
                 .from('children')
-                .select('name, age')
+                .select('*')
                 .eq('parent_id', profile.id);
                 
-              profile.children = childrenData || [];
+              // Add profile with its children to the array
+              profilesWithChildren.push({
+                ...profile,
+                childrenData: childrenData || []
+              });
             }
             
-            setSuggestedProfiles(filteredProfiles);
+            setSuggestedProfiles(profilesWithChildren);
           }
         }
         
