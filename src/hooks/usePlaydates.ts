@@ -4,13 +4,29 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 
+// Define and export the Playdate interface
+export interface Playdate {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  families: number;
+  status?: string;
+  host?: string;
+  host_id?: string;
+  attendees?: number;
+  start_time?: string;
+  end_time?: string;
+}
+
 export const usePlaydates = () => {
   const { user } = useAuth();
-  const [allPlaydates, setAllPlaydates] = useState([]);
-  const [myPlaydates, setMyPlaydates] = useState([]);
-  const [pastPlaydates, setPastPlaydates] = useState([]);
+  const [allPlaydates, setAllPlaydates] = useState<Playdate[]>([]);
+  const [myPlaydates, setMyPlaydates] = useState<Playdate[]>([]);
+  const [pastPlaydates, setPastPlaydates] = useState<Playdate[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<any>(null);
 
   useEffect(() => {
     const fetchPlaydates = async () => {
@@ -56,7 +72,7 @@ export const usePlaydates = () => {
         if (creatorsError) throw creatorsError;
         
         // Create a map of creator profiles by id
-        const creatorProfileMap = {};
+        const creatorProfileMap: Record<string, any> = {};
         if (creatorProfiles) {
           creatorProfiles.forEach(profile => {
             creatorProfileMap[profile.id] = profile;
@@ -73,7 +89,7 @@ export const usePlaydates = () => {
         if (participantsError) throw participantsError;
 
         // Count participants for each playdate
-        const participantCounts = {};
+        const participantCounts: Record<string, number> = {};
         if (allParticipants) {
           allParticipants.forEach(participant => {
             if (!participantCounts[participant.playdate_id]) {
@@ -95,7 +111,9 @@ export const usePlaydates = () => {
             families: participantCounts[playdate.id] || 0,
             status: 'upcoming',
             host: creatorProfile ? creatorProfile.parent_name : 'Unknown Host',
-            host_id: playdate.creator_id
+            host_id: playdate.creator_id,
+            start_time: playdate.start_time,
+            end_time: playdate.end_time
           };
         });
 
@@ -110,7 +128,9 @@ export const usePlaydates = () => {
             families: participantCounts[playdate.id] || 0,
             status: 'past',
             host: creatorProfile ? creatorProfile.parent_name : 'Unknown Host',
-            host_id: playdate.creator_id
+            host_id: playdate.creator_id,
+            start_time: playdate.start_time,
+            end_time: playdate.end_time
           };
         });
 
@@ -130,7 +150,9 @@ export const usePlaydates = () => {
             families: participantCounts[playdate.id] || 0,
             status: 'confirmed',
             host: creatorProfile ? creatorProfile.parent_name : 'Unknown Host',
-            host_id: playdate.creator_id
+            host_id: playdate.creator_id,
+            start_time: playdate.start_time,
+            end_time: playdate.end_time
           };
         });
 

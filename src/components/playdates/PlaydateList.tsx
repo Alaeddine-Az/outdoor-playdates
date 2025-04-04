@@ -17,7 +17,11 @@ interface PlaydateListProps {
   showCreateButton?: boolean;
 }
 
-const getPlaydateStatus = (playdate: any): "confirmed" | "upcoming" | "past" | "cancelled" => {
+const getPlaydateStatus = (playdate: Playdate): "confirmed" | "upcoming" | "past" | "cancelled" => {
+  if (!playdate.start_time || !playdate.end_time) {
+    return playdate.status as "confirmed" | "upcoming" | "past" | "cancelled" || "upcoming";
+  }
+  
   const now = new Date();
   const startDate = new Date(playdate.start_time);
   const endDate = new Date(playdate.end_time);
@@ -81,12 +85,12 @@ const PlaydateList = ({
           {playdates.map((playdate) => (
             <PlaydateItem 
               key={playdate.id}
-              id={playdate.id}  // Added the missing 'id' property here
+              id={playdate.id}
               title={playdate.title}
               date={playdate.date}
               time={playdate.time}
               location={playdate.location}
-              attendees={playdate.attendees}
+              attendees={playdate.families}
               status={getPlaydateStatus(playdate)}
               onClick={() => navigate(`/playdate/${playdate.id}`)}
             />
