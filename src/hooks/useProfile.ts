@@ -1,26 +1,13 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
-interface Profile {
-  id: string;
-  user_id: string;
-  parent_name: string;
-  // Add other profile fields here as needed
-}
-
-interface Child {
-  id: string;
-  name: string;
-  parent_id: string;
-  // Add other child fields here
-}
-
 export const useProfile = (profileId?: string) => {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [children, setChildren] = useState<Child[]>([]);
+  const [profile, setProfile] = useState(null);
+  const [children, setChildren] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCurrentUser, setIsCurrentUser] = useState(false);
@@ -33,16 +20,18 @@ export const useProfile = (profileId?: string) => {
       }
 
       try {
+        // Determine which user ID to use for profile lookup
         const targetUserId = profileId || user.id;
+        
+        // Check if this is the current user's profile
         setIsCurrentUser(targetUserId === user.id);
 
         console.log("Fetching profile for user ID:", targetUserId);
-
-        // FIXED: Match user using 'user_id' instead of 'id'
+        
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('user_id', targetUserId)
+          .eq('id', targetUserId)
           .single();
 
         if (profileError) {
@@ -54,11 +43,11 @@ export const useProfile = (profileId?: string) => {
         console.log("Profile data fetched:", profileData);
         setProfile(profileData);
 
-        // Fetch children linked to this profile
+        // Fetch children
         const { data: childrenData, error: childrenError } = await supabase
           .from('children')
           .select('*')
-          .eq('parent_id', profileData.id); // use internal profile ID here
+          .eq('parent_id', targetUserId);
 
         if (childrenError) {
           console.error('Error loading children:', childrenError);
@@ -70,6 +59,7 @@ export const useProfile = (profileId?: string) => {
       } catch (error) {
         console.error('Error in profile hook:', error);
         setError("Failed to load user data");
+        // Don't show toast here as we're handling the error in the component
       } finally {
         setLoading(false);
       }
