@@ -49,6 +49,7 @@ const PlaydateDetail = () => {
         if (playdateError) throw playdateError;
         setPlaydate(playdateData);
 
+        // Always fetch creator data regardless of who is viewing
         if (playdateData.creator_id) {
           const { data: creatorData, error: creatorError } = await supabase
             .from('profiles')
@@ -56,8 +57,10 @@ const PlaydateDetail = () => {
             .eq('id', playdateData.creator_id)
             .single();
 
-          if (!creatorError) {
+          if (!creatorError && creatorData) {
             setCreator(creatorData);
+          } else {
+            console.error('Error fetching creator profile:', creatorError);
           }
         }
 
