@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -13,6 +14,7 @@ interface PlaydateData {
   families: number;
   status: 'upcoming' | 'pending' | 'completed';
   host?: string;
+  host_id?: string;
 }
 
 interface ConnectionData {
@@ -35,7 +37,6 @@ export const useDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [upcomingPlaydates, setUpcomingPlaydates] = useState<PlaydateData[]>([]);
-  const [suggestedConnections, setSuggestedConnections] = useState<ConnectionData[]>([]);
   const [nearbyEvents, setNearbyEvents] = useState<EventData[]>([]);
 
   useEffect(() => {
@@ -60,7 +61,7 @@ export const useDashboard = () => {
         if (user) {
           const { data: playdatesData, error: playdatesError } = await supabase
             .from('playdates')
-            .select('*, playdate_participants(*), profiles:creator_id(parent_name)') 
+            .select('*, playdate_participants(*), profiles:creator_id(parent_name, id)') 
             .order('created_at', { ascending: false });
 
           if (playdatesError) {
@@ -114,6 +115,7 @@ export const useDashboard = () => {
                 
                 const attendees = 1;
                 const hostName = playdate.profiles?.parent_name || 'Unknown Host';
+                const hostId = playdate.profiles?.id || null;
                 
                 return {
                   id: playdate.id,
@@ -124,7 +126,8 @@ export const useDashboard = () => {
                   attendees: attendees,
                   families: attendees,
                   status: status,
-                  host: hostName
+                  host: hostName,
+                  host_id: hostId
                 };
               } catch (err) {
                 console.error("Error processing playdate:", err, playdate);
@@ -137,7 +140,8 @@ export const useDashboard = () => {
                   attendees: 1,
                   families: 1,
                   status: 'pending' as const,
-                  host: playdate.profiles?.parent_name || 'Unknown Host'
+                  host: playdate.profiles?.parent_name || 'Unknown Host',
+                  host_id: playdate.profiles?.id || null
                 };
               }
             });
@@ -146,30 +150,7 @@ export const useDashboard = () => {
           }
         }
         
-        setSuggestedConnections([
-          {
-            id: '1',
-            name: 'Michael P.',
-            childName: 'Oliver (6)',
-            interests: ['Sports', 'STEM'],
-            distance: '0.5 miles'
-          },
-          {
-            id: '2',
-            name: 'Sarah T.',
-            childName: 'Liam (5)',
-            interests: ['Arts', 'Nature'],
-            distance: '0.8 miles'
-          },
-          {
-            id: '3',
-            name: 'David R.',
-            childName: 'Sophia (6)',
-            interests: ['STEM', 'Reading'],
-            distance: '1.2 miles'
-          }
-        ]);
-        
+        // Nearby events - kept as hardcoded for now but could be replaced with real data
         setNearbyEvents([
           {
             title: 'Community Playground Day',
@@ -200,7 +181,6 @@ export const useDashboard = () => {
     profile,
     children,
     upcomingPlaydates,
-    suggestedConnections,
     nearbyEvents
   };
 };
