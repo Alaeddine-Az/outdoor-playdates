@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { useConnections } from '@/hooks/useConnections';
-import { ParentProfile, ChildProfile, ProfileWithChildren } from '@/types';
+import { ProfileWithChildren } from '@/types';
 
 interface PlaydateData {
   id: string;
@@ -35,7 +35,6 @@ export const useDashboard = () => {
 
   const {
     loading: connectionsLoading,
-    connectionProfiles,
     isConnected,
     hasPendingRequest,
     error: connectionsError,
@@ -48,27 +47,55 @@ export const useDashboard = () => {
   const [nearbyEvents, setNearbyEvents] = useState<EventData[]>([]);
   const [suggestedProfiles, setSuggestedProfiles] = useState<ProfileWithChildren[]>([]);
 
+  // 🧪 Emergency fallback if loading gets stuck
   useEffect(() => {
-    // Handle errors early
+    const timeout = setTimeout(() => {
+      if (!initialLoadDone) {
+        console.warn('⏳ Forcing initialLoadDone after timeout');
+        setInitialLoadDone(true);
+        setLoading(false);
+      }
+    }, 5000);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  // 🧪 Debug logs
+  useEffect(() => {
+    console.log('🔥 useDashboard INIT');
+    console.log('user:', user);
+    console.log('profile:', profile);
+    console.log('profileLoading:', profileLoading);
+    console.log('connectionsError:', connectionsError);
+  }, [user, profile, profileLoading, connectionsError]);
+
+  useEffect(() => {
+    console.log('📦 useDashboard effect triggered');
+
     if (profileError || connectionsError) {
+      console.error('❌ Dashboard Error:', profileError || connectionsError);
       setError(profileError || connectionsError);
       setLoading(false);
       setInitialLoadDone(true);
       return;
     }
 
-    if (!user || profileLoading) {
-      setLoading(true);
+    if (!user) {
+      console.warn('⚠️ No user found. Cannot load dashboard.');
+      setError('User not authenticated');
+      setLoading(false);
+      setInitialLoadDone(true);
+      return;
+    }
+
+    if (profileLoading) {
+      console.log('⏳ Profile still loading...');
       return;
     }
 
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        console.log("Loading dashboard data for user:", user?.id);
-        console.log("Profile data:", profile);
-
-        if (!user) return;
+        console.log('✅ Fetching dashboard data...');
 
         // Fetch playdates
         const { data: playdatesData, error: playdatesError } = await supabase
@@ -122,7 +149,7 @@ export const useDashboard = () => {
             families: 1,
             status,
             host: playdate.profiles?.parent_name || 'Unknown Host',
-            host_id: playdate.profiles?.id || null
+            host_id: playdate.profiles?.id || null,
           };
         });
 
@@ -167,26 +194,35 @@ export const useDashboard = () => {
 
         setSuggestedProfiles(profilesWithChildren);
 
-        // Hardcoded events
+        // Nearby events (placeholder)
         setNearbyEvents([
           { title: 'Community Playground Day', date: 'Jun 17', location: 'City Central Park' },
-          { title: 'Kids\' Science Fair', date: 'Jun 24', location: 'Public Library' }
+          { title: 'Kids\' Science Fair', date: 'Jun 24', location: 'Public Library' },
         ]);
 
         setError(null);
       } catch (err: any) {
-        console.error("Error loading dashboard data:", err);
-        setError(err?.message || "Failed to load dashboard data");
+        console.error('❌ Error loading dashboard data:', err);
+        setError(err?.message || 'Failed to load dashboard data');
         setUpcomingPlaydates([]);
         setSuggestedProfiles([]);
       } finally {
+        console.log('✅ Dashboard data fetch complete');
         setLoading(false);
         setInitialLoadDone(true);
       }
     };
 
     fetchDashboardData();
-  }, [user, profile, profileLoading, profileError, isConnected, hasPendingRequest, connectionsError]);
+  }, [
+    user,
+    profile,
+    profileLoading,
+    profileError,
+    isConnected,
+    hasPendingRequest,
+    connectionsError,
+  ]);
 
   return {
     loading: !initialLoadDone || loading || profileLoading || connectionsLoading,
@@ -195,6 +231,6 @@ export const useDashboard = () => {
     children,
     upcomingPlaydates,
     nearbyEvents,
-    suggestedProfiles
+    suggestedProfiles,
   };
 };
