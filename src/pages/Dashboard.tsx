@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -33,16 +32,32 @@ const Dashboard = () => {
     }
   }, [error]);
 
-  // Get interests safely
   const interests = profile?.interests || [];
-  
-  // Format children for display
   const childrenWithAges = children?.map(child => ({
     name: child.name,
     age: child.age
   })) || [];
 
-  // Error state display
+  // ❗️ Show skeletons while loading or profile is not ready
+  if (loading || !profile) {
+    return (
+      <div className="animate-fade-in px-4 py-6 max-w-6xl mx-auto">
+        <Skeleton className="h-64 w-full rounded-xl mb-6" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <Skeleton className="h-48 w-full rounded-xl" />
+          </div>
+          <div className="space-y-6">
+            <Skeleton className="h-48 w-full rounded-xl" />
+            <Skeleton className="h-64 w-full rounded-xl" />
+            <Skeleton className="h-48 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ❗️ Error state
   if (error) {
     return (
       <div className="animate-fade-in min-h-[60vh] flex flex-col items-center justify-center">
@@ -79,7 +94,7 @@ const Dashboard = () => {
         {/* Text */}
         <div className="relative z-30 text-left mt-8">
           <h1 className="text-3xl md:text-4xl font-extrabold text-black mb-2">
-            Welcome back, {profile?.parent_name?.split(' ')[0] || ''}!
+            Welcome back, {profile.parent_name?.split(' ')[0]}!
           </h1>
           <p className="text-md md:text-lg text-black">
             Here&apos;s what&apos;s happening with your playdates and connections.
@@ -111,40 +126,26 @@ const Dashboard = () => {
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {loading ? (
-            <Skeleton className="h-64 w-full rounded-xl" />
-          ) : (
-            <PlaydatesList
-              title="Upcoming Playdates"
-              playdates={upcomingPlaydates}
-              showNewButton={true}
-              viewAllLink="/playdates"
-            />
-          )}
+          <PlaydatesList
+            title="Upcoming Playdates"
+            playdates={upcomingPlaydates}
+            showNewButton={true}
+            viewAllLink="/playdates"
+          />
         </div>
         <div className="space-y-6">
-          {loading ? (
-            <>
-              <Skeleton className="h-48 w-full rounded-xl" />
-              <Skeleton className="h-64 w-full rounded-xl" />
-              <Skeleton className="h-48 w-full rounded-xl" />
-            </>
-          ) : (
-            <>
-              <ProfileSummary 
-                name={profile?.parent_name || ''} 
-                children={childrenWithAges} 
-                interests={interests} 
-              />
-              <SuggestedConnections 
-                profiles={suggestedProfiles}
-                loading={loading} 
-              />
-              <NearbyEvents 
-                events={nearbyEvents} 
-              />
-            </>
-          )}
+          <ProfileSummary 
+            name={profile.parent_name} 
+            children={childrenWithAges} 
+            interests={interests} 
+          />
+          <SuggestedConnections 
+            profiles={suggestedProfiles}
+            loading={false} 
+          />
+          <NearbyEvents 
+            events={nearbyEvents} 
+          />
         </div>
       </div>
     </div>
