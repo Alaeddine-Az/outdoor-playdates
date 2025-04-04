@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
+import { useConnections } from '@/hooks/useConnections';
 
 interface PlaydateData {
   id: string;
@@ -34,10 +35,12 @@ interface EventData {
 export const useDashboard = () => {
   const { user } = useAuth();
   const { profile, children, loading: profileLoading, error: profileError } = useProfile();
+  const { loading: connectionsLoading, connectionProfiles, isConnected, hasPendingRequest } = useConnections();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [upcomingPlaydates, setUpcomingPlaydates] = useState<PlaydateData[]>([]);
   const [nearbyEvents, setNearbyEvents] = useState<EventData[]>([]);
+  const [suggestedProfiles, setSuggestedProfiles] = useState<any[]>([]);
 
   useEffect(() => {
     if (profileError) {
@@ -59,6 +62,7 @@ export const useDashboard = () => {
         setLoading(true);
         
         if (user) {
+          // Fetch playdates
           const { data: playdatesData, error: playdatesError } = await supabase
             .from('playdates')
             .select('*, playdate_participants(*), profiles:creator_id(parent_name, id)') 
@@ -148,6 +152,37 @@ export const useDashboard = () => {
             
             setUpcomingPlaydates(formattedPlaydates);
           }
+
+          // Fetch suggested profiles
+          const { data: profilesData, error: profilesError } = await supabase
+            .from('profiles')
+            .select('*')
+            .neq('id', user.id)
+            .limit(5);
+            
+          if (profilesError) {
+            console.error("Error fetching profiles:", profilesError);
+            throw profilesError;
+          }
+
+          // Filter out profiles the user is already connected to or has sent a request to
+          if (profilesData) {
+            const filteredProfiles = profilesData.filter(profile => {
+              return !isConnected(profile.id) && !hasPendingRequest(profile.id);
+            });
+            
+            // Fetch children for each profile
+            for (const profile of filteredProfiles) {
+              const { data: childrenData } = await supabase
+                .from('children')
+                .select('name, age')
+                .eq('parent_id', profile.id);
+                
+              profile.children = childrenData || [];
+            }
+            
+            setSuggestedProfiles(filteredProfiles);
+          }
         }
         
         // Nearby events - kept as hardcoded for now but could be replaced with real data
@@ -173,14 +208,15 @@ export const useDashboard = () => {
     };
 
     fetchDashboardData();
-  }, [user, profile, profileLoading, profileError]);
+  }, [user, profile, profileLoading, profileError, isConnected, hasPendingRequest]);
 
   return {
-    loading: loading || profileLoading,
+    loading: loading || profileLoading || connectionsLoading,
     error,
     profile,
     children,
     upcomingPlaydates,
-    nearbyEvents
+    nearbyEvents,
+    suggestedProfiles
   };
 };

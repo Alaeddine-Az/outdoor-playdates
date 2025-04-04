@@ -1,22 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, MapPin, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
 import { useConnections } from '@/hooks/useConnections';
-import { supabase } from '@/integrations/supabase/client';
 import { ParentProfile } from '@/types';
-
-interface SuggestedConnectionProps {
-  id: string;
-  name: string;
-  childName: string;
-  interests: string[];
-  distance: string;
-}
 
 // Component that displays a single connection card
 const ConnectionCard = ({ 
@@ -110,67 +100,13 @@ const ConnectionCard = ({
   );
 };
 
-const useSuggestedProfiles = () => {
-  const { user } = useAuth();
-  const [profiles, setProfiles] = useState<ParentProfile[]>([]);
-  const [profileChildren, setProfileChildren] = useState<Record<string, { name: string, age: string }[]>>({});
-  const [loading, setLoading] = useState(true);
-  const { isConnected, hasPendingRequest } = useConnections();
+interface SuggestedConnectionsProps {
+  profiles: ParentProfile[];
+}
 
-  useEffect(() => {
-    const fetchSuggestedProfiles = async () => {
-      if (!user) return;
-      
-      try {
-        setLoading(true);
-        
-        // Fetch profiles excluding current user
-        const { data: profilesData, error: profilesError } = await supabase
-          .from('profiles')
-          .select('*')
-          .neq('id', user.id)
-          .limit(5);
-          
-        if (profilesError) throw profilesError;
-        
-        // Filter out profiles the user is already connected to or has sent a request to
-        const filteredProfiles = (profilesData || []).filter(profile => {
-          return !isConnected(profile.id) && !hasPendingRequest(profile.id);
-        });
-        
-        setProfiles(filteredProfiles);
-        
-        // Fetch children for each profile
-        for (const profile of filteredProfiles) {
-          const { data: childrenData, error: childrenError } = await supabase
-            .from('children')
-            .select('name, age')
-            .eq('parent_id', profile.id);
-            
-          if (childrenError) throw childrenError;
-          
-          setProfileChildren(prev => ({
-            ...prev,
-            [profile.id]: childrenData || []
-          }));
-        }
-      } catch (error) {
-        console.error("Error fetching suggested profiles:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchSuggestedProfiles();
-  }, [user, isConnected, hasPendingRequest]);
-  
-  return { profiles, profileChildren, loading };
-};
-
-const SuggestedConnections = () => {
+const SuggestedConnections = ({ profiles = [] }: SuggestedConnectionsProps) => {
   const navigate = useNavigate();
-  const { profiles, profileChildren, loading } = useSuggestedProfiles();
-  const { sendConnectionRequest } = useConnections();
+  const { loading, sendConnectionRequest } = useConnections();
   
   const handleConnect = async (profileId: string) => {
     try {
@@ -254,7 +190,7 @@ const SuggestedConnections = () => {
               <motion.div key={profile.id} variants={item}>
                 <ConnectionCard 
                   profile={profile} 
-                  children={profileChildren[profile.id] || []} 
+                  children={profile.children || []} 
                   onConnect={handleConnect}
                 />
               </motion.div>

@@ -18,7 +18,7 @@ const Dashboard = () => {
     profile,
     children,
     upcomingPlaydates,
-    suggestedConnections,
+    suggestedProfiles,
     nearbyEvents,
     error
   } = useDashboard();
@@ -124,7 +124,7 @@ const Dashboard = () => {
           </div>
           <div className="space-y-6">
             <ProfileSummary name={profile?.parent_name || 'User'} children={childrenWithAges} interests={interests} />
-            <SuggestedConnections connections={suggestedConnections} />
+            <SuggestedConnections profiles={suggestedProfiles} />
             <NearbyEvents events={nearbyEvents} />
           </div>
         </div>
