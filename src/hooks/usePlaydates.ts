@@ -59,24 +59,27 @@ export const usePlaydates = () => {
 
         // Fetch creator profiles for all playdates
         const allPlaydatesWithCreators = [...upcomingPlaydates, ...pastPlaydatesData];
-        const creatorIds = allPlaydatesWithCreators.map(playdate => playdate.creator_id);
+        const creatorIds = allPlaydatesWithCreators.map(playdate => playdate.creator_id).filter(Boolean);
         
         // Remove duplicates from creatorIds
         const uniqueCreatorIds = [...new Set(creatorIds)];
         
-        const { data: creatorProfiles, error: creatorsError } = await supabase
-          .from('profiles')
-          .select('id, parent_name')
-          .in('id', uniqueCreatorIds);
+        // Only fetch profiles if we have creator IDs
+        let creatorProfileMap: Record<string, any> = {};
+        if (uniqueCreatorIds.length > 0) {
+          const { data: creatorProfiles, error: creatorsError } = await supabase
+            .from('profiles')
+            .select('id, parent_name')
+            .in('id', uniqueCreatorIds);
+            
+          if (creatorsError) throw creatorsError;
           
-        if (creatorsError) throw creatorsError;
-        
-        // Create a map of creator profiles by id
-        const creatorProfileMap: Record<string, any> = {};
-        if (creatorProfiles) {
-          creatorProfiles.forEach(profile => {
-            creatorProfileMap[profile.id] = profile;
-          });
+          // Create a map of creator profiles by id
+          if (creatorProfiles) {
+            creatorProfiles.forEach(profile => {
+              creatorProfileMap[profile.id] = profile;
+            });
+          }
         }
 
         // Get participants for each playdate
@@ -101,7 +104,7 @@ export const usePlaydates = () => {
 
         // Format the data for each category
         const formattedUpcoming = upcomingPlaydates.map(playdate => {
-          const creatorProfile = creatorProfileMap[playdate.creator_id];
+          const creatorProfile = playdate.creator_id ? creatorProfileMap[playdate.creator_id] : null;
           return {
             id: playdate.id,
             title: playdate.title,
@@ -118,7 +121,7 @@ export const usePlaydates = () => {
         });
 
         const formattedPast = pastPlaydatesData.map(playdate => {
-          const creatorProfile = creatorProfileMap[playdate.creator_id];
+          const creatorProfile = playdate.creator_id ? creatorProfileMap[playdate.creator_id] : null;
           return {
             id: playdate.id,
             title: playdate.title,
@@ -140,7 +143,7 @@ export const usePlaydates = () => {
         );
 
         const formattedMyPlaydates = myPlaydatesData.map(playdate => {
-          const creatorProfile = creatorProfileMap[playdate.creator_id];
+          const creatorProfile = playdate.creator_id ? creatorProfileMap[playdate.creator_id] : null;
           return {
             id: playdate.id,
             title: playdate.title,

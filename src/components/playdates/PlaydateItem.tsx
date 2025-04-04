@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, MapPin, Users } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface PlaydateItemProps {
@@ -13,6 +13,8 @@ interface PlaydateItemProps {
   status?: 'upcoming' | 'confirmed' | 'past' | 'cancelled';
   onClick?: () => void;
   id: string;
+  host?: string;
+  host_id?: string;
 }
 
 const statusColors = {
@@ -30,7 +32,9 @@ const PlaydateItem = ({
   location,
   attendees,
   status = 'upcoming',
-  onClick
+  onClick,
+  host,
+  host_id
 }: PlaydateItemProps) => {
   const navigate = useNavigate();
   
@@ -39,6 +43,13 @@ const PlaydateItem = ({
       onClick();
     } else {
       navigate(`/playdate/${id}`);
+    }
+  };
+  
+  const handleHostClick = (e: React.MouseEvent) => {
+    if (host_id) {
+      e.stopPropagation();
+      navigate(`/parent/${host_id}`);
     }
   };
   
@@ -53,6 +64,16 @@ const PlaydateItem = ({
           {status.charAt(0).toUpperCase() + status.slice(1)}
         </Badge>
       </div>
+      
+      {host && host_id && (
+        <p 
+          className="text-sm text-primary hover:underline cursor-pointer mb-3"
+          onClick={handleHostClick}
+        >
+          <User className="h-3 w-3 inline mr-1" />
+          Hosted by {host}
+        </p>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 text-sm text-muted-foreground">
         <div className="flex items-center gap-2">

@@ -91,6 +91,8 @@ const PlaydateList = ({
               time={playdate.time}
               location={playdate.location}
               attendees={playdate.families}
+              host={playdate.host}
+              host_id={playdate.host_id}
               status={getPlaydateStatus(playdate)}
               onClick={() => navigate(`/playdate/${playdate.id}`)}
             />
