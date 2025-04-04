@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import { CalendarClock, MapPin, Users, Clock, ArrowLeft, User, Crown } from 'lucide-react';
 import { format } from 'date-fns';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ChildProfile, PlaydateParticipant } from '@/types';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -203,6 +204,15 @@ const PlaydateDetail = () => {
     }
   };
 
+  const getInitials = (name: string) => {
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase();
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[80vh]">
@@ -291,8 +301,9 @@ const PlaydateDetail = () => {
                   </h3>
                   <div className="flex items-center gap-3 p-3 rounded-lg border border-amber-200 bg-amber-50">
                     <Avatar className="h-12 w-12">
+                      <AvatarImage src={creator.avatar_url} alt={creator.parent_name} />
                       <AvatarFallback className="bg-amber-500 text-white">
-                        {creator.parent_name?.[0] || 'H'}
+                        {getInitials(creator.parent_name)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
@@ -301,7 +312,7 @@ const PlaydateDetail = () => {
                           {creator.parent_name}
                         </Link>
                       </p>
-                      <p className="text-sm text-muted-foreground">{creator.location}</p>
+                      <p className="text-sm text-muted-foreground">{creator.location || creator.city}</p>
                       {creator.description && (
                         <p className="text-sm mt-1 line-clamp-2">{creator.description}</p>
                       )}
@@ -358,8 +369,16 @@ const PlaydateDetail = () => {
                               <div className="text-sm text-muted-foreground mt-1 flex items-center">
                                 <User className="h-3 w-3 mr-1" />
                                 <span>Parent: </span>
-                                <Link to={`/parent/${details.parent?.id}`} className="ml-1 hover:underline">
-                                  {details.parent?.parent_name}
+                                <Link to={`/parent/${details.parent?.id}`} className="ml-1 hover:underline group flex items-center">
+                                  <Avatar className="h-5 w-5 mr-1 inline-block">
+                                    <AvatarImage src={details.parent?.avatar_url} alt={details.parent?.parent_name} />
+                                    <AvatarFallback className="text-[8px]">
+                                      {getInitials(details.parent?.parent_name)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span className="group-hover:text-primary transition-colors">
+                                    {details.parent?.parent_name}
+                                  </span>
                                 </Link>
                               </div>
                             </>
