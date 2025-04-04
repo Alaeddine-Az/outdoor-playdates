@@ -12,18 +12,19 @@ import { containerAnimation, itemAnimation } from '@/components/dashboard/animat
 
 interface SuggestedConnectionsProps {
   profiles: ProfileWithChildren[];
+  loading?: boolean;
 }
 
-const SuggestedConnections = ({ profiles = [] }: SuggestedConnectionsProps) => {
+const SuggestedConnections = ({ profiles = [], loading = false }: SuggestedConnectionsProps) => {
   const navigate = useNavigate();
-  const { loading } = useConnections();
+  const { loading: connectionsLoading } = useConnections();
   
-  if (loading) {
+  if (loading || connectionsLoading) {
     return <ConnectionSkeleton />;
   }
   
   return (
-    <Card className="rounded-3xl overflow-hidden border-none shadow-md">
+    <Card className="rounded-3xl overflow-hidden border-none shadow-md h-full">
       <CardHeader className="border-b border-muted/30 bg-gradient-to-r from-play-purple/20 to-purple-100 pb-3">
         <CardTitle className="text-lg font-semibold flex items-center">
           <div className="w-10 h-10 rounded-full bg-play-purple/20 flex items-center justify-center mr-3 text-purple-600">

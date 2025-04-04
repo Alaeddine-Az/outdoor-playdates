@@ -5,7 +5,7 @@ import { Users } from 'lucide-react';
 
 const ConnectionSkeleton = () => {
   return (
-    <Card className="rounded-3xl overflow-hidden border-none shadow-md">
+    <Card className="rounded-3xl overflow-hidden border-none shadow-md h-full">
       <CardHeader className="border-b border-muted/30 bg-gradient-to-r from-play-purple/20 to-purple-100 pb-3">
         <CardTitle className="text-lg font-semibold flex items-center">
           <div className="w-10 h-10 rounded-full bg-play-purple/20 flex items-center justify-center mr-3 text-purple-600">
@@ -24,9 +24,13 @@ const ConnectionSkeleton = () => {
                   <div className="h-5 w-24 bg-muted rounded mb-2"></div>
                   <div className="h-3 w-32 bg-muted rounded"></div>
                 </div>
+                <div className="w-9 h-9 rounded-full bg-muted"></div>
               </div>
             </div>
           ))}
+        </div>
+        <div className="mt-4">
+          <div className="h-10 w-full rounded-full bg-muted animate-pulse"></div>
         </div>
       </CardContent>
     </Card>
