@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { useConnections } from '@/hooks/useConnections';
-import { ParentProfile, ChildProfile } from '@/types';
+import { ParentProfile, ChildProfile, ProfileWithChildren } from '@/types';
 
 interface PlaydateData {
   id: string;
@@ -31,11 +30,6 @@ interface EventData {
   title: string;
   date: string;
   location: string;
-}
-
-// Define a type for the profile with children
-interface ProfileWithChildren extends ParentProfile {
-  childrenData: ChildProfile[];
 }
 
 export const useDashboard = () => {
@@ -174,7 +168,11 @@ export const useDashboard = () => {
           // Filter out profiles the user is already connected to or has sent a request to
           if (profilesData) {
             const filteredProfiles = profilesData.filter(profile => {
-              return !isConnected(profile.id) && !hasPendingRequest(profile.id);
+              return profile && profile.id && 
+                typeof isConnected === 'function' && 
+                typeof hasPendingRequest === 'function' &&
+                !isConnected(profile.id) && 
+                !hasPendingRequest(profile.id);
             });
             
             // Create an array to hold profiles with their children
@@ -182,16 +180,27 @@ export const useDashboard = () => {
             
             // Fetch children for each profile
             for (const profile of filteredProfiles) {
-              const { data: childrenData } = await supabase
-                .from('children')
-                .select('*')
-                .eq('parent_id', profile.id);
-                
-              // Add profile with its children to the array
-              profilesWithChildren.push({
-                ...profile,
-                childrenData: childrenData || []
-              });
+              if (profile && profile.id) {
+                try {
+                  const { data: childrenData, error: childrenError } = await supabase
+                    .from('children')
+                    .select('*')
+                    .eq('parent_id', profile.id);
+                  
+                  if (childrenError) {
+                    console.error("Error fetching children for profile:", profile.id, childrenError);
+                    continue;
+                  }
+                  
+                  // Add profile with its children to the array
+                  profilesWithChildren.push({
+                    ...profile,
+                    childrenData: childrenData || []
+                  });
+                } catch (childErr) {
+                  console.error("Exception fetching children for profile:", profile.id, childErr);
+                }
+              }
             }
             
             setSuggestedProfiles(profilesWithChildren);
@@ -213,9 +222,9 @@ export const useDashboard = () => {
         ]);
         
         setLoading(false);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error loading dashboard data:", err);
-        setError("Failed to load dashboard data");
+        setError(err?.message || "Failed to load dashboard data");
         setLoading(false);
       }
     };

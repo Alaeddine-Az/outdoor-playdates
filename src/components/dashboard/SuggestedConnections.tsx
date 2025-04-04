@@ -19,7 +19,9 @@ const SuggestedConnections = ({ profiles = [], loading = false }: SuggestedConne
   const navigate = useNavigate();
   const { loading: connectionsLoading } = useConnections();
   
-  if (loading || connectionsLoading) {
+  const isLoading = loading || connectionsLoading;
+  
+  if (isLoading) {
     return <ConnectionSkeleton />;
   }
   
@@ -34,7 +36,7 @@ const SuggestedConnections = ({ profiles = [], loading = false }: SuggestedConne
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4 bg-white">
-        {profiles.length === 0 ? (
+        {!profiles || profiles.length === 0 ? (
           <div className="text-center p-6 text-muted-foreground">
             <p>No suggested connections available right now.</p>
             <p className="text-sm mt-2">Check back later for new connections!</p>

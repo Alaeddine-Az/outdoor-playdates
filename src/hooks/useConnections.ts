@@ -56,34 +56,49 @@ export function useConnections() {
           // Get unique IDs of all connection parties
           const allProfileIds = new Set<string>();
           allConnections.forEach((c: Connection) => {
-            allProfileIds.add(c.requester_id);
-            allProfileIds.add(c.recipient_id);
+            if (c.requester_id) allProfileIds.add(c.requester_id);
+            if (c.recipient_id) allProfileIds.add(c.recipient_id);
           });
-          allProfileIds.delete(user.id);
+          
+          // Remove the current user's ID from the set
+          if (user.id) {
+            allProfileIds.delete(user.id);
+          }
 
-          // Fetch profiles for all connections
+          // Fetch profiles for all connections only if there are profile IDs to fetch
           if (allProfileIds.size > 0) {
-            const { data: profiles, error: profilesError } = await supabase
-              .from('profiles')
-              .select('*')
-              .in('id', Array.from(allProfileIds));
+            const profileIdsArray = Array.from(allProfileIds).filter(id => id !== null && id !== undefined);
+            
+            if (profileIdsArray.length > 0) {
+              const { data: profiles, error: profilesError } = await supabase
+                .from('profiles')
+                .select('*')
+                .in('id', profileIdsArray);
 
-            if (profilesError) throw profilesError;
+              if (profilesError) throw profilesError;
 
-            const profileMap: Record<string, ParentProfile> = {};
-            profiles?.forEach(profile => {
-              profileMap[profile.id] = profile as ParentProfile;
-            });
+              const profileMap: Record<string, ParentProfile> = {};
+              if (profiles) {
+                profiles.forEach(profile => {
+                  if (profile && profile.id) {
+                    profileMap[profile.id] = profile as ParentProfile;
+                  }
+                });
+              }
 
-            setConnectionProfiles(profileMap);
+              setConnectionProfiles(profileMap);
+            }
+          } else {
+            // If no profiles to fetch, set an empty object to avoid undefined errors
+            setConnectionProfiles({});
           }
         }
       } catch (e: any) {
         console.error('Error loading connections:', e);
-        setError(e.message);
+        setError(e.message || 'Failed to load connections');
         toast({
           title: 'Error loading connections',
-          description: e.message,
+          description: e.message || 'Failed to load connections',
           variant: 'destructive',
         });
       } finally {
