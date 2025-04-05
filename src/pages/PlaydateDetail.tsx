@@ -226,6 +226,12 @@ const PlaydateDetail = () => {
                   )}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
                 />
               </div>
+              {playdate.description && (
+              <div className="mt-4">
+                <h3 className="text-lg font-medium mb-1">About this Playdate</h3>
+                <p className="text-muted-foreground">{playdate.description}</p>
+              </div>
+            )}
             </CardContent>
           </Card>
 
