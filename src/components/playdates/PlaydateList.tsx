@@ -46,6 +46,8 @@ const PlaydateList = ({
 }: PlaydateListProps) => {
   const navigate = useNavigate();
   
+  console.log(`Rendering ${title} with ${playdates.length} playdates:`, playdates);
+  
   return (
     <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
       <div className="flex items-center justify-between mb-6">
@@ -84,21 +86,24 @@ const PlaydateList = ({
         </div>
       ) : (
         <div className="space-y-4">
-          {playdates.map((playdate) => (
-            <PlaydateItem 
-              key={playdate.id}
-              id={playdate.id}
-              title={playdate.title}
-              date={playdate.date}
-              time={playdate.time}
-              location={playdate.location}
-              attendees={playdate.families}
-              host={playdate.host}
-              host_id={playdate.host_id}
-              status={getPlaydateStatus(playdate)}
-              onClick={() => navigate(`/playdate/${playdate.id}`)}
-            />
-          ))}
+          {playdates.map((playdate) => {
+            console.log(`Rendering playdate ${playdate.id} with host: ${playdate.host}, host_id: ${playdate.host_id}`);
+            return (
+              <PlaydateItem 
+                key={playdate.id}
+                id={playdate.id}
+                title={playdate.title}
+                date={playdate.date}
+                time={playdate.time}
+                location={playdate.location}
+                attendees={playdate.families}
+                host={playdate.host}
+                host_id={playdate.host_id}
+                status={getPlaydateStatus(playdate)}
+                onClick={() => navigate(`/playdate/${playdate.id}`)}
+              />
+            );
+          })}
         </div>
       )}
       

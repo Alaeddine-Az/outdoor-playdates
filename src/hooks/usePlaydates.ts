@@ -57,21 +57,24 @@ export const usePlaydates = () => {
 
         if (pastError) throw pastError;
 
-        // Fetch creator profiles for all playdates
-        const allPlaydatesWithCreators = [...upcomingPlaydates, ...pastPlaydatesData];
-        const creatorIds = allPlaydatesWithCreators
+        // Gather all creator IDs for profile lookup
+        const allPlaydates = [...upcomingPlaydates, ...pastPlaydatesData];
+        const creatorIds = allPlaydates
           .map(playdate => playdate.creator_id)
           .filter(Boolean);
         
         // Remove duplicates from creatorIds
         const uniqueCreatorIds = [...new Set(creatorIds)];
         
-        // Log for debugging
         console.log('Creator IDs to fetch:', uniqueCreatorIds);
         
-        // Only fetch profiles if we have creator IDs
+        // Create a map to store creator profiles
         let creatorProfileMap: Record<string, any> = {};
+        
+        // Only fetch profiles if we have creator IDs
         if (uniqueCreatorIds.length > 0) {
+          console.log('Fetching profiles for creator IDs:', uniqueCreatorIds);
+          
           const { data: creatorProfiles, error: creatorsError } = await supabase
             .from('profiles')
             .select('id, parent_name')
@@ -82,19 +85,26 @@ export const usePlaydates = () => {
             throw creatorsError;
           }
           
-          // Log for debugging
           console.log('Creator profiles fetched:', creatorProfiles);
           
           // Create a map of creator profiles by id
           if (creatorProfiles && creatorProfiles.length > 0) {
             creatorProfiles.forEach(profile => {
-              creatorProfileMap[profile.id] = profile;
+              if (profile.id && profile.parent_name) {
+                creatorProfileMap[profile.id] = profile;
+              } else {
+                console.warn('Incomplete profile data:', profile);
+              }
             });
+          } else {
+            console.warn('No creator profiles returned from Supabase.');
           }
+          
+          console.log('Creator profile map created:', creatorProfileMap);
         }
 
         // Get participants for each playdate
-        const playdateIds = allPlaydatesWithCreators.map(playdate => playdate.id);
+        const playdateIds = allPlaydates.map(playdate => playdate.id);
         const { data: allParticipants, error: participantsError } = await supabase
           .from('playdate_participants')
           .select('playdate_id, id')
@@ -117,11 +127,10 @@ export const usePlaydates = () => {
         const formattedUpcoming = upcomingPlaydates.map(playdate => {
           const creatorId = playdate.creator_id;
           const creatorProfile = creatorId ? creatorProfileMap[creatorId] : null;
+          const hostName = creatorProfile?.parent_name || 'Unknown Host';
           
-          // Log detailed information for debugging
           if (!creatorProfile && creatorId) {
-            console.log(`No profile found for creator ID: ${creatorId}`);
-            console.log('Creator profile map keys:', Object.keys(creatorProfileMap));
+            console.warn(`No profile found for creator ID: ${creatorId}`);
           }
           
           return {
@@ -132,7 +141,7 @@ export const usePlaydates = () => {
             location: playdate.location,
             families: participantCounts[playdate.id] || 0,
             status: 'upcoming',
-            host: creatorProfile ? creatorProfile.parent_name : 'Unknown Host',
+            host: hostName,
             host_id: creatorId,
             start_time: playdate.start_time,
             end_time: playdate.end_time
@@ -142,6 +151,11 @@ export const usePlaydates = () => {
         const formattedPast = pastPlaydatesData.map(playdate => {
           const creatorId = playdate.creator_id;
           const creatorProfile = creatorId ? creatorProfileMap[creatorId] : null;
+          const hostName = creatorProfile?.parent_name || 'Unknown Host';
+          
+          if (!creatorProfile && creatorId) {
+            console.warn(`No profile found for creator ID: ${creatorId}`);
+          }
           
           return {
             id: playdate.id,
@@ -151,7 +165,7 @@ export const usePlaydates = () => {
             location: playdate.location,
             families: participantCounts[playdate.id] || 0,
             status: 'past',
-            host: creatorProfile ? creatorProfile.parent_name : 'Unknown Host',
+            host: hostName,
             host_id: creatorId,
             start_time: playdate.start_time,
             end_time: playdate.end_time
@@ -166,6 +180,11 @@ export const usePlaydates = () => {
         const formattedMyPlaydates = myPlaydatesData.map(playdate => {
           const creatorId = playdate.creator_id;
           const creatorProfile = creatorId ? creatorProfileMap[creatorId] : null;
+          const hostName = creatorProfile?.parent_name || 'Unknown Host';
+          
+          if (!creatorProfile && creatorId) {
+            console.warn(`No profile found for creator ID: ${creatorId}`);
+          }
           
           return {
             id: playdate.id,
@@ -175,7 +194,7 @@ export const usePlaydates = () => {
             location: playdate.location,
             families: participantCounts[playdate.id] || 0,
             status: 'confirmed',
-            host: creatorProfile ? creatorProfile.parent_name : 'Unknown Host',
+            host: hostName,
             host_id: creatorId,
             start_time: playdate.start_time,
             end_time: playdate.end_time
