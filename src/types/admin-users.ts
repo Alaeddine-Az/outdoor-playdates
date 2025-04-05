@@ -4,6 +4,7 @@ export interface User {
   email: string;
   role?: string;
   created_at: string;
+  updated_at?: string;
   user_metadata?: {
     parent_name?: string;
     [key: string]: any;
@@ -19,12 +20,4 @@ export interface CreateUserData {
 export interface UpdateUserPasswordData {
   userId: string;
   password: string;
-}
-
-export interface AdminUsersState {
-  users: User[];
-  isLoading: boolean;
-  error: Error | null;
-  currentPage: number;
-  perPage: number;
 }

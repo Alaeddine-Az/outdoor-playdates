@@ -11,6 +11,7 @@ interface SuggestedPlaydateCardProps {
   numFamilies: number;
   playdateId?: string;
   hostId?: string;
+  hostName?: string;
 }
 
 const SuggestedPlaydateCard = ({ 
@@ -19,7 +20,8 @@ const SuggestedPlaydateCard = ({
   location, 
   numFamilies, 
   playdateId, 
-  hostId 
+  hostId,
+  hostName = "Unknown Host"
 }: SuggestedPlaydateCardProps) => {
   const navigate = useNavigate();
 
@@ -77,7 +79,7 @@ const SuggestedPlaydateCard = ({
             className="text-primary hover:underline cursor-pointer" 
             onClick={handleHostClick}
           >
-            View Host
+            Hosted by {hostName}
           </span>
         </div>
       )}

@@ -85,7 +85,7 @@ const ChildrenSection = ({ children }: ChildrenSectionProps) => {
             >
               <CardHeader className="p-0">
                 <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                  <CardTitle className="text-left">Child Profile #{index + 1}</CardTitle>
+                  <CardTitle className="text-left">{child.name}</CardTitle>
                 </AccordionTrigger>
               </CardHeader>
               

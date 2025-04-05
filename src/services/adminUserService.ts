@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
@@ -36,9 +35,6 @@ export const fetchUsers = async (currentPage: number, perPage: number): Promise<
     // Make the request to the edge function
     const { data, error } = await supabase.functions.invoke('admin-users', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: { 
         action: 'getUsers',
         page: currentPage,
@@ -72,9 +68,6 @@ export const createUser = async (userData: CreateUserData): Promise<any> => {
 
     const { data, error } = await supabase.functions.invoke('admin-users', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: {
         action: 'createUser',
         email: userData.email,

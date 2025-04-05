@@ -17,7 +17,11 @@ interface PlaydateListProps {
   showCreateButton?: boolean;
 }
 
-const getPlaydateStatus = (playdate: any): "confirmed" | "upcoming" | "past" | "cancelled" => {
+const getPlaydateStatus = (playdate: Playdate): "confirmed" | "upcoming" | "past" | "cancelled" => {
+  if (!playdate.start_time || !playdate.end_time) {
+    return playdate.status as "confirmed" | "upcoming" | "past" | "cancelled" || "upcoming";
+  }
+  
   const now = new Date();
   const startDate = new Date(playdate.start_time);
   const endDate = new Date(playdate.end_time);
@@ -42,6 +46,8 @@ const PlaydateList = ({
 }: PlaydateListProps) => {
   const navigate = useNavigate();
   
+  console.log(`Rendering ${title} with ${playdates.length} playdates:`, playdates);
+  
   return (
     <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
       <div className="flex items-center justify-between mb-6">
@@ -61,7 +67,9 @@ const PlaydateList = ({
       ) : error ? (
         <div className="p-8 text-center">
           <h3 className="text-lg font-medium mb-2">Error loading playdates</h3>
-          <p className="text-muted-foreground">{error}</p>
+          <p className="text-muted-foreground">
+            {typeof error === 'object' ? 'An error occurred' : error}
+          </p>
         </div>
       ) : playdates.length === 0 ? (
         <div className="p-8 text-center">
@@ -78,19 +86,24 @@ const PlaydateList = ({
         </div>
       ) : (
         <div className="space-y-4">
-          {playdates.map((playdate) => (
-            <PlaydateItem 
-              key={playdate.id}
-              id={playdate.id}  // Added the missing 'id' property here
-              title={playdate.title}
-              date={playdate.date}
-              time={playdate.time}
-              location={playdate.location}
-              attendees={playdate.attendees}
-              status={getPlaydateStatus(playdate)}
-              onClick={() => navigate(`/playdate/${playdate.id}`)}
-            />
-          ))}
+          {playdates.map((playdate) => {
+            console.log(`Rendering playdate ${playdate.id} with host: ${playdate.host}, host_id: ${playdate.host_id}`);
+            return (
+              <PlaydateItem 
+                key={playdate.id}
+                id={playdate.id}
+                title={playdate.title}
+                date={playdate.date}
+                time={playdate.time}
+                location={playdate.location}
+                attendees={playdate.families}
+                host={playdate.host}
+                host_id={playdate.host_id}
+                status={getPlaydateStatus(playdate)}
+                onClick={() => navigate(`/playdate/${playdate.id}`)}
+              />
+            );
+          })}
         </div>
       )}
       

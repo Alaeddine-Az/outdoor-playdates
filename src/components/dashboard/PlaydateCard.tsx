@@ -14,6 +14,7 @@ interface PlaydateCardProps {
     families: number;
     status?: string;
     host?: string;
+    host_id?: string;
   };
 }
 
@@ -27,11 +28,28 @@ const statusColors = {
 
 const PlaydateCard: React.FC<PlaydateCardProps> = ({ playdate }) => {
   const navigate = useNavigate();
-  const { id, title, date, time, location, families, status = 'upcoming', host = 'Unknown Host' } = playdate;
+  const { 
+    id, 
+    title, 
+    date, 
+    time, 
+    location, 
+    families, 
+    status = 'upcoming', 
+    host = 'Unknown Host',
+    host_id
+  } = playdate;
   const statusClass = statusColors[status as keyof typeof statusColors] || 'bg-muted text-muted-foreground';
 
   const handleClick = () => {
     navigate(`/playdate/${id}`);
+  };
+  
+  const handleHostClick = (e: React.MouseEvent) => {
+    if (host_id) {
+      e.stopPropagation();
+      navigate(`/parent/${host_id}`);
+    }
   };
 
   return (
@@ -52,7 +70,15 @@ const PlaydateCard: React.FC<PlaydateCardProps> = ({ playdate }) => {
         </span>
       </div>
 
-      <p className="text-sm font-medium text-primary mb-3">Hosted by {host}</p>
+      <p 
+        className={cn(
+          "text-sm font-medium mb-3",
+          host_id ? "text-primary cursor-pointer hover:underline" : "text-muted-foreground"
+        )}
+        onClick={host_id ? handleHostClick : undefined}
+      >
+        Hosted by {host}
+      </p>
 
       {/* Info Items */}
       <div className="grid gap-3 text-sm text-muted-foreground">
