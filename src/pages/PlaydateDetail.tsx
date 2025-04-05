@@ -36,138 +36,124 @@ const PlaydateDetail = () => {
   const isParticipant = !!userParticipation;
 
   useEffect(() => {
-    const fetchPlaydateDetails = async () => {
-      try {
-        if (!id) return;
+  const fetchPlaydateDetails = async () => {
+    try {
+      if (!id) return;
 
-        const { data: playdateData, error: playdateError } = await supabase
-          .from('playdates')
+      const { data: playdateData, error: playdateError } = await supabase
+        .from('playdates')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (playdateError) throw playdateError;
+      setPlaydate(playdateData);
+
+      // Always fetch creator data
+      if (playdateData.creator_id) {
+        const { data: creatorData, error: creatorError } = await supabase
+          .from('profiles')
           .select('*')
-          .eq('id', id)
+          .eq('id', playdateData.creator_id)
           .single();
 
-        if (playdateError) throw playdateError;
-        setPlaydate(playdateData);
-
-        // Always fetch creator data regardless of who is viewing
-        if (playdateData.creator_id) {
-          const { data: creatorData, error: creatorError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', playdateData.creator_id)
-            .single();
-
-          if (!creatorError && creatorData) {
-            setCreator(creatorData);
-          } else {
-            console.error('Error fetching creator profile:', creatorError);
-          }
+        if (!creatorError && creatorData) {
+          setCreator(creatorData);
+        } else {
+          console.error('Error fetching creator profile:', creatorError);
         }
+      }
 
-        // Fetch all participants for this playdate
-        const { data: participantsData, error: participantsError } = await supabase
-          .from('playdate_participants')
-          .select('*')
-          .eq('playdate_id', id);
+      // Fetch all participants for this playdate
+      const { data: participantsData, error: participantsError } = await supabase
+        .from('playdate_participants')
+        .select('*')
+        .eq('playdate_id', id);
 
-        if (participantsError) throw participantsError;
-        
-        // Normalize participant data structure
-        const adaptedParticipants = participantsData ? participantsData.map(p => ({
-          ...p,
-          child_ids: p.child_ids && p.child_ids.length > 0 ? p.child_ids : [p.child_id],
-          parent_id: p.parent_id || user?.id || ''
-        })) : [];
-        
-        setParticipants(adaptedParticipants);
+      if (participantsError) throw participantsError;
 
-        // Now fetch details for all children and their parents
-        if (adaptedParticipants && adaptedParticipants.length > 0) {
-          const participantDetailsObj: { [key: string]: { parent: any; child: ChildProfile | null } } = {};
-          
-          // Process all participants
-          for (const participant of adaptedParticipants) {
-            // Get all child IDs for this participant
-            const childIdsToProcess = participant.child_ids && participant.child_ids.length > 0 
-              ? participant.child_ids 
-              : [participant.child_id];
-            
-            // For each child ID, fetch child and parent data
-            for (const childId of childIdsToProcess) {
-              if (!childId) continue;
-              
-              console.log(`Fetching details for child ID: ${childId}`);
-              
-              // Fetch child data by child ID (not by parent)
-              const { data: childData, error: childError } = await supabase
-                .from('children')
-                .select('*')
-                .eq('id', childId)
-                .single();
-              
-              if (childError) {
-                console.error(`Error fetching child ${childId}:`, childError);
-                continue;
-              }
-              
-              if (childData) {
-                console.log(`Found child: ${childData.name} with parent ID: ${childData.parent_id}`);
-                
-                // Fetch parent profile using the child's parent_id
-                const { data: parentData, error: parentError } = await supabase
-                  .from('profiles')
-                  .select('*')
-                  .eq('id', childData.parent_id)
-                  .single();
-                
-                if (parentError) {
-                  console.error(`Error fetching parent for child ${childId}:`, parentError);
-                  continue;
-                }
-                
-                if (parentData) {
-                  console.log(`Found parent: ${parentData.parent_name} for child: ${childData.name}`);
-                  
-                  // Store the details with a unique key combining participant ID and child ID
-                  const detailKey = `${participant.id}_${childId}`;
-                  participantDetailsObj[detailKey] = {
-                    parent: parentData,
-                    child: childData
-                  };
-                }
-              }
-            }
-          }
-          
-          console.log('All participant details:', participantDetailsObj);
-          setParticipantDetails(participantDetailsObj);
-        }
+      const adaptedParticipants = participantsData ? participantsData.map(p => ({
+        ...p,
+        child_ids: p.child_ids && p.child_ids.length > 0 ? p.child_ids : [p.child_id],
+        parent_id: p.parent_id || user?.id || ''
+      })) : [];
 
-        // Fetch current user's children for the join section
-        if (user) {
-          const { data: childrenData, error: childrenError } = await supabase
+      setParticipants(adaptedParticipants);
+
+      // Fetch details for all children and their parents
+      const participantDetailsObj: {
+        [key: string]: { parent: any; child: ChildProfile | null }
+      } = {};
+
+      for (const participant of adaptedParticipants) {
+        const childIdsToProcess = participant.child_ids || [];
+
+        for (const childId of childIdsToProcess) {
+          if (!childId) continue;
+
+          console.log(`🔍 Fetching child ID: ${childId}`);
+
+          const { data: childData, error: childError } = await supabase
             .from('children')
             .select('*')
-            .eq('parent_id', user.id);
+            .eq('id', childId)
+            .single();
 
-          if (!childrenError && childrenData) {
-            setUserChildren(childrenData);
+          if (childError) {
+            console.warn(`⚠️ Could not fetch child for ID: ${childId}`, childError);
           }
-        }
-      } catch (error) {
-        console.error('Error fetching playdate details:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load playdate details.',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
-    fetchPlaydateDetails();
-  }, [id, user]);
+          let parentData = null;
+          if (childData?.parent_id) {
+            const { data: parent, error: parentError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', childData.parent_id)
+              .single();
+
+            if (parentError) {
+              console.warn(`⚠️ Could not fetch parent for ID: ${childData.parent_id}`, parentError);
+            } else {
+              parentData = parent;
+            }
+          }
+
+          const detailKey = `${participant.id}_${childId}`;
+          participantDetailsObj[detailKey] = {
+            parent: parentData,
+            child: childData || null,
+          };
+        }
+      }
+
+      console.log('✅ Final participant details:', participantDetailsObj);
+      setParticipantDetails(participantDetailsObj);
+
+      // Fetch current user's children for join section
+      if (user) {
+        const { data: childrenData, error: childrenError } = await supabase
+          .from('children')
+          .select('*')
+          .eq('parent_id', user.id);
+
+        if (!childrenError && childrenData) {
+          setUserChildren(childrenData);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error fetching playdate details:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load playdate details.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchPlaydateDetails();
+}, [id, user]);
 
   const handleChildSelection = (childId: string) => {
     setSelectedChildIds(prev => {
