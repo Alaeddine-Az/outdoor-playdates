@@ -59,10 +59,15 @@ export const usePlaydates = () => {
 
         // Fetch creator profiles for all playdates
         const allPlaydatesWithCreators = [...upcomingPlaydates, ...pastPlaydatesData];
-        const creatorIds = allPlaydatesWithCreators.map(playdate => playdate.creator_id).filter(Boolean);
+        const creatorIds = allPlaydatesWithCreators
+          .map(playdate => playdate.creator_id)
+          .filter(Boolean);
         
         // Remove duplicates from creatorIds
         const uniqueCreatorIds = [...new Set(creatorIds)];
+        
+        // Log for debugging
+        console.log('Creator IDs to fetch:', uniqueCreatorIds);
         
         // Only fetch profiles if we have creator IDs
         let creatorProfileMap: Record<string, any> = {};
@@ -72,10 +77,16 @@ export const usePlaydates = () => {
             .select('id, parent_name')
             .in('id', uniqueCreatorIds);
             
-          if (creatorsError) throw creatorsError;
+          if (creatorsError) {
+            console.error('Error fetching creator profiles:', creatorsError);
+            throw creatorsError;
+          }
+          
+          // Log for debugging
+          console.log('Creator profiles fetched:', creatorProfiles);
           
           // Create a map of creator profiles by id
-          if (creatorProfiles) {
+          if (creatorProfiles && creatorProfiles.length > 0) {
             creatorProfiles.forEach(profile => {
               creatorProfileMap[profile.id] = profile;
             });
@@ -104,7 +115,15 @@ export const usePlaydates = () => {
 
         // Format the data for each category
         const formattedUpcoming = upcomingPlaydates.map(playdate => {
-          const creatorProfile = playdate.creator_id ? creatorProfileMap[playdate.creator_id] : null;
+          const creatorId = playdate.creator_id;
+          const creatorProfile = creatorId ? creatorProfileMap[creatorId] : null;
+          
+          // Log detailed information for debugging
+          if (!creatorProfile && creatorId) {
+            console.log(`No profile found for creator ID: ${creatorId}`);
+            console.log('Creator profile map keys:', Object.keys(creatorProfileMap));
+          }
+          
           return {
             id: playdate.id,
             title: playdate.title,
@@ -114,14 +133,16 @@ export const usePlaydates = () => {
             families: participantCounts[playdate.id] || 0,
             status: 'upcoming',
             host: creatorProfile ? creatorProfile.parent_name : 'Unknown Host',
-            host_id: playdate.creator_id,
+            host_id: creatorId,
             start_time: playdate.start_time,
             end_time: playdate.end_time
           };
         });
 
         const formattedPast = pastPlaydatesData.map(playdate => {
-          const creatorProfile = playdate.creator_id ? creatorProfileMap[playdate.creator_id] : null;
+          const creatorId = playdate.creator_id;
+          const creatorProfile = creatorId ? creatorProfileMap[creatorId] : null;
+          
           return {
             id: playdate.id,
             title: playdate.title,
@@ -131,7 +152,7 @@ export const usePlaydates = () => {
             families: participantCounts[playdate.id] || 0,
             status: 'past',
             host: creatorProfile ? creatorProfile.parent_name : 'Unknown Host',
-            host_id: playdate.creator_id,
+            host_id: creatorId,
             start_time: playdate.start_time,
             end_time: playdate.end_time
           };
@@ -143,7 +164,9 @@ export const usePlaydates = () => {
         );
 
         const formattedMyPlaydates = myPlaydatesData.map(playdate => {
-          const creatorProfile = playdate.creator_id ? creatorProfileMap[playdate.creator_id] : null;
+          const creatorId = playdate.creator_id;
+          const creatorProfile = creatorId ? creatorProfileMap[creatorId] : null;
+          
           return {
             id: playdate.id,
             title: playdate.title,
@@ -153,7 +176,7 @@ export const usePlaydates = () => {
             families: participantCounts[playdate.id] || 0,
             status: 'confirmed',
             host: creatorProfile ? creatorProfile.parent_name : 'Unknown Host',
-            host_id: playdate.creator_id,
+            host_id: creatorId,
             start_time: playdate.start_time,
             end_time: playdate.end_time
           };

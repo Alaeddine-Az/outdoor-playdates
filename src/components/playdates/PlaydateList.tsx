@@ -66,7 +66,7 @@ const PlaydateList = ({
         <div className="p-8 text-center">
           <h3 className="text-lg font-medium mb-2">Error loading playdates</h3>
           <p className="text-muted-foreground">
-            {error && typeof error === 'object' ? 'An error occurred' : error}
+            {typeof error === 'object' ? 'An error occurred' : error}
           </p>
         </div>
       ) : playdates.length === 0 ? (
