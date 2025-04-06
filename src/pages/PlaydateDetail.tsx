@@ -6,16 +6,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
-import { CalendarClock, MapPin, Users, Clock, ArrowLeft, User, Crown, Edit, Save } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ChildProfile, PlaydateParticipant } from '@/types';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
+
+// Import refactored components
+import { PlaydateHost } from '@/components/playdates/detail/PlaydateHost';
+import { PlaydateInfo } from '@/components/playdates/detail/PlaydateInfo';
+import { PlaydateParticipants } from '@/components/playdates/detail/PlaydateParticipants';
+import { PlaydateJoin } from '@/components/playdates/detail/PlaydateJoin';
+import { PlaydateSchedule } from '@/components/playdates/detail/PlaydateSchedule';
+import { PlaydateEdit } from '@/components/playdates/detail/PlaydateEdit';
 
 const PlaydateDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,7 +31,6 @@ const PlaydateDetail = () => {
     [key: string]: { parent: any; child: ChildProfile }
   }>({});
   const [userChildren, setUserChildren] = useState<any[]>([]);
-  const [selectedChildIds, setSelectedChildIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isJoining, setIsJoining] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -46,16 +47,6 @@ const PlaydateDetail = () => {
       maxParticipants: ''
     }
   });
-
-  const getInitials = (name: string) => {
-    return name
-      ? name
-          .split(' ')
-          .map(word => word[0])
-          .join('')
-          .toUpperCase()
-      : '?';
-  };
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -172,7 +163,7 @@ const PlaydateDetail = () => {
     fetchDetails();
   }, [id, user, form]);
 
-  const handleJoinPlaydate = async () => {
+  const handleJoinPlaydate = async (selectedChildIds: string[]) => {
     if (!user || selectedChildIds.length === 0 || !id) {
       toast({
         title: 'Error',
@@ -221,14 +212,6 @@ const PlaydateDetail = () => {
     } finally {
       setIsJoining(false);
     }
-  };
-
-  const handleChildSelection = (childId: string) => {
-    setSelectedChildIds(prev =>
-      prev.includes(childId)
-        ? prev.filter(id => id !== childId)
-        : [...prev, childId]
-    );
   };
 
   const handleUpdatePlaydate = async (values: any) => {
@@ -330,251 +313,38 @@ const PlaydateDetail = () => {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle>{playdate.title}</CardTitle>
               {isCreator && (
-                <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                      <DialogTitle>Edit Playdate</DialogTitle>
-                    </DialogHeader>
-                    <Form {...form}>
-                      <form onSubmit={form.handleSubmit(handleUpdatePlaydate)} className="space-y-4">
-                        <FormField
-                          control={form.control}
-                          name="title"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Title</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Playdate title" {...field} />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Description</FormLabel>
-                              <FormControl>
-                                <Textarea placeholder="Description (optional)" {...field} />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="location"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Location</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Address" {...field} />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        <div className="grid grid-cols-2 gap-4">
-                          <FormField
-                            control={form.control}
-                            name="startDate"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Date</FormLabel>
-                                <FormControl>
-                                  <Input type="date" {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="maxParticipants"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Max Participants</FormLabel>
-                                <FormControl>
-                                  <Input type="number" placeholder="Optional" {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <FormField
-                            control={form.control}
-                            name="startTime"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Start Time</FormLabel>
-                                <FormControl>
-                                  <Input type="time" {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="endTime"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>End Time</FormLabel>
-                                <FormControl>
-                                  <Input type="time" {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        <div className="flex justify-end gap-2 mt-4">
-                          <DialogClose asChild>
-                            <Button variant="outline" type="button">Cancel</Button>
-                          </DialogClose>
-                          <Button type="submit" disabled={isUpdating}>
-                            {isUpdating ? 'Saving...' : 'Save Changes'}
-                          </Button>
-                        </div>
-                      </form>
-                    </Form>
-                  </DialogContent>
-                </Dialog>
+                <PlaydateEdit 
+                  playdate={playdate}
+                  isUpdating={isUpdating}
+                  isEditDialogOpen={isEditDialogOpen}
+                  setIsEditDialogOpen={setIsEditDialogOpen}
+                  onUpdate={handleUpdatePlaydate}
+                  form={form}
+                />
               )}
             </CardHeader>
             <CardContent>
-              {/* Add host information here */}
-              {creator && (
-                <div className="flex items-center mb-4 bg-primary/5 p-3 rounded-md">
-                  <Avatar className="h-10 w-10 mr-3">
-                    <AvatarImage src={creator.avatar_url} alt={creator.parent_name} />
-                    <AvatarFallback>{creator.parent_name ? creator.parent_name.charAt(0).toUpperCase() : '?'}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="text-sm text-muted-foreground">Hosted by</div>
-                    <Link to={`/parent/${creator.id}`} className="font-medium text-primary hover:underline">
-                      {creator.parent_name}
-                    </Link>
-                  </div>
-                </div>
-              )}
-
-              <div className="mb-4 text-sm text-muted-foreground">
-                <CalendarClock className="inline w-4 h-4 mr-1" />
-                {format(new Date(playdate.start_time), 'PPPp')} –{' '}
-                {format(new Date(playdate.end_time), 'p')}
-              </div>
-
-              <div className="mb-4">
-                <MapPin className="inline w-4 h-4 mr-1" />
-                <span className="font-medium">{playdate.location}</span>
-              </div>
-
-              <div className="w-full h-64 rounded overflow-hidden border">
-                <iframe
-                  title="Map"
-                  width="100%"
-                  height="100%"
-                  loading="lazy"
-                  style={{ border: 0 }}
-                  src={`https://maps.google.com/maps?q=${encodeURIComponent(
-                    playdate.location
-                  )}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
-                />
-              </div>
-              {playdate.description && (
-              <div className="mt-4">
-                <h3 className="text-lg font-medium mb-1">About this Playdate</h3>
-                <p className="text-muted-foreground">{playdate.description}</p>
-              </div>
-            )}
+              <PlaydateHost creator={creator} />
+              <PlaydateInfo playdate={playdate} />
             </CardContent>
           </Card>
 
           {/* PARTICIPANTS */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Users className="h-5 w-5 mr-2" />
-                Participants ({Object.keys(participantDetails).length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {Object.entries(participantDetails).map(([key, { parent, child }]) => (
-                <div key={key} className="flex items-start space-x-3 p-3 border rounded-lg mb-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback>{getInitials(child?.name)}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-medium">{child?.name}</p>
-                    <p className="text-sm text-muted-foreground">{child?.age} years</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      <User className="inline h-3 w-3 mr-1" />
-                      Parent:{' '}
-                      {parent ? (
-                        <Link to={`/parent/${parent.id}`} className="hover:underline text-primary">
-                          {parent.parent_name}
-                        </Link>
-                      ) : (
-                        '?'
-                      )}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <PlaydateParticipants participantDetails={participantDetails} />
         </div>
 
         {/* RIGHT COLUMN */}
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Join this Playdate</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {userChildren.length > 0 ? (
-                <>
-                  <div className="mb-4 space-y-2">
-                    {userChildren.map(child => (
-                      <div key={child.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          checked={selectedChildIds.includes(child.id)}
-                          onCheckedChange={() => handleChildSelection(child.id)}
-                        />
-                        <span>{child.name} ({child.age})</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Button
-                    className="w-full"
-                    disabled={isJoining || selectedChildIds.length === 0}
-                    onClick={handleJoinPlaydate}
-                  >
-                    {isJoining ? 'Joining...' : 'Join'}
-                  </Button>
-                </>
-              ) : (
-                <p className="text-sm text-muted-foreground">You need to add children first.</p>
-              )}
-            </CardContent>
-          </Card>
+          <PlaydateJoin 
+            userChildren={userChildren}
+            isJoining={isJoining}
+            onJoin={handleJoinPlaydate}
+          />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>When</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm">
-              <p><b>Date:</b> {format(new Date(playdate.start_time), 'PPP')}</p>
-              <p><b>Time:</b> {format(new Date(playdate.start_time), 'p')} – {format(new Date(playdate.end_time), 'p')}</p>
-              {playdate.max_participants && (
-                <p><b>Capacity:</b> {participants.length} / {playdate.max_participants}</p>
-              )}
-            </CardContent>
-          </Card>
+          <PlaydateSchedule 
+            playdate={playdate}
+            participantsCount={participants.length}
+          />
         </div>
       </div>
     </div>
