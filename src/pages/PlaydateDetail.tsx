@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -5,11 +6,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
-import { CalendarClock, MapPin, Users, Clock, ArrowLeft, User, Crown } from 'lucide-react';
+import { CalendarClock, MapPin, Users, Clock, ArrowLeft, User, Crown, Edit, Save } from 'lucide-react';
 import { format } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ChildProfile, PlaydateParticipant } from '@/types';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
 
 const PlaydateDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +32,20 @@ const PlaydateDetail = () => {
   const [selectedChildIds, setSelectedChildIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isJoining, setIsJoining] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const form = useForm({
+    defaultValues: {
+      title: '',
+      description: '',
+      location: '',
+      startDate: '',
+      startTime: '',
+      endTime: '',
+      maxParticipants: ''
+    }
+  });
 
   const getInitials = (name: string) => {
     return name
@@ -121,6 +141,22 @@ const PlaydateDetail = () => {
             .eq('parent_id', user.id);
           setUserChildren(childrenData || []);
         }
+
+        // Set form default values for editing
+        if (playdateData) {
+          const startDate = new Date(playdateData.start_time);
+          const endDate = new Date(playdateData.end_time);
+          
+          form.reset({
+            title: playdateData.title,
+            description: playdateData.description || '',
+            location: playdateData.location,
+            startDate: format(startDate, 'yyyy-MM-dd'),
+            startTime: format(startDate, 'HH:mm'),
+            endTime: format(endDate, 'HH:mm'),
+            maxParticipants: playdateData.max_participants?.toString() || ''
+          });
+        }
       } catch (err) {
         console.error('Failed to load playdate data:', err);
         toast({
@@ -134,7 +170,7 @@ const PlaydateDetail = () => {
     };
 
     fetchDetails();
-  }, [id, user]);
+  }, [id, user, form]);
 
   const handleJoinPlaydate = async () => {
     if (!user || selectedChildIds.length === 0 || !id) {
@@ -175,6 +211,75 @@ const PlaydateDetail = () => {
     );
   };
 
+  const handleUpdatePlaydate = async (values: any) => {
+    if (!user || !id || user.id !== playdate?.creator_id) {
+      toast({
+        title: 'Unauthorized',
+        description: 'You can only edit playdates you created.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      // Format date and time fields into ISO strings
+      const startDateTime = new Date(`${values.startDate}T${values.startTime}`);
+      const endDateTime = new Date(`${values.startDate}T${values.endTime}`);
+
+      // Validate end time is after start time
+      if (endDateTime <= startDateTime) {
+        toast({
+          title: 'Invalid time range',
+          description: 'End time must be after start time.',
+          variant: 'destructive',
+        });
+        setIsUpdating(false);
+        return;
+      }
+
+      const { error } = await supabase
+        .from('playdates')
+        .update({
+          title: values.title,
+          description: values.description,
+          location: values.location,
+          start_time: startDateTime.toISOString(),
+          end_time: endDateTime.toISOString(),
+          max_participants: values.maxParticipants ? parseInt(values.maxParticipants) : null
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Update the local state
+      setPlaydate({
+        ...playdate,
+        title: values.title,
+        description: values.description,
+        location: values.location,
+        start_time: startDateTime.toISOString(),
+        end_time: endDateTime.toISOString(),
+        max_participants: values.maxParticipants ? parseInt(values.maxParticipants) : null
+      });
+
+      setIsEditDialogOpen(false);
+      toast({
+        title: 'Success',
+        description: 'Playdate updated successfully!',
+      });
+    } catch (err: any) {
+      console.error('Failed to update playdate:', err);
+      toast({
+        title: 'Update failed',
+        description: err.message || 'Could not update playdate.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   if (isLoading) {
     return <div className="text-center p-8">Loading...</div>;
   }
@@ -188,6 +293,9 @@ const PlaydateDetail = () => {
     );
   }
 
+  // Check if the current user is the creator of the playdate
+  const isCreator = user && playdate.creator_id === user.id;
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <Button variant="ghost" onClick={() => navigate('/playdates')}>
@@ -199,8 +307,123 @@ const PlaydateDetail = () => {
         {/* LEFT COLUMN */}
         <div className="md:col-span-2 space-y-6">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle>{playdate.title}</CardTitle>
+              {isCreator && (
+                <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>Edit Playdate</DialogTitle>
+                    </DialogHeader>
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(handleUpdatePlaydate)} className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="title"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Title</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Playdate title" {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Description</FormLabel>
+                              <FormControl>
+                                <Textarea placeholder="Description (optional)" {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="location"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Location</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Address" {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="startDate"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Date</FormLabel>
+                                <FormControl>
+                                  <Input type="date" {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="maxParticipants"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Max Participants</FormLabel>
+                                <FormControl>
+                                  <Input type="number" placeholder="Optional" {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="startTime"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Start Time</FormLabel>
+                                <FormControl>
+                                  <Input type="time" {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="endTime"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>End Time</FormLabel>
+                                <FormControl>
+                                  <Input type="time" {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <div className="flex justify-end gap-2 mt-4">
+                          <DialogClose asChild>
+                            <Button variant="outline" type="button">Cancel</Button>
+                          </DialogClose>
+                          <Button type="submit" disabled={isUpdating}>
+                            {isUpdating ? 'Saving...' : 'Save Changes'}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
+              )}
             </CardHeader>
             <CardContent>
               <div className="mb-4 text-sm text-muted-foreground">
