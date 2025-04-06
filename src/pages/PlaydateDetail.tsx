@@ -28,7 +28,7 @@ const PlaydateDetail = () => {
   const [creator, setCreator] = useState<any>(null);
   const [participants, setParticipants] = useState<PlaydateParticipant[]>([]);
   const [participantDetails, setParticipantDetails] = useState<{
-    [key: string]: { parent: any; child: ChildProfile }
+    [key: string]: { parent: any; child: ChildProfile; status?: string }
   }>({});
   const [userChildren, setUserChildren] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -109,7 +109,7 @@ const PlaydateDetail = () => {
         );
 
         const detailsObj: {
-          [key: string]: { parent: any; child: ChildProfile };
+          [key: string]: { parent: any; child: ChildProfile; status?: string };
         } = {};
 
         for (const p of normalized) {
@@ -117,7 +117,11 @@ const PlaydateDetail = () => {
             const child = childMap[childId];
             if (child) {
               const parent = parentMap[child.parent_id];
-              detailsObj[`${p.id}_${childId}`] = { child, parent };
+              detailsObj[`${p.id}_${childId}`] = { 
+                child, 
+                parent, 
+                status: p.status || 'pending' 
+              };
             }
           }
         }

@@ -4,11 +4,16 @@ import { Link } from 'react-router-dom';
 import { Users, User } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { ChildProfile } from '@/types';
 
 interface PlaydateParticipantsProps {
   participantDetails: {
-    [key: string]: { parent: any; child: ChildProfile };
+    [key: string]: { 
+      parent: any; 
+      child: ChildProfile;
+      status?: string; 
+    };
   };
 }
 
@@ -23,6 +28,22 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({ part
       : '?';
   };
 
+  const getStatusBadge = (status: string = 'pending') => {
+    const statusColors = {
+      confirmed: "bg-green-100 text-green-800 hover:bg-green-100",
+      pending: "bg-amber-100 text-amber-800 hover:bg-amber-100",
+      canceled: "bg-red-100 text-red-800 hover:bg-red-100",
+    };
+    
+    const color = statusColors[status as keyof typeof statusColors] || statusColors.pending;
+    
+    return (
+      <Badge variant="outline" className={`ml-auto ${color}`}>
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Badge>
+    );
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -32,13 +53,16 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({ part
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {Object.entries(participantDetails).map(([key, { parent, child }]) => (
+        {Object.entries(participantDetails).map(([key, { parent, child, status }]) => (
           <div key={key} className="flex items-start space-x-3 p-3 border rounded-lg mb-3">
             <Avatar className="h-10 w-10">
               <AvatarFallback>{getInitials(child?.name)}</AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <p className="font-medium">{child?.name}</p>
+              <div className="flex items-center justify-between">
+                <p className="font-medium">{child?.name}</p>
+                {getStatusBadge(status)}
+              </div>
               <p className="text-sm text-muted-foreground">{child?.age} years</p>
               <p className="text-xs text-muted-foreground mt-1">
                 <User className="inline h-3 w-3 mr-1" />
