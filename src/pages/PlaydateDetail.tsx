@@ -446,6 +446,22 @@ const PlaydateDetail = () => {
               )}
             </CardHeader>
             <CardContent>
+              {/* Add host information here */}
+              {creator && (
+                <div className="flex items-center mb-4 bg-primary/5 p-3 rounded-md">
+                  <Avatar className="h-10 w-10 mr-3">
+                    <AvatarImage src={creator.avatar_url} alt={creator.parent_name} />
+                    <AvatarFallback>{creator.parent_name ? creator.parent_name.charAt(0).toUpperCase() : '?'}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="text-sm text-muted-foreground">Hosted by</div>
+                    <Link to={`/parent/${creator.id}`} className="font-medium text-primary hover:underline">
+                      {creator.parent_name}
+                    </Link>
+                  </div>
+                </div>
+              )}
+
               <div className="mb-4 text-sm text-muted-foreground">
                 <CalendarClock className="inline w-4 h-4 mr-1" />
                 {format(new Date(playdate.start_time), 'PPPp')} –{' '}
