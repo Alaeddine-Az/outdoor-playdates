@@ -184,15 +184,35 @@ const PlaydateDetail = () => {
 
     setIsJoining(true);
     try {
+      // Get the first child ID to use as the primary child_id (required by the schema)
+      const primaryChildId = selectedChildIds[0];
+      
       await supabase.from('playdate_participants').insert({
         playdate_id: id,
+        child_id: primaryChildId, // Add the required child_id field
         child_ids: selectedChildIds,
         parent_id: user.id,
         status: 'pending'
       });
 
       toast({ title: 'Success', description: 'You have joined the playdate!' });
+      
+      // Refresh the participants list after joining
+      const { data: rawParticipants } = await supabase
+        .from('playdate_participants')
+        .select('*')
+        .eq('playdate_id', id);
+        
+      if (rawParticipants) {
+        const normalized = rawParticipants.map(p => ({
+          ...p,
+          child_ids: p.child_ids?.length ? p.child_ids : [p.child_id]
+        }));
+        setParticipants(normalized);
+      }
+      
     } catch (err: any) {
+      console.error('Error joining playdate:', err);
       toast({
         title: 'Failed',
         description: err.message || 'Could not join playdate.',
