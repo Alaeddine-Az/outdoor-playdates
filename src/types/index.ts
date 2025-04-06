@@ -86,7 +86,7 @@ export interface Playdate {
   end_time: string;
   creator_id: string;
   max_participants?: number;
-  status?: string;
+  status?: string; // Add status field to match the database
   created_at: string;
   updated_at: string;
 }
