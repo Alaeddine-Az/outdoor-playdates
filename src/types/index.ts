@@ -75,3 +75,18 @@ export interface PlaydateParticipant {
   created_at: string;
   updated_at: string;
 }
+
+// Add Playdate interface to represent the playdate structure
+export interface Playdate {
+  id: string;
+  title: string;
+  description?: string;
+  location: string;
+  start_time: string;
+  end_time: string;
+  creator_id: string;
+  max_participants?: number;
+  status?: string;
+  created_at: string;
+  updated_at: string;
+}

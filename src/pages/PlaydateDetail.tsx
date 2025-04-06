@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,6 +17,7 @@ import { PlaydateParticipants } from '@/components/playdates/detail/PlaydatePart
 import { PlaydateJoin } from '@/components/playdates/detail/PlaydateJoin';
 import { PlaydateSchedule } from '@/components/playdates/detail/PlaydateSchedule';
 import { PlaydateEdit } from '@/components/playdates/detail/PlaydateEdit';
+import { PlaydateCancel } from '@/components/playdates/detail/PlaydateCancel';
 
 const PlaydateDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -35,6 +35,7 @@ const PlaydateDetail = () => {
   const [isJoining, setIsJoining] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -287,6 +288,28 @@ const PlaydateDetail = () => {
     }
   };
 
+  const handlePlaydateCanceled = async () => {
+    // Refresh the playdate data after cancellation
+    if (!id) return;
+    
+    try {
+      const { data: updatedPlaydate } = await supabase
+        .from('playdates')
+        .select('*')
+        .eq('id', id)
+        .single();
+        
+      if (updatedPlaydate) {
+        setPlaydate(updatedPlaydate);
+      } else {
+        // If somehow the playdate was deleted, navigate back to playdates
+        navigate('/playdates');
+      }
+    } catch (err) {
+      console.error('Error refreshing playdate data:', err);
+    }
+  };
+
   if (isLoading) {
     return <div className="text-center p-8">Loading...</div>;
   }
@@ -302,6 +325,7 @@ const PlaydateDetail = () => {
 
   // Check if the current user is the creator of the playdate
   const isCreator = user && playdate.creator_id === user.id;
+  const isCanceled = playdate.status === 'canceled';
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -310,21 +334,35 @@ const PlaydateDetail = () => {
         Back to Playdates
       </Button>
 
+      {isCanceled && (
+        <div className="mt-4 p-3 bg-red-100 text-red-800 rounded-md border border-red-200">
+          This playdate has been canceled by the host.
+        </div>
+      )}
+
       <div className="grid md:grid-cols-3 gap-6 mt-6">
         {/* LEFT COLUMN */}
         <div className="md:col-span-2 space-y-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle>{playdate.title}</CardTitle>
-              {isCreator && (
-                <PlaydateEdit 
-                  playdate={playdate}
-                  isUpdating={isUpdating}
-                  isEditDialogOpen={isEditDialogOpen}
-                  setIsEditDialogOpen={setIsEditDialogOpen}
-                  onUpdate={handleUpdatePlaydate}
-                  form={form}
-                />
+              {isCreator && !isCanceled && (
+                <div className="flex gap-2">
+                  <PlaydateEdit 
+                    playdate={playdate}
+                    isUpdating={isUpdating}
+                    isEditDialogOpen={isEditDialogOpen}
+                    setIsEditDialogOpen={setIsEditDialogOpen}
+                    onUpdate={handleUpdatePlaydate}
+                    form={form}
+                  />
+                  <PlaydateCancel
+                    playdateId={id || ''}
+                    onCanceled={handlePlaydateCanceled}
+                    isProcessing={isProcessing}
+                    setIsProcessing={setIsProcessing}
+                  />
+                </div>
               )}
             </CardHeader>
             <CardContent>
@@ -339,11 +377,13 @@ const PlaydateDetail = () => {
 
         {/* RIGHT COLUMN */}
         <div className="space-y-6">
-          <PlaydateJoin 
-            userChildren={userChildren}
-            isJoining={isJoining}
-            onJoin={handleJoinPlaydate}
-          />
+          {!isCanceled && (
+            <PlaydateJoin 
+              userChildren={userChildren}
+              isJoining={isJoining}
+              onJoin={handleJoinPlaydate}
+            />
+          )}
 
           <PlaydateSchedule 
             playdate={playdate}
