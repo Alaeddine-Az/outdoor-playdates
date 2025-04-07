@@ -23,7 +23,7 @@ interface PlaydateParticipantsProps {
   playdateId: string;
   isCompleted: boolean;
   isCanceled: boolean;
-  onParticipantRemoved: () => void;
+  onParticipantRemoved: () => Promise<void>;
 }
 
 export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({ 
@@ -81,7 +81,7 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
         });
         
         // Call the callback to refresh the participants list
-        onParticipantRemoved();
+        await onParticipantRemoved();
       } catch (err: any) {
         console.error('Error removing child from playdate:', err);
         toast({

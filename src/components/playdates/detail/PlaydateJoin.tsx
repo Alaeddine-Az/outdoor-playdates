@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 interface PlaydateJoinProps {
   userChildren: any[];
   isJoining: boolean;
-  onJoin: (selectedChildIds: string[]) => void;
+  onJoin: (selectedChildIds: string[]) => Promise<void>;
   isCompleted?: boolean;
   isCanceled?: boolean;
 }
@@ -29,8 +29,8 @@ export const PlaydateJoin: React.FC<PlaydateJoinProps> = ({
     );
   };
 
-  const handleJoin = () => {
-    onJoin(selectedChildIds);
+  const handleJoin = async () => {
+    await onJoin(selectedChildIds);
     // Clear selection after joining
     setSelectedChildIds([]);
   };

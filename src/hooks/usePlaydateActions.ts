@@ -24,13 +24,15 @@ export const usePlaydateActions = (playdateId: string | undefined, refreshData: 
     try {
       const primaryChildId = selectedChildIds[0];
 
-      await supabase.from('playdate_participants').insert({
+      const { error } = await supabase.from('playdate_participants').insert({
         playdate_id: playdateId,
         child_id: primaryChildId,
         child_ids: selectedChildIds,
         parent_id: user.id,
         status: 'pending'
       });
+      
+      if (error) throw error;
 
       toast({ title: 'Success', description: 'You have joined the playdate!' });
       
