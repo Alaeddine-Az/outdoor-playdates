@@ -27,7 +27,7 @@ const PlaydateDetail = () => {
   const [creator, setCreator] = useState<any>(null);
   const [participants, setParticipants] = useState<PlaydateParticipant[]>([]);
   const [participantDetails, setParticipantDetails] = useState<{
-    [key: string]: { parent: any; child: ChildProfile; status?: string }
+    [key: string]: { parent: any; child: ChildProfile; status?: string; participantId?: string }
   }>({});
   const [userChildren, setUserChildren] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,117 +48,118 @@ const PlaydateDetail = () => {
     }
   });
 
-  useEffect(() => {
-    const fetchDetails = async () => {
-      try {
-        if (!id) return;
+  const loadPlaydateData = async () => {
+    try {
+      if (!id) return;
 
-        const { data: playdateData, error: playdateError } = await supabase
-          .from('playdates')
-          .select('*')
-          .eq('id', id)
-          .single();
-        if (playdateError) throw playdateError;
-        setPlaydate(playdateData);
+      const { data: playdateData, error: playdateError } = await supabase
+        .from('playdates')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (playdateError) throw playdateError;
+      setPlaydate(playdateData);
 
-        const { data: creatorData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', playdateData.creator_id)
-          .single();
-        setCreator(creatorData);
+      const { data: creatorData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', playdateData.creator_id)
+        .single();
+      setCreator(creatorData);
 
-        const { data: rawParticipants } = await supabase
-          .from('playdate_participants')
-          .select('*')
-          .eq('playdate_id', id);
-        if (!rawParticipants) return;
+      const { data: rawParticipants } = await supabase
+        .from('playdate_participants')
+        .select('*')
+        .eq('playdate_id', id);
+      if (!rawParticipants) return;
 
-        const normalized = rawParticipants.map(p => ({
-          ...p,
-          child_ids: p.child_ids?.length ? p.child_ids : [p.child_id]
-        }));
-        setParticipants(normalized);
+      const normalized = rawParticipants.map(p => ({
+        ...p,
+        child_ids: p.child_ids?.length ? p.child_ids : [p.child_id]
+      }));
+      setParticipants(normalized);
 
-        const allChildIds = normalized.flatMap(p => p.child_ids).filter(Boolean);
-        const uniqueChildIds = [...new Set(allChildIds)];
+      const allChildIds = normalized.flatMap(p => p.child_ids).filter(Boolean);
+      const uniqueChildIds = [...new Set(allChildIds)];
 
-        const { data: allChildren } = await supabase
-          .from('children')
-          .select('*')
-          .in('id', uniqueChildIds);
+      const { data: allChildren } = await supabase
+        .from('children')
+        .select('*')
+        .in('id', uniqueChildIds);
 
-        const parentIds = allChildren?.map(c => c.parent_id).filter(Boolean);
-        const uniqueParentIds = [...new Set(parentIds)];
+      const parentIds = allChildren?.map(c => c.parent_id).filter(Boolean);
+      const uniqueParentIds = [...new Set(parentIds)];
 
-        const { data: allParents } = await supabase
-          .from('profiles')
-          .select('*')
-          .in('id', uniqueParentIds);
+      const { data: allParents } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('id', uniqueParentIds);
 
-        const parentMap = Object.fromEntries(
-          (allParents || []).map(p => [p.id, p])
-        );
+      const parentMap = Object.fromEntries(
+        (allParents || []).map(p => [p.id, p])
+      );
 
-        const childMap = Object.fromEntries(
-          (allChildren || []).map(c => [c.id, c])
-        );
+      const childMap = Object.fromEntries(
+        (allChildren || []).map(c => [c.id, c])
+      );
 
-        const detailsObj: {
-          [key: string]: { parent: any; child: ChildProfile; status?: string };
-        } = {};
+      const detailsObj: {
+        [key: string]: { parent: any; child: ChildProfile; status?: string; participantId?: string };
+      } = {};
 
-        for (const p of normalized) {
-          for (const childId of p.child_ids) {
-            const child = childMap[childId];
-            if (child) {
-              const parent = parentMap[child.parent_id];
-              detailsObj[`${p.id}_${childId}`] = {
-                child,
-                parent,
-                status: p.status || 'pending'
-              };
-            }
+      for (const p of normalized) {
+        for (const childId of p.child_ids) {
+          const child = childMap[childId];
+          if (child) {
+            const parent = parentMap[child.parent_id];
+            detailsObj[`${p.id}_${childId}`] = {
+              child,
+              parent,
+              status: p.status || 'pending',
+              participantId: p.id
+            };
           }
         }
-
-        setParticipantDetails(detailsObj);
-
-        if (user) {
-          const { data: childrenData } = await supabase
-            .from('children')
-            .select('*')
-            .eq('parent_id', user.id);
-          setUserChildren(childrenData || []);
-        }
-
-        if (playdateData) {
-          const startDate = new Date(playdateData.start_time);
-          const endDate = new Date(playdateData.end_time);
-
-          form.reset({
-            title: playdateData.title,
-            description: playdateData.description || '',
-            location: playdateData.location,
-            startDate: format(startDate, 'yyyy-MM-dd'),
-            startTime: format(startDate, 'HH:mm'),
-            endTime: format(endDate, 'HH:mm'),
-            maxParticipants: playdateData.max_participants?.toString() || ''
-          });
-        }
-      } catch (err) {
-        console.error('Failed to load playdate data:', err);
-        toast({
-          title: 'Error loading data',
-          description: 'Could not load playdate or participants.',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
       }
-    };
 
-    fetchDetails();
+      setParticipantDetails(detailsObj);
+
+      if (user) {
+        const { data: childrenData } = await supabase
+          .from('children')
+          .select('*')
+          .eq('parent_id', user.id);
+        setUserChildren(childrenData || []);
+      }
+
+      if (playdateData) {
+        const startDate = new Date(playdateData.start_time);
+        const endDate = new Date(playdateData.end_time);
+
+        form.reset({
+          title: playdateData.title,
+          description: playdateData.description || '',
+          location: playdateData.location,
+          startDate: format(startDate, 'yyyy-MM-dd'),
+          startTime: format(startDate, 'HH:mm'),
+          endTime: format(endDate, 'HH:mm'),
+          maxParticipants: playdateData.max_participants?.toString() || ''
+        });
+      }
+    } catch (err) {
+      console.error('Failed to load playdate data:', err);
+      toast({
+        title: 'Error loading data',
+        description: 'Could not load playdate or participants.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPlaydateData();
   }, [id, user, form]);
 
   const handleJoinPlaydate = async (selectedChildIds: string[]) => {
@@ -184,19 +185,8 @@ const PlaydateDetail = () => {
       });
 
       toast({ title: 'Success', description: 'You have joined the playdate!' });
-
-      const { data: rawParticipants } = await supabase
-        .from('playdate_participants')
-        .select('*')
-        .eq('playdate_id', id);
-
-      if (rawParticipants) {
-        const normalized = rawParticipants.map(p => ({
-          ...p,
-          child_ids: p.child_ids?.length ? p.child_ids : [p.child_id]
-        }));
-        setParticipants(normalized);
-      }
+      
+      loadPlaydateData();
 
     } catch (err: any) {
       console.error('Error joining playdate:', err);
@@ -296,6 +286,10 @@ const PlaydateDetail = () => {
     }
   };
 
+  const handleParticipantRemoved = () => {
+    loadPlaydateData();
+  };
+
   if (isLoading) {
     return <div className="text-center p-8">Loading...</div>;
   }
@@ -362,7 +356,13 @@ const PlaydateDetail = () => {
             </CardContent>
           </Card>
 
-          <PlaydateParticipants participantDetails={participantDetails} />
+          <PlaydateParticipants 
+            participantDetails={participantDetails} 
+            playdateId={id || ''}
+            isCompleted={isCompleted}
+            isCanceled={isCanceled}
+            onParticipantRemoved={handleParticipantRemoved}
+          />
         </div>
 
         <div className="space-y-6">
