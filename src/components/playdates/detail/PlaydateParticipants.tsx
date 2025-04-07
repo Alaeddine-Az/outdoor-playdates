@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, User, X } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -34,7 +34,7 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
   onParticipantRemoved
 }) => {
   const { user } = useAuth();
-  const [isRemoving, setIsRemoving] = React.useState(false);
+  const [removingParticipantIds, setRemovingParticipantIds] = useState<string[]>([]);
 
   const getInitials = (name: string) => {
     return name
@@ -66,7 +66,7 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
     if (!user || !participantId || isCompleted || isCanceled) return;
     
     if (confirm(`Are you sure you want to remove ${childName} from this playdate?`)) {
-      setIsRemoving(true);
+      setRemovingParticipantIds(prev => [...prev, participantId]);
       try {
         const { error } = await supabase
           .from('playdate_participants')
@@ -90,7 +90,7 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
           variant: "destructive",
         });
       } finally {
-        setIsRemoving(false);
+        setRemovingParticipantIds(prev => prev.filter(id => id !== participantId));
       }
     }
   };
@@ -104,48 +104,57 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {Object.entries(participantDetails).map(([key, { parent, child, status, participantId }]) => {
-          const isCurrentUserChild = user && parent?.id === user.id;
-          const canRemove = isCurrentUserChild && !isCompleted && !isCanceled && participantId;
-          
-          return (
-            <div key={key} className="flex items-start space-x-3 p-3 border rounded-lg mb-3">
-              <Avatar className="h-10 w-10">
-                <AvatarFallback>{getInitials(child?.name)}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <p className="font-medium">{child?.name}</p>
-                  {getStatusBadge(status)}
+        {Object.keys(participantDetails).length === 0 ? (
+          <p className="text-muted-foreground text-sm">No participants yet. Be the first to join!</p>
+        ) : (
+          Object.entries(participantDetails).map(([key, { parent, child, status, participantId }]) => {
+            const isCurrentUserChild = user && parent?.id === user.id;
+            const canRemove = isCurrentUserChild && !isCompleted && !isCanceled && participantId;
+            const isRemoving = participantId && removingParticipantIds.includes(participantId);
+            
+            return (
+              <div key={key} className="flex items-start space-x-3 p-3 border rounded-lg mb-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarFallback>{getInitials(child?.name)}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium">{child?.name}</p>
+                    {getStatusBadge(status)}
+                  </div>
+                  <p className="text-sm text-muted-foreground">{child?.age} years</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    <User className="inline h-3 w-3 mr-1" />
+                    Parent:{' '}
+                    {parent ? (
+                      <Link to={`/parent/${parent.id}`} className="hover:underline text-primary">
+                        {parent.parent_name}
+                      </Link>
+                    ) : (
+                      '?'
+                    )}
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground">{child?.age} years</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  <User className="inline h-3 w-3 mr-1" />
-                  Parent:{' '}
-                  {parent ? (
-                    <Link to={`/parent/${parent.id}`} className="hover:underline text-primary">
-                      {parent.parent_name}
-                    </Link>
-                  ) : (
-                    '?'
-                  )}
-                </p>
+                {canRemove && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => handleRemoveChild(participantId, child?.name)}
+                    disabled={isRemoving}
+                  >
+                    {isRemoving ? (
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-red-500 border-t-transparent"></span>
+                    ) : (
+                      <X className="h-4 w-4" />
+                    )}
+                    <span className="sr-only">Remove</span>
+                  </Button>
+                )}
               </div>
-              {canRemove && (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                  onClick={() => handleRemoveChild(participantId, child?.name)}
-                  disabled={isRemoving}
-                >
-                  <X className="h-4 w-4" />
-                  <span className="sr-only">Remove</span>
-                </Button>
-              )}
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </CardContent>
     </Card>
   );

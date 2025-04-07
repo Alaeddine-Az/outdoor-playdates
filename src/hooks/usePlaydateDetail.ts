@@ -52,6 +52,7 @@ export const usePlaydateDetail = (id: string | undefined) => {
   const loadPlaydateData = async () => {
     try {
       if (!id) return;
+      setIsLoading(true);
 
       const { data: playdateData, error: playdateError } = await supabase
         .from('playdates')
@@ -72,58 +73,65 @@ export const usePlaydateDetail = (id: string | undefined) => {
         .from('playdate_participants')
         .select('*')
         .eq('playdate_id', id);
-      if (!rawParticipants) return;
+      if (!rawParticipants) {
+        setParticipants([]);
+        setParticipantDetails({});
+      } else {
+        const normalized = rawParticipants.map(p => ({
+          ...p,
+          child_ids: p.child_ids?.length ? p.child_ids : [p.child_id]
+        }));
+        setParticipants(normalized);
 
-      const normalized = rawParticipants.map(p => ({
-        ...p,
-        child_ids: p.child_ids?.length ? p.child_ids : [p.child_id]
-      }));
-      setParticipants(normalized);
+        const allChildIds = normalized.flatMap(p => p.child_ids).filter(Boolean);
+        const uniqueChildIds = [...new Set(allChildIds)];
 
-      const allChildIds = normalized.flatMap(p => p.child_ids).filter(Boolean);
-      const uniqueChildIds = [...new Set(allChildIds)];
+        if (uniqueChildIds.length > 0) {
+          const { data: allChildren } = await supabase
+            .from('children')
+            .select('*')
+            .in('id', uniqueChildIds);
 
-      const { data: allChildren } = await supabase
-        .from('children')
-        .select('*')
-        .in('id', uniqueChildIds);
+          const parentIds = (allChildren || []).map(c => c.parent_id).filter(Boolean);
+          const uniqueParentIds = [...new Set(parentIds)];
 
-      const parentIds = allChildren?.map(c => c.parent_id).filter(Boolean);
-      const uniqueParentIds = [...new Set(parentIds)];
+          const { data: allParents } = await supabase
+            .from('profiles')
+            .select('*')
+            .in('id', uniqueParentIds);
 
-      const { data: allParents } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('id', uniqueParentIds);
+          const parentMap = Object.fromEntries(
+            (allParents || []).map(p => [p.id, p])
+          );
 
-      const parentMap = Object.fromEntries(
-        (allParents || []).map(p => [p.id, p])
-      );
+          const childMap = Object.fromEntries(
+            (allChildren || []).map(c => [c.id, c])
+          );
 
-      const childMap = Object.fromEntries(
-        (allChildren || []).map(c => [c.id, c])
-      );
+          const detailsObj: {
+            [key: string]: { parent: any; child: ChildProfile; status?: string; participantId?: string };
+          } = {};
 
-      const detailsObj: {
-        [key: string]: { parent: any; child: ChildProfile; status?: string; participantId?: string };
-      } = {};
-
-      for (const p of normalized) {
-        for (const childId of p.child_ids) {
-          const child = childMap[childId];
-          if (child) {
-            const parent = parentMap[child.parent_id];
-            detailsObj[`${p.id}_${childId}`] = {
-              child,
-              parent,
-              status: p.status || 'pending',
-              participantId: p.id
-            };
+          for (const p of normalized) {
+            for (const childId of p.child_ids) {
+              const child = childMap[childId];
+              if (child) {
+                const parent = parentMap[child.parent_id];
+                detailsObj[`${p.id}_${childId}`] = {
+                  child,
+                  parent,
+                  status: p.status || 'pending',
+                  participantId: p.id
+                };
+              }
+            }
           }
+
+          setParticipantDetails(detailsObj);
+        } else {
+          setParticipantDetails({});
         }
       }
-
-      setParticipantDetails(detailsObj);
 
       if (user) {
         const { data: childrenData } = await supabase

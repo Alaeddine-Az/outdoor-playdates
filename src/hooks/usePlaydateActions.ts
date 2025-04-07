@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
-export const usePlaydateActions = (playdateId: string | undefined, refreshData: () => void) => {
+export const usePlaydateActions = (playdateId: string | undefined, refreshData: () => Promise<void>) => {
   const { user } = useAuth();
   const [isJoining, setIsJoining] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -34,7 +34,8 @@ export const usePlaydateActions = (playdateId: string | undefined, refreshData: 
 
       toast({ title: 'Success', description: 'You have joined the playdate!' });
       
-      refreshData();
+      // Immediately refresh the data to show the updated participants
+      await refreshData();
 
     } catch (err: any) {
       console.error('Error joining playdate:', err);
@@ -87,7 +88,8 @@ export const usePlaydateActions = (playdateId: string | undefined, refreshData: 
 
       if (error) throw error;
 
-      refreshData();
+      // Immediately refresh the data to show the updated playdate
+      await refreshData();
       
       toast({
         title: 'Success',
@@ -106,7 +108,8 @@ export const usePlaydateActions = (playdateId: string | undefined, refreshData: 
   };
 
   const handlePlaydateCanceled = async () => {
-    refreshData();
+    // Immediately refresh the data to show the canceled status
+    await refreshData();
   };
 
   return {

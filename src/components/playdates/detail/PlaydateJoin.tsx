@@ -31,6 +31,8 @@ export const PlaydateJoin: React.FC<PlaydateJoinProps> = ({
 
   const handleJoin = () => {
     onJoin(selectedChildIds);
+    // Clear selection after joining
+    setSelectedChildIds([]);
   };
 
   const isDisabled = isJoining || selectedChildIds.length === 0 || isCompleted || isCanceled;

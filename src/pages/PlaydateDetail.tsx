@@ -8,7 +8,6 @@ import { PlaydateStatusMessage } from '@/components/playdates/detail/PlaydateSta
 import { PlaydateHeader } from '@/components/playdates/detail/PlaydateHeader';
 import { usePlaydateDetail } from '@/hooks/usePlaydateDetail';
 import { usePlaydateActions } from '@/hooks/usePlaydateActions';
-import { toast } from '@/components/ui/use-toast';
 
 const PlaydateDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,8 +44,12 @@ const PlaydateDetail = () => {
     setIsEditDialogOpen(false);
   };
 
-  const handleParticipantRemoved = () => {
-    loadPlaydateData();
+  const handleParticipantRemoved = async () => {
+    await loadPlaydateData();
+  };
+
+  const handleJoin = async (selectedChildIds: string[]) => {
+    await handleJoinPlaydate(selectedChildIds);
   };
 
   if (isLoading) {
@@ -102,7 +105,7 @@ const PlaydateDetail = () => {
             <PlaydateJoin
               userChildren={userChildren}
               isJoining={isJoining}
-              onJoin={handleJoinPlaydate}
+              onJoin={handleJoin}
               isCompleted={isCompleted}
               isCanceled={isCanceled}
             />
