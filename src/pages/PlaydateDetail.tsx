@@ -10,7 +10,6 @@ import { format } from 'date-fns';
 import { ChildProfile, PlaydateParticipant } from '@/types';
 import { useForm } from 'react-hook-form';
 
-// Import refactored components
 import { PlaydateHost } from '@/components/playdates/detail/PlaydateHost';
 import { PlaydateInfo } from '@/components/playdates/detail/PlaydateInfo';
 import { PlaydateParticipants } from '@/components/playdates/detail/PlaydateParticipants';
@@ -54,7 +53,6 @@ const PlaydateDetail = () => {
       try {
         if (!id) return;
 
-        // Fetch playdate
         const { data: playdateData, error: playdateError } = await supabase
           .from('playdates')
           .select('*')
@@ -63,7 +61,6 @@ const PlaydateDetail = () => {
         if (playdateError) throw playdateError;
         setPlaydate(playdateData);
 
-        // Fetch creator profile
         const { data: creatorData } = await supabase
           .from('profiles')
           .select('*')
@@ -71,7 +68,6 @@ const PlaydateDetail = () => {
           .single();
         setCreator(creatorData);
 
-        // Fetch participants
         const { data: rawParticipants } = await supabase
           .from('playdate_participants')
           .select('*')
@@ -84,7 +80,6 @@ const PlaydateDetail = () => {
         }));
         setParticipants(normalized);
 
-        // Fetch child & parent data for all child_ids
         const allChildIds = normalized.flatMap(p => p.child_ids).filter(Boolean);
         const uniqueChildIds = [...new Set(allChildIds)];
 
@@ -129,7 +124,6 @@ const PlaydateDetail = () => {
 
         setParticipantDetails(detailsObj);
 
-        // Fetch current user's children
         if (user) {
           const { data: childrenData } = await supabase
             .from('children')
@@ -138,7 +132,6 @@ const PlaydateDetail = () => {
           setUserChildren(childrenData || []);
         }
 
-        // Set form default values for editing
         if (playdateData) {
           const startDate = new Date(playdateData.start_time);
           const endDate = new Date(playdateData.end_time);
@@ -180,12 +173,11 @@ const PlaydateDetail = () => {
 
     setIsJoining(true);
     try {
-      // Get the first child ID to use as the primary child_id (required by the schema)
       const primaryChildId = selectedChildIds[0];
       
       await supabase.from('playdate_participants').insert({
         playdate_id: id,
-        child_id: primaryChildId, // Add the required child_id field
+        child_id: primaryChildId,
         child_ids: selectedChildIds,
         parent_id: user.id,
         status: 'pending'
@@ -193,7 +185,6 @@ const PlaydateDetail = () => {
 
       toast({ title: 'Success', description: 'You have joined the playdate!' });
       
-      // Refresh the participants list after joining
       const { data: rawParticipants } = await supabase
         .from('playdate_participants')
         .select('*')
@@ -231,11 +222,9 @@ const PlaydateDetail = () => {
 
     setIsUpdating(true);
     try {
-      // Format date and time fields into ISO strings
       const startDateTime = new Date(`${values.startDate}T${values.startTime}`);
       const endDateTime = new Date(`${values.startDate}T${values.endTime}`);
 
-      // Validate end time is after start time
       if (endDateTime <= startDateTime) {
         toast({
           title: 'Invalid time range',
@@ -260,7 +249,6 @@ const PlaydateDetail = () => {
 
       if (error) throw error;
 
-      // Update the local state
       setPlaydate({
         ...playdate,
         title: values.title,
@@ -289,7 +277,6 @@ const PlaydateDetail = () => {
   };
 
   const handlePlaydateCanceled = async () => {
-    // Refresh the playdate data after cancellation
     if (!id) return;
     
     try {
@@ -302,7 +289,6 @@ const PlaydateDetail = () => {
       if (updatedPlaydate) {
         setPlaydate(updatedPlaydate);
       } else {
-        // If somehow the playdate was deleted, navigate back to playdates
         navigate('/playdates');
       }
     } catch (err) {
@@ -323,9 +309,9 @@ const PlaydateDetail = () => {
     );
   }
 
-  // Check if the current user is the creator of the playdate
   const isCreator = user && playdate.creator_id === user.id;
   const isCanceled = playdate.status === 'canceled';
+  const isCompleted = new Date(playdate.end_time) < new Date();
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -339,14 +325,19 @@ const PlaydateDetail = () => {
           This playdate has been canceled by the host.
         </div>
       )}
+      
+      {isCompleted && !isCanceled && (
+        <div className="mt-4 p-3 bg-amber-100 text-amber-800 rounded-md border border-amber-200">
+          This playdate has already ended.
+        </div>
+      )}
 
       <div className="grid md:grid-cols-3 gap-6 mt-6">
-        {/* LEFT COLUMN */}
         <div className="md:col-span-2 space-y-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle>{playdate.title}</CardTitle>
-              {isCreator && !isCanceled && (
+              {isCreator && !isCanceled && !isCompleted && (
                 <div className="flex gap-2">
                   <PlaydateEdit 
                     playdate={playdate}
@@ -371,23 +362,24 @@ const PlaydateDetail = () => {
             </CardContent>
           </Card>
 
-          {/* PARTICIPANTS */}
           <PlaydateParticipants participantDetails={participantDetails} />
         </div>
 
-        {/* RIGHT COLUMN */}
         <div className="space-y-6">
           {!isCanceled && (
             <PlaydateJoin 
               userChildren={userChildren}
               isJoining={isJoining}
               onJoin={handleJoinPlaydate}
+              isCompleted={isCompleted}
+              isCanceled={isCanceled}
             />
           )}
 
           <PlaydateSchedule 
             playdate={playdate}
             participantsCount={participants.length}
+            isCompleted={isCompleted}
           />
         </div>
       </div>

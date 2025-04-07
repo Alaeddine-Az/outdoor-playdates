@@ -2,6 +2,8 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Calendar } from 'lucide-react';
 
 interface PlaydateScheduleProps {
   playdate: {
@@ -10,13 +12,26 @@ interface PlaydateScheduleProps {
     max_participants?: number;
   };
   participantsCount: number;
+  isCompleted?: boolean;
 }
 
-export const PlaydateSchedule: React.FC<PlaydateScheduleProps> = ({ playdate, participantsCount }) => {
+export const PlaydateSchedule: React.FC<PlaydateScheduleProps> = ({ 
+  playdate, 
+  participantsCount,
+  isCompleted = false
+}) => {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>When</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="flex items-center">
+          <Calendar className="h-5 w-5 mr-2" />
+          When
+        </CardTitle>
+        {isCompleted && (
+          <Badge variant="outline" className="bg-amber-100 text-amber-800">
+            Completed
+          </Badge>
+        )}
       </CardHeader>
       <CardContent className="text-sm">
         <p><b>Date:</b> {format(new Date(playdate.start_time), 'PPP')}</p>

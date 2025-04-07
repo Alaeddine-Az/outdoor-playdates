@@ -8,9 +8,17 @@ interface PlaydateJoinProps {
   userChildren: any[];
   isJoining: boolean;
   onJoin: (selectedChildIds: string[]) => void;
+  isCompleted?: boolean;
+  isCanceled?: boolean;
 }
 
-export const PlaydateJoin: React.FC<PlaydateJoinProps> = ({ userChildren, isJoining, onJoin }) => {
+export const PlaydateJoin: React.FC<PlaydateJoinProps> = ({ 
+  userChildren, 
+  isJoining, 
+  onJoin, 
+  isCompleted = false,
+  isCanceled = false 
+}) => {
   const [selectedChildIds, setSelectedChildIds] = useState<string[]>([]);
 
   const handleChildSelection = (childId: string) => {
@@ -25,6 +33,19 @@ export const PlaydateJoin: React.FC<PlaydateJoinProps> = ({ userChildren, isJoin
     onJoin(selectedChildIds);
   };
 
+  const isDisabled = isJoining || selectedChildIds.length === 0 || isCompleted || isCanceled;
+  
+  let buttonText = isJoining ? 'Joining...' : 'Join';
+  let helperText = '';
+  
+  if (isCompleted) {
+    buttonText = 'Playdate Completed';
+    helperText = 'This playdate has already ended.';
+  } else if (isCanceled) {
+    buttonText = 'Playdate Canceled';
+    helperText = 'This playdate has been canceled.';
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -37,6 +58,7 @@ export const PlaydateJoin: React.FC<PlaydateJoinProps> = ({ userChildren, isJoin
               {userChildren.map(child => (
                 <div key={child.id} className="flex items-center space-x-2">
                   <Checkbox
+                    disabled={isCompleted || isCanceled}
                     checked={selectedChildIds.includes(child.id)}
                     onCheckedChange={() => handleChildSelection(child.id)}
                   />
@@ -44,12 +66,15 @@ export const PlaydateJoin: React.FC<PlaydateJoinProps> = ({ userChildren, isJoin
                 </div>
               ))}
             </div>
+            {helperText && (
+              <p className="text-sm text-muted-foreground mb-2">{helperText}</p>
+            )}
             <Button
               className="w-full"
-              disabled={isJoining || selectedChildIds.length === 0}
+              disabled={isDisabled}
               onClick={handleJoin}
             >
-              {isJoining ? 'Joining...' : 'Join'}
+              {buttonText}
             </Button>
           </>
         ) : (
