@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -113,10 +113,10 @@ const PlaydateDetail = () => {
             const child = childMap[childId];
             if (child) {
               const parent = parentMap[child.parent_id];
-              detailsObj[`${p.id}_${childId}`] = { 
-                child, 
-                parent, 
-                status: p.status || 'pending' 
+              detailsObj[`${p.id}_${childId}`] = {
+                child,
+                parent,
+                status: p.status || 'pending'
               };
             }
           }
@@ -135,7 +135,7 @@ const PlaydateDetail = () => {
         if (playdateData) {
           const startDate = new Date(playdateData.start_time);
           const endDate = new Date(playdateData.end_time);
-          
+
           form.reset({
             title: playdateData.title,
             description: playdateData.description || '',
@@ -174,7 +174,7 @@ const PlaydateDetail = () => {
     setIsJoining(true);
     try {
       const primaryChildId = selectedChildIds[0];
-      
+
       await supabase.from('playdate_participants').insert({
         playdate_id: id,
         child_id: primaryChildId,
@@ -184,12 +184,12 @@ const PlaydateDetail = () => {
       });
 
       toast({ title: 'Success', description: 'You have joined the playdate!' });
-      
+
       const { data: rawParticipants } = await supabase
         .from('playdate_participants')
         .select('*')
         .eq('playdate_id', id);
-        
+
       if (rawParticipants) {
         const normalized = rawParticipants.map(p => ({
           ...p,
@@ -197,7 +197,7 @@ const PlaydateDetail = () => {
         }));
         setParticipants(normalized);
       }
-      
+
     } catch (err: any) {
       console.error('Error joining playdate:', err);
       toast({
@@ -278,14 +278,14 @@ const PlaydateDetail = () => {
 
   const handlePlaydateCanceled = async () => {
     if (!id) return;
-    
+
     try {
       const { data: updatedPlaydate } = await supabase
         .from('playdates')
         .select('*')
         .eq('id', id)
         .single();
-        
+
       if (updatedPlaydate) {
         setPlaydate(updatedPlaydate);
       } else {
@@ -325,7 +325,7 @@ const PlaydateDetail = () => {
           This playdate has been canceled by the host.
         </div>
       )}
-      
+
       {isCompleted && !isCanceled && (
         <div className="mt-4 p-3 bg-amber-100 text-amber-800 rounded-md border border-amber-200">
           This playdate has already ended.
@@ -335,11 +335,15 @@ const PlaydateDetail = () => {
       <div className="grid md:grid-cols-3 gap-6 mt-6">
         <div className="md:col-span-2 space-y-6">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader>
               <CardTitle>{playdate.title}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <PlaydateHost creator={creator} />
+              <PlaydateInfo playdate={playdate} />
               {isCreator && !isCanceled && !isCompleted && (
                 <div className="flex gap-2">
-                  <PlaydateEdit 
+                  <PlaydateEdit
                     playdate={playdate}
                     isUpdating={isUpdating}
                     isEditDialogOpen={isEditDialogOpen}
@@ -355,10 +359,6 @@ const PlaydateDetail = () => {
                   />
                 </div>
               )}
-            </CardHeader>
-            <CardContent>
-              <PlaydateHost creator={creator} />
-              <PlaydateInfo playdate={playdate} />
             </CardContent>
           </Card>
 
@@ -367,7 +367,7 @@ const PlaydateDetail = () => {
 
         <div className="space-y-6">
           {!isCanceled && (
-            <PlaydateJoin 
+            <PlaydateJoin
               userChildren={userChildren}
               isJoining={isJoining}
               onJoin={handleJoinPlaydate}
@@ -376,7 +376,7 @@ const PlaydateDetail = () => {
             />
           )}
 
-          <PlaydateSchedule 
+          <PlaydateSchedule
             playdate={playdate}
             participantsCount={participants.length}
             isCompleted={isCompleted}
