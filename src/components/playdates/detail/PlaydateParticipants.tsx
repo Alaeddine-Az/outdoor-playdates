@@ -19,7 +19,7 @@ interface PlaydateParticipantsProps {
   playdateId: string;
   isCompleted: boolean;
   isCanceled: boolean;
-  onParticipantRemoved: (participantId: string) => Promise<void>;
+  onParticipantRemoved: (participantId: string, childId: string) => Promise<void>;
   isRemoving?: string[];
 }
 
@@ -43,11 +43,11 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
       : '?';
   };
 
-  const handleRemoveChild = async (participantId: string, childName: string) => {
+  const handleRemoveChild = async (participantId: string, childId: string, childName: string) => {
     if (!user || !participantId || isCompleted || isCanceled) return;
     
     if (confirm(`Are you sure you want to remove ${childName} from this playdate?`)) {
-      await onParticipantRemoved(participantId);
+      await onParticipantRemoved(participantId, childId);
     }
   };
 
@@ -95,7 +95,7 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
                     variant="ghost" 
                     size="icon" 
                     className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => handleRemoveChild(participantId, child.id)}
+                    onClick={() => handleRemoveChild(participantId, child.id, child.name)}
                     disabled={isCurrentlyRemoving}
                   >
                     {isCurrentlyRemoving ? (
