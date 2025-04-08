@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Connection, ParentProfile } from '@/types';
@@ -14,7 +14,7 @@ export function useConnections() {
   const [suggestedConnections, setSuggestedConnections] = useState<ParentProfile[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const loadConnections = useCallback(async () => {
+  const loadConnections = async () => {
     if (!user) {
       setLoading(false);
       return;
@@ -88,9 +88,9 @@ export function useConnections() {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  };
 
-  const loadSuggestedConnections = useCallback(async () => {
+  const loadSuggestedConnections = async () => {
     if (!user) return;
 
     try {
@@ -114,16 +114,20 @@ export function useConnections() {
 
       if (profilesError) throw profilesError;
 
+      console.log('Fetched potential connections:', profiles);
       setSuggestedConnections(profiles as ParentProfile[]);
     } catch (e: any) {
       console.error('Error loading suggested connections:', e.message);
     }
-  }, [user]);
+  };
 
   useEffect(() => {
-    loadConnections();
-    loadSuggestedConnections();
-  }, [loadConnections, loadSuggestedConnections]);
+    if (user?.id) {
+      console.log('Loading dashboard data for user:', user.id);
+      loadConnections();
+      loadSuggestedConnections();
+    }
+  }, [user?.id]);
 
   const sendConnectionRequest = async (recipientId: string) => {
     if (!user) return { success: false, error: 'Not authenticated' };
