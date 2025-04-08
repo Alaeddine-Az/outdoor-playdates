@@ -48,27 +48,43 @@ const AdminSignups: React.FC = () => {
         </div>
       ) : (
         <>
-          <EarlySignupList 
-            title="Active Signups"
-            description="Users who have signed up for early access and are in the onboarding process"
-            signups={signups}
-            onApprove={handleApprove}
-            onReject={handleReject}
-            onCreateAccount={handleCreateAccount}
-            onMarkComplete={handleMarkComplete}
-            loading={loading}
-            showCompleteButton={true}
-          />
-          
-          <EarlySignupList
-            title="Onboarding Complete"
-            description="Users who have completed the onboarding process"
-            signups={completedSignups}
-            onApprove={handleApprove}
-            onReject={handleReject}
-            onCreateAccount={handleCreateAccount}
-            loading={loading}
-          />
+          {/* Display no data message if both signup lists are empty */}
+          {signups.length === 0 && completedSignups.length === 0 ? (
+            <div className="bg-muted/50 rounded-lg p-8 text-center">
+              <AlertTriangle className="mx-auto h-12 w-12 text-amber-500 mb-4" />
+              <h3 className="text-lg font-medium mb-2">No early signups found</h3>
+              <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                There are no early signups in the database. Make sure your Supabase database contains entries in the 'early_signups' table.
+              </p>
+              <Button onClick={refreshSignups} variant="outline" size="sm">
+                Try Again
+              </Button>
+            </div>
+          ) : (
+            <>
+              <EarlySignupList 
+                title="Active Signups"
+                description="Users who have signed up for early access and are in the onboarding process"
+                signups={signups}
+                onApprove={handleApprove}
+                onReject={handleReject}
+                onCreateAccount={handleCreateAccount}
+                onMarkComplete={handleMarkComplete}
+                loading={false}
+                showCompleteButton={true}
+              />
+              
+              <EarlySignupList
+                title="Onboarding Complete"
+                description="Users who have completed the onboarding process"
+                signups={completedSignups}
+                onApprove={handleApprove}
+                onReject={handleReject}
+                onCreateAccount={handleCreateAccount}
+                loading={false}
+              />
+            </>
+          )}
         </>
       )}
       

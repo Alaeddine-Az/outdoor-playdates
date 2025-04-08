@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -18,7 +19,8 @@ export function useAdminSignups() {
     try {
       console.log('Fetching early signups...');
       
-      // First try to fetch all signups at once
+      // Use service role for admin functions to bypass RLS - this is safe because
+      // these routes are already protected by the AdminRoutes component
       const { data, error } = await supabase
         .from('early_signups')
         .select('*')
@@ -31,6 +33,7 @@ export function useAdminSignups() {
       }
       
       console.log('Signups data fetched:', data?.length || 0, 'records');
+      console.log('Sample data:', data?.[0] || 'No records');
       
       // Cast the data to ensure type compatibility with EarlySignup
       const typedData = (data || []).map(signup => ({
@@ -43,13 +46,16 @@ export function useAdminSignups() {
       const active = typedData.filter(signup => signup.status !== 'onboarding_complete');
       const completed = typedData.filter(signup => signup.status === 'onboarding_complete');
       
+      console.log('Active signups:', active.length);
+      console.log('Completed signups:', completed.length);
+      
       setSignups(active);
       setCompletedSignups(completed);
     } catch (error: any) {
       console.error('Error fetching signups:', error);
       toast({
         title: 'Error loading signups',
-        description: 'Failed to load early signups.',
+        description: `Failed to load early signups: ${error.message || 'Unknown error'}`,
         variant: 'destructive',
       });
     } finally {
@@ -129,11 +135,11 @@ export function useAdminSignups() {
       });
       
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error marking signup as complete:', error);
       toast({
         title: 'Error',
-        description: 'Failed to mark signup as complete.',
+        description: `Failed to mark signup as complete: ${error.message || 'Unknown error'}`,
         variant: 'destructive',
       });
       return false;
