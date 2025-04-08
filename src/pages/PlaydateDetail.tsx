@@ -55,9 +55,9 @@ const PlaydateDetail = () => {
   };
 
   // Handle removing a participant
-  const handleParticipantRemoved = async (participantId: string) => {
+  const handleParticipantRemoved = async (participantId: string, childIdToRemove: string) => {
     // Call the hook function to remove from database
-    await handleRemoveParticipant(participantId);
+    await handleRemoveParticipant(participantId, childIdToRemove);
     
     // Update local state immediately for a responsive UI
     setLocalParticipantDetails(prev => {
@@ -73,7 +73,7 @@ const PlaydateDetail = () => {
   };
 
   const handleJoin = async (selectedChildIds: string[]) => {
-    await handleJoinPlaydate(selectedChildIds, playdate);
+    await handleJoinPlaydate(selectedChildIds);
   };
 
   if (isLoading) {
