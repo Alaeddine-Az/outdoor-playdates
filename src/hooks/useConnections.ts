@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Connection, ParentProfile } from '@/types';
@@ -12,8 +12,8 @@ export function useConnections() {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [connectionProfiles, setConnectionProfiles] = useState<Record<string, ParentProfile>>({});
   const [suggestedConnections, setSuggestedConnections] = useState<ParentProfile[]>([]);
-  const [hasLoadedSuggestions, setHasLoadedSuggestions] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasLoadedSuggestions = useRef(false); // ✅ persists across renders and refreshes
 
   const loadConnections = async () => {
     if (!user) {
@@ -92,7 +92,7 @@ export function useConnections() {
   };
 
   const loadSuggestedConnections = async () => {
-    if (!user || hasLoadedSuggestions) return;
+    if (!user || hasLoadedSuggestions.current) return;
 
     try {
       const { data: existingConnections, error: connError } = await supabase
@@ -115,9 +115,9 @@ export function useConnections() {
 
       if (profilesError) throw profilesError;
 
-      console.log('Fetched potential connections at:', new Date().toISOString(), profiles);
+      console.log('[loadSuggestedConnections] Triggered at', new Date().toISOString());
       setSuggestedConnections(profiles as ParentProfile[]);
-      setHasLoadedSuggestions(true); // ✅ prevent re-fetching loop
+      hasLoadedSuggestions.current = true; // ✅ Prevent future re-fetches
     } catch (e: any) {
       console.error('Error loading suggested connections:', e.message);
     }
@@ -127,7 +127,7 @@ export function useConnections() {
     if (user?.id) {
       console.log('Loading dashboard data for user:', user.id);
       loadConnections();
-      loadSuggestedConnections();
+      loadSuggestedConnections(); // ✅ Safe now
     }
   }, [user?.id]);
 
