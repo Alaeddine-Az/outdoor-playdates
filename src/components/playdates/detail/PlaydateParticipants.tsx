@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { Users, User, X } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChildProfile } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,7 +13,6 @@ interface PlaydateParticipantsProps {
     [key: string]: { 
       parent: any; 
       child: ChildProfile;
-      status?: string;
       participantId?: string;
     };
   };
@@ -45,22 +43,6 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
       : '?';
   };
 
-  const getStatusBadge = (status: string = 'pending') => {
-    const statusColors = {
-      confirmed: "bg-green-100 text-green-800 hover:bg-green-100",
-      pending: "bg-amber-100 text-amber-800 hover:bg-amber-100",
-      canceled: "bg-red-100 text-red-800 hover:bg-red-100",
-    };
-    
-    const color = statusColors[status as keyof typeof statusColors] || statusColors.pending;
-    
-    return (
-      <Badge variant="outline" className={`ml-auto ${color}`}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </Badge>
-    );
-  };
-
   const handleRemoveChild = async (participantId: string, childName: string) => {
     if (!user || !participantId || isCompleted || isCanceled) return;
     
@@ -81,7 +63,7 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
         {Object.keys(participantDetails).length === 0 ? (
           <p className="text-muted-foreground text-sm">No participants yet. Be the first to join!</p>
         ) : (
-          Object.entries(participantDetails).map(([key, { parent, child, status, participantId }]) => {
+          Object.entries(participantDetails).map(([key, { parent, child, participantId }]) => {
             const isCurrentUserChild = user && parent?.id === user.id;
             const canRemove = isCurrentUserChild && !isCompleted && !isCanceled && participantId;
             const isCurrentlyRemoving = participantId && isRemoving.includes(participantId);
@@ -94,7 +76,6 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <p className="font-medium">{child?.name}</p>
-                    {getStatusBadge(status)}
                   </div>
                   <p className="text-sm text-muted-foreground">{child?.age} years</p>
                   <p className="text-xs text-muted-foreground mt-1">

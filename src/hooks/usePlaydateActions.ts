@@ -32,8 +32,7 @@ export const usePlaydateActions = (
         playdate_id: playdateId,
         child_id: primaryChildId,
         child_ids: selectedChildIds,
-        parent_id: user.id,
-        status: 'pending'
+        parent_id: user.id
       });
 
       if (error) throw error;

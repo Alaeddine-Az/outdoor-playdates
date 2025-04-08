@@ -71,7 +71,6 @@ export interface PlaydateParticipant {
   child_id: string; // Keep this for backward compatibility
   child_ids?: string[]; // Optional array of child IDs
   parent_id?: string; // Optional parent ID
-  status: string;
   created_at: string;
   updated_at: string;
 }

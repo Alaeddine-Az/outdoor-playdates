@@ -14,7 +14,6 @@ export interface PlaydateDetailData {
     [key: string]: { 
       parent: any; 
       child: ChildProfile; 
-      status?: string; 
       participantId?: string 
     };
   };
@@ -32,7 +31,7 @@ export const usePlaydateDetail = (id: string | undefined) => {
   const [creator, setCreator] = useState<any>(null);
   const [participants, setParticipants] = useState<PlaydateParticipant[]>([]);
   const [participantDetails, setParticipantDetails] = useState<{
-    [key: string]: { parent: any; child: ChildProfile; status?: string; participantId?: string }
+    [key: string]: { parent: any; child: ChildProfile; participantId?: string }
   }>({});
   const [userChildren, setUserChildren] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -109,7 +108,7 @@ export const usePlaydateDetail = (id: string | undefined) => {
           );
 
           const detailsObj: {
-            [key: string]: { parent: any; child: ChildProfile; status?: string; participantId?: string };
+            [key: string]: { parent: any; child: ChildProfile; participantId?: string };
           } = {};
 
           for (const p of normalized) {
@@ -120,7 +119,6 @@ export const usePlaydateDetail = (id: string | undefined) => {
                 detailsObj[`${p.id}_${childId}`] = {
                   child,
                   parent,
-                  status: p.status || 'pending',
                   participantId: p.id
                 };
               }
