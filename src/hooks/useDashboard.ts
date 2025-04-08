@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
+import { useConnections } from '@/hooks/useConnections';
 
 interface PlaydateData {
   id: string;
@@ -32,6 +33,7 @@ interface EventData {
 export const useDashboard = () => {
   const { user } = useAuth();
   const { profile, children, loading: profileLoading, error: profileError } = useProfile();
+  const { isConnected, hasPendingRequest } = useConnections();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [upcomingPlaydates, setUpcomingPlaydates] = useState<PlaydateData[]>([]);
@@ -146,29 +148,72 @@ export const useDashboard = () => {
           }
         }
         
-        setSuggestedConnections([
-          {
-            id: '1',
-            name: 'Michael P.',
-            childName: 'Oliver (6)',
-            interests: ['Sports', 'STEM'],
-            distance: '0.5 miles'
-          },
-          {
-            id: '2',
-            name: 'Sarah T.',
-            childName: 'Liam (5)',
-            interests: ['Arts', 'Nature'],
-            distance: '0.8 miles'
-          },
-          {
-            id: '3',
-            name: 'David R.',
-            childName: 'Sophia (6)',
-            interests: ['STEM', 'Reading'],
-            distance: '1.2 miles'
-          }
-        ]);
+        const { data: potentialConnections, error: connectionsError } = await supabase
+          .from('profiles')
+          .select('*, children(*)')
+          .neq('id', user.id)
+          .limit(5);
+
+        if (connectionsError) {
+          console.error("Error fetching potential connections:", connectionsError);
+          throw connectionsError;
+        }
+
+        if (potentialConnections) {
+          console.log("Fetched potential connections:", potentialConnections);
+          
+          const filteredConnections = potentialConnections.filter(connection => {
+            return !isConnected(connection.id) && !hasPendingRequest(connection.id);
+          });
+
+          const formattedConnections = filteredConnections.map(connection => {
+            const firstChild = connection.children && connection.children.length > 0 
+              ? connection.children[0] 
+              : null;
+              
+            const childDisplay = firstChild 
+              ? `${firstChild.name} (${firstChild.age})` 
+              : 'No children';
+              
+            const parentInterests = connection.interests || ['Arts & Crafts', 'Nature'];
+              
+            const locationDisplay = connection.city || connection.location || 'Nearby';
+              
+            return {
+              id: connection.id,
+              name: connection.parent_name || 'Anonymous',
+              childName: childDisplay,
+              interests: parentInterests,
+              distance: locationDisplay
+            };
+          });
+          
+          setSuggestedConnections(formattedConnections.slice(0, 3));
+        } else {
+          setSuggestedConnections([
+            {
+              id: '1',
+              name: 'Michael P.',
+              childName: 'Oliver (6)',
+              interests: ['Sports', 'STEM'],
+              distance: '0.5 miles'
+            },
+            {
+              id: '2',
+              name: 'Sarah T.',
+              childName: 'Liam (5)',
+              interests: ['Arts', 'Nature'],
+              distance: '0.8 miles'
+            },
+            {
+              id: '3',
+              name: 'David R.',
+              childName: 'Sophia (6)',
+              interests: ['STEM', 'Reading'],
+              distance: '1.2 miles'
+            }
+          ]);
+        }
         
         setNearbyEvents([
           {
@@ -192,7 +237,7 @@ export const useDashboard = () => {
     };
 
     fetchDashboardData();
-  }, [user, profile, profileLoading, profileError]);
+  }, [user, profile, profileLoading, profileError, isConnected, hasPendingRequest]);
 
   return {
     loading: loading || profileLoading,

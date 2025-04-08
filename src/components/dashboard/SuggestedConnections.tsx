@@ -1,10 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, MapPin, UserPlus } from 'lucide-react';
+import { Users, MapPin, UserPlus, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useConnections } from '@/hooks/useConnections';
+import { toast } from '@/components/ui/use-toast';
 
 interface SuggestedConnectionProps {
   id: string;
@@ -16,6 +18,9 @@ interface SuggestedConnectionProps {
 
 const ConnectionCard = ({ id, name, childName, interests, distance }: SuggestedConnectionProps) => {
   const navigate = useNavigate();
+  const { sendConnectionRequest, isConnected, hasPendingRequest } = useConnections();
+  const [isSending, setIsSending] = useState(false);
+  const [hasSent, setHasSent] = useState(hasPendingRequest(id));
   
   // Generate a color based on the name
   const getColor = (name: string) => {
@@ -33,6 +38,28 @@ const ConnectionCard = ({ id, name, childName, interests, distance }: SuggestedC
   };
   
   const colorClass = colorMap[getColor(name) as keyof typeof colorMap];
+
+  const handleSendRequest = async () => {
+    if (isConnected(id) || hasSent) return;
+    
+    setIsSending(true);
+    const result = await sendConnectionRequest(id);
+    setIsSending(false);
+    
+    if (result.success) {
+      setHasSent(true);
+      toast({
+        title: "Connection Request Sent",
+        description: `Your connection request was sent to ${name}.`
+      });
+    } else {
+      toast({
+        title: "Failed to Send Request",
+        description: result.error || "Could not send connection request.",
+        variant: "destructive"
+      });
+    }
+  };
   
   return (
     <motion.div 
@@ -69,9 +96,17 @@ const ConnectionCard = ({ id, name, childName, interests, distance }: SuggestedC
         </div>
         <Button 
           size="sm" 
-          className="h-9 w-9 p-0 bg-play-beige hover:bg-play-orange/10 text-play-orange border border-play-orange/30 rounded-full shadow-sm"
+          className={`h-9 w-9 p-0 ${hasSent ? 'bg-green-100 text-green-600 hover:bg-green-200' : 'bg-play-beige hover:bg-play-orange/10 text-play-orange border border-play-orange/30'} rounded-full shadow-sm`}
+          onClick={handleSendRequest}
+          disabled={isSending || hasSent || isConnected(id)}
         >
-          <UserPlus className="h-4 w-4" />
+          {isSending ? (
+            <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          ) : hasSent ? (
+            <CheckCircle className="h-4 w-4" />
+          ) : (
+            <UserPlus className="h-4 w-4" />
+          )}
         </Button>
       </div>
       
@@ -128,11 +163,17 @@ const SuggestedConnections = ({ connections }: SuggestedConnectionsProps) => {
           initial="hidden"
           animate="show"
         >
-          {connections.map((connection, index) => (
-            <motion.div key={connection.id} variants={item}>
-              <ConnectionCard {...connection} />
-            </motion.div>
-          ))}
+          {connections.length > 0 ? (
+            connections.map((connection) => (
+              <motion.div key={connection.id} variants={item}>
+                <ConnectionCard {...connection} />
+              </motion.div>
+            ))
+          ) : (
+            <div className="text-center py-4 text-muted-foreground">
+              No suggested connections available right now.
+            </div>
+          )}
         </motion.div>
         
         <div className="mt-4">
