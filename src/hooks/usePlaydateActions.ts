@@ -111,36 +111,36 @@ export const usePlaydateActions = (playdateId: string | undefined, refreshData: 
   };
 
   const handleRemoveParticipant = async (participantId: string) => {
-    if (!user || !participantId) return;
+  if (!user || !participantId) return;
 
-    setIsRemoving(prev => [...prev, participantId]);
+  setIsRemoving(prev => [...prev, participantId]);
 
-    try {
-      const { error } = await supabase
-        .from('playdate_participants')
-        .delete()
-        .eq('id', participantId);
+  try {
+    const { error } = await supabase
+      .from('playdate_participants')
+      .delete()
+      .eq('participant_id', participantId); // ✅ FIXED HERE
 
-      if (error) throw error;
+    if (error) throw error;
 
-      // Immediately refresh the data to show the updated participants list
-      await refreshData();
+    // Immediately refresh the data to show the updated participants list
+    await refreshData();
 
-      toast({
-        title: 'Success',
-        description: 'Child removed from playdate successfully!'
-      });
-    } catch (err: any) {
-      console.error('Error removing child from playdate:', err);
-      toast({
-        title: 'Failed',
-        description: err.message || 'Could not remove child from playdate.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsRemoving(prev => prev.filter(id => id !== participantId));
-    }
-  };
+    toast({
+      title: 'Success',
+      description: 'Child removed from playdate successfully!'
+    });
+  } catch (err: any) {
+    console.error('Error removing child from playdate:', err);
+    toast({
+      title: 'Failed',
+      description: err.message || 'Could not remove child from playdate.',
+      variant: 'destructive',
+    });
+  } finally {
+    setIsRemoving(prev => prev.filter(id => id !== participantId));
+  }
+};
 
   const handlePlaydateCanceled = async () => {
     // Immediately refresh the data to show the canceled status
