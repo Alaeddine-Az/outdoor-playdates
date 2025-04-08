@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PlaydateParticipants } from '@/components/playdates/detail/PlaydateParticipants';
 import { PlaydateJoin } from '@/components/playdates/detail/PlaydateJoin';
@@ -12,9 +11,9 @@ import { usePlaydateActions } from '@/hooks/usePlaydateActions';
 const PlaydateDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  
+
   const {
     playdate,
     creator,
@@ -41,13 +40,33 @@ const PlaydateDetail = () => {
     handleRemoveParticipant
   } = usePlaydateActions(id, loadPlaydateData);
 
+  // ✅ Step 1: Local participantDetails state
+  const [localParticipantDetails, setLocalParticipantDetails] = useState(participantDetails);
+
+  // ✅ Step 2: Sync when the hook value changes
+  useEffect(() => {
+    setLocalParticipantDetails(participantDetails);
+  }, [participantDetails]);
+
   const handleUpdatePlaydateSubmit = (values: any) => {
     handleUpdatePlaydate(values, playdate);
     setIsEditDialogOpen(false);
   };
 
+  // ✅ Step 3: Remove and update local state
   const handleParticipantRemoved = async (participantId: string) => {
     await handleRemoveParticipant(participantId);
+
+    setLocalParticipantDetails(prev => {
+      const updated = { ...prev };
+      for (const key in updated) {
+        if (updated[key].participantId === participantId) {
+          delete updated[key];
+          break;
+        }
+      }
+      return updated;
+    });
   };
 
   const handleJoin = async (selectedChildIds: string[]) => {
@@ -94,7 +113,7 @@ const PlaydateDetail = () => {
       <div className="grid md:grid-cols-3 gap-6 mt-6">
         <div className="md:col-span-2 space-y-6">
           <PlaydateParticipants 
-            participantDetails={participantDetails} 
+            participantDetails={localParticipantDetails} // ✅ use local state
             playdateId={id || ''}
             isCompleted={isCompleted}
             isCanceled={isCanceled}
