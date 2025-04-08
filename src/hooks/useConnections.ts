@@ -1,8 +1,10 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Connection, ParentProfile } from '@/types';
 import { toast } from '@/components/ui/use-toast';
+import { useConnectionsState } from './useConnectionsState';
 
 export function useConnections() {
   const { user } = useAuth();
@@ -13,7 +15,7 @@ export function useConnections() {
   const [connectionProfiles, setConnectionProfiles] = useState<Record<string, ParentProfile>>({});
   const [suggestedConnections, setSuggestedConnections] = useState<ParentProfile[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const hasLoadedSuggestions = useRef(false); // ✅ persists across renders and refreshes
+  const { hasLoadedSuggestions, markSuggestionsLoaded } = useConnectionsState(); // ✅ use persistent global state
 
   const loadConnections = async () => {
     if (!user) {
@@ -92,7 +94,7 @@ export function useConnections() {
   };
 
   const loadSuggestedConnections = async () => {
-    if (!user || hasLoadedSuggestions.current) return;
+    if (!user || hasLoadedSuggestions) return;
 
     try {
       const { data: existingConnections, error: connError } = await supabase
@@ -117,7 +119,7 @@ export function useConnections() {
 
       console.log('[loadSuggestedConnections] Triggered at', new Date().toISOString());
       setSuggestedConnections(profiles as ParentProfile[]);
-      hasLoadedSuggestions.current = true; // ✅ Prevent future re-fetches
+      markSuggestionsLoaded(); // ✅ Set global flag that persists across re-renders and refreshes
     } catch (e: any) {
       console.error('Error loading suggested connections:', e.message);
     }
@@ -127,7 +129,7 @@ export function useConnections() {
     if (user?.id) {
       console.log('Loading dashboard data for user:', user.id);
       loadConnections();
-      loadSuggestedConnections(); // ✅ Safe now
+      loadSuggestedConnections(); // ✅ Now controlled by persistent flag
     }
   }, [user?.id]);
 
