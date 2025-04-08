@@ -95,7 +95,7 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
                     variant="ghost" 
                     size="icon" 
                     className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => handleRemoveChild(participantId, child?.name)}
+                    onClick={() => handleRemoveChild(participantId, child.id)}
                     disabled={isCurrentlyRemoving}
                   >
                     {isCurrentlyRemoving ? (
