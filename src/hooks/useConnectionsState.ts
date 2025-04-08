@@ -1,10 +1,11 @@
 // This module keeps track of global connection state that persists
 // across hook re-initializations to prevent duplicate fetches
 
+import { useRef } from 'react';
+
 let hasLoadedSuggestionsGlobal = false;
 
 export function useConnectionsState() {
-  const { useRef } = require('react');
   const wasLoadedRef = useRef(hasLoadedSuggestionsGlobal);
 
   const markSuggestionsLoaded = () => {
