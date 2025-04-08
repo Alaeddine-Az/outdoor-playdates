@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -8,6 +9,7 @@ export function useAdminSignups() {
   const { approvePendingSignup, rejectPendingSignup } = useAdminFunctions();
   const [loading, setLoading] = useState(true);
   const [signups, setSignups] = useState<EarlySignup[]>([]);
+  const [completedSignups, setCompletedSignups] = useState<EarlySignup[]>([]);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const [selectedSignup, setSelectedSignup] = useState<EarlySignup | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,7 +37,12 @@ export function useAdminSignups() {
         status: (signup.status || 'pending') as 'pending' | 'approved' | 'rejected' | 'converted'
       })) as EarlySignup[];
       
-      setSignups(typedData);
+      // Split the data into active and completed signups
+      const active = typedData.filter(signup => signup.status !== 'onboarding_complete');
+      const completed = typedData.filter(signup => signup.status === 'onboarding_complete');
+      
+      setSignups(active);
+      setCompletedSignups(completed);
     } catch (error) {
       console.error('Error fetching signups:', error);
       toast({
@@ -79,6 +86,46 @@ export function useAdminSignups() {
         title: 'Signup rejected',
         description: 'The signup has been rejected.',
       });
+    }
+  };
+
+  const handleMarkComplete = async (signupId: string) => {
+    try {
+      const { error } = await supabase
+        .from('early_signups')
+        .update({ status: 'onboarding_complete' })
+        .eq('id', signupId);
+
+      if (error) throw error;
+
+      // Find the signup that was marked as complete
+      const completedSignup = signups.find(signup => signup.id === signupId);
+      
+      if (completedSignup) {
+        // Remove from active signups
+        setSignups(prevSignups => prevSignups.filter(signup => signup.id !== signupId));
+        
+        // Add to completed signups
+        setCompletedSignups(prevCompleted => [
+          { ...completedSignup, status: 'onboarding_complete' },
+          ...prevCompleted
+        ]);
+      }
+      
+      toast({
+        title: 'Onboarding complete',
+        description: 'The signup has been marked as complete.',
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error marking signup as complete:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to mark signup as complete.',
+        variant: 'destructive',
+      });
+      return false;
     }
   };
 
@@ -157,8 +204,10 @@ export function useAdminSignups() {
   return {
     loading,
     signups,
+    completedSignups,
     handleApprove,
     handleReject,
+    handleMarkComplete,
     handleCreateAccount,
     isModalOpen,
     selectedSignup,

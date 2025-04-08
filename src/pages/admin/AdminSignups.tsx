@@ -8,8 +8,10 @@ const AdminSignups: React.FC = () => {
   const {
     loading,
     signups,
+    completedSignups,
     handleApprove,
     handleReject,
+    handleMarkComplete,
     handleCreateAccount,
     isModalOpen,
     selectedSignup,
@@ -24,11 +26,25 @@ const AdminSignups: React.FC = () => {
   }, [refreshSignups]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8">
       <h1 className="text-2xl font-bold">Early Signups</h1>
       
       <EarlySignupList 
+        title="Active Signups"
+        description="Users who have signed up for early access and are in the onboarding process"
         signups={signups}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        onCreateAccount={handleCreateAccount}
+        onMarkComplete={handleMarkComplete}
+        loading={loading}
+        showCompleteButton={true}
+      />
+      
+      <EarlySignupList
+        title="Onboarding Complete"
+        description="Users who have completed the onboarding process"
+        signups={completedSignups}
         onApprove={handleApprove}
         onReject={handleReject}
         onCreateAccount={handleCreateAccount}
