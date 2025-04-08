@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +11,7 @@ export function useConnections() {
   const [sentRequests, setSentRequests] = useState<Connection[]>([]);
   const [connections, setConnections] = useState<Connection[]>([]);
   const [connectionProfiles, setConnectionProfiles] = useState<Record<string, ParentProfile>>({});
+  const [suggestedConnections, setSuggestedConnections] = useState<ParentProfile[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const loadConnections = useCallback(async () => {
@@ -22,9 +22,8 @@ export function useConnections() {
 
     setLoading(true);
     setError(null);
-    
+
     try {
-      // Fetch all connections related to the user using direct table query
       const { data, error: connectionsError } = await supabase
         .from('connections')
         .select('*')
@@ -36,26 +35,22 @@ export function useConnections() {
       }
 
       if (data) {
-        // Cast and sort connections by status
         const allConnections = data as Connection[];
-        
-        const pending = allConnections.filter(c => 
+
+        const pending = allConnections.filter(c =>
           c.status === 'pending' && c.recipient_id === user.id
         );
-        
-        const sent = allConnections.filter(c => 
+
+        const sent = allConnections.filter(c =>
           c.status === 'pending' && c.requester_id === user.id
         );
-        
-        const accepted = allConnections.filter(c => 
-          c.status === 'accepted'
-        );
+
+        const accepted = allConnections.filter(c => c.status === 'accepted');
 
         setPendingRequests(pending);
         setSentRequests(sent);
         setConnections(accepted);
 
-        // Get unique IDs of all connection parties
         const allProfileIds = new Set<string>();
         allConnections.forEach((c: Connection) => {
           allProfileIds.add(c.requester_id);
@@ -63,7 +58,6 @@ export function useConnections() {
         });
         allProfileIds.delete(user.id);
 
-        // Fetch profiles for all connections
         if (allProfileIds.size > 0) {
           const { data: profiles, error: profilesError } = await supabase
             .from('profiles')
@@ -96,16 +90,46 @@ export function useConnections() {
     }
   }, [user]);
 
+  const loadSuggestedConnections = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      const { data: existingConnections, error: connError } = await supabase
+        .from('connections')
+        .select('requester_id, recipient_id')
+        .or(`requester_id.eq.${user.id},recipient_id.eq.${user.id}`);
+
+      if (connError) throw connError;
+
+      const excludedIds = new Set<string>([user.id]);
+      existingConnections?.forEach(c => {
+        if (c.requester_id !== user.id) excludedIds.add(c.requester_id);
+        if (c.recipient_id !== user.id) excludedIds.add(c.recipient_id);
+      });
+
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .not('id', 'in', `(${Array.from(excludedIds).join(',')})`);
+
+      if (profilesError) throw profilesError;
+
+      setSuggestedConnections(profiles as ParentProfile[]);
+    } catch (e: any) {
+      console.error('Error loading suggested connections:', e.message);
+    }
+  }, [user]);
+
   useEffect(() => {
     loadConnections();
-  }, [loadConnections]);
+    loadSuggestedConnections();
+  }, [loadConnections, loadSuggestedConnections]);
 
   const sendConnectionRequest = async (recipientId: string) => {
     if (!user) return { success: false, error: 'Not authenticated' };
     if (recipientId === user.id) return { success: false, error: 'Cannot connect with yourself' };
 
     try {
-      // Check if connection already exists
       const { data: existing, error: checkError } = await supabase
         .from('connections')
         .select('*')
@@ -113,21 +137,20 @@ export function useConnections() {
         .maybeSingle();
 
       if (checkError) throw checkError;
-      
+
       if (existing) {
-        return { 
-          success: false, 
-          error: existing.status === 'pending' 
-            ? 'Connection request already pending' 
+        return {
+          success: false,
+          error: existing.status === 'pending'
+            ? 'Connection request already pending'
             : 'Already connected'
         };
       }
 
-      // Create new connection request
       const { data, error } = await supabase
         .from('connections')
-        .insert([{ 
-          requester_id: user.id, 
+        .insert([{
+          requester_id: user.id,
           recipient_id: recipientId,
           status: 'pending'
         }])
@@ -142,7 +165,7 @@ export function useConnections() {
           description: 'Your connection request has been sent.',
         });
       }
-      
+
       return { success: true, data };
     } catch (e: any) {
       console.error('Error sending connection request:', e);
@@ -160,8 +183,7 @@ export function useConnections() {
 
     try {
       const newStatus = accept ? 'accepted' : 'declined';
-      
-      // Update connection status
+
       const { data, error } = await supabase
         .from('connections')
         .update({ status: newStatus })
@@ -173,7 +195,7 @@ export function useConnections() {
 
       if (data && data.length > 0) {
         setPendingRequests(prev => prev.filter(req => req.id !== connectionId));
-        
+
         if (accept) {
           setConnections(prev => [...prev, data[0] as Connection]);
           toast({
@@ -187,7 +209,7 @@ export function useConnections() {
           });
         }
       }
-      
+
       return { success: true };
     } catch (e: any) {
       console.error('Error responding to connection request:', e);
@@ -201,8 +223,8 @@ export function useConnections() {
   };
 
   const isConnected = (profileId: string): boolean => {
-    return connections.some(c => 
-      (c.requester_id === profileId && c.recipient_id === user?.id) || 
+    return connections.some(c =>
+      (c.requester_id === profileId && c.recipient_id === user?.id) ||
       (c.recipient_id === profileId && c.requester_id === user?.id)
     );
   };
@@ -218,6 +240,7 @@ export function useConnections() {
     sentRequests,
     connections,
     connectionProfiles,
+    suggestedConnections,
     sendConnectionRequest,
     respondToRequest,
     isConnected,
