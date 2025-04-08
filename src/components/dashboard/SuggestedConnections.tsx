@@ -100,12 +100,25 @@ const SuggestedConnections = () => {
   useEffect(() => {
     const fetchConnections = async () => {
       setLoading(true);
+
+      const {
+        data: { user },
+        error: userError
+      } = await supabase.auth.getUser();
+
+      if (userError) {
+        console.error('Error getting user:', userError);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
-        .from('suggested_connections') // replace with your table name
-        .select('id, name, child_name, interests, city');
+        .from('profiles')
+        .select('id, name, child_name, interests, city')
+        .neq('id', user?.id);
 
       if (error) {
-        console.error('Error fetching suggested connections:', error);
+        console.error('Error fetching profiles:', error);
       } else {
         const mappedData = data.map((item: any) => ({
           id: item.id,
