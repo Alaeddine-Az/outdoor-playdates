@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useAdminFunctions } from '@/hooks/useAdminFunctions';
@@ -14,27 +13,30 @@ export function useAdminSignups() {
   const [selectedSignup, setSelectedSignup] = useState<EarlySignup | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    fetchSignups();
-  }, []);
-
-  const fetchSignups = async () => {
+  const fetchSignups = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch all early signups ordered by status (pending first) and then by creation date
+      console.log('Fetching early signups...');
+      
+      // First try to fetch all signups at once
       const { data, error } = await supabase
         .from('early_signups')
         .select('*')
         .order('status', { ascending: true })
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase query error:', error);
+        throw error;
+      }
+      
+      console.log('Signups data fetched:', data?.length || 0, 'records');
       
       // Cast the data to ensure type compatibility with EarlySignup
       const typedData = (data || []).map(signup => ({
         ...signup,
         invited_at: signup.invited_at || null,
-        status: (signup.status || 'pending') as 'pending' | 'approved' | 'rejected' | 'converted'
+        status: (signup.status || 'pending') as 'pending' | 'approved' | 'rejected' | 'converted' | 'onboarding_complete'
       })) as EarlySignup[];
       
       // Split the data into active and completed signups
@@ -43,7 +45,7 @@ export function useAdminSignups() {
       
       setSignups(active);
       setCompletedSignups(completed);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching signups:', error);
       toast({
         title: 'Error loading signups',
@@ -53,7 +55,11 @@ export function useAdminSignups() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchSignups();
+  }, [fetchSignups]);
 
   const handleApprove = async (signupId: string) => {
     const result = await approvePendingSignup(signupId);
@@ -91,12 +97,17 @@ export function useAdminSignups() {
 
   const handleMarkComplete = async (signupId: string) => {
     try {
+      console.log('Marking signup as complete:', signupId);
+      
       const { error } = await supabase
         .from('early_signups')
         .update({ status: 'onboarding_complete' })
         .eq('id', signupId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating signup status:', error);
+        throw error;
+      }
 
       // Find the signup that was marked as complete
       const completedSignup = signups.find(signup => signup.id === signupId);
