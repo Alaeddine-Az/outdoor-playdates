@@ -116,90 +116,83 @@ const SuggestedConnections = ({ connections: externalConnections }: SuggestedCon
 
   const {
     data: { user },
-    error: userError
+    error: userError,
   } = await supabase.auth.getUser();
 
-  if (userError) {
-    console.error('Error getting user:', userError);
+  if (userError || !user?.id) {
+    console.error('Error getting current user:', userError);
     setLoading(false);
     return;
   }
 
-  // Get other profiles (not current user)
+  // Step 1: Fetch other profiles (exclude current user)
   const { data: profiles, error: profilesError } = await supabase
     .from('profiles')
     .select('id, parent_name, city')
-    .neq('id', user?.id);
+    .neq('id', user.id);
 
-  if (profilesError) {
+  if (profilesError || !profiles) {
     console.error('Error fetching profiles:', profilesError);
     setLoading(false);
     return;
   }
 
-  // Get children for those profiles
   const profileIds = profiles.map((p) => p.id);
 
-  const { data: childrenData, error: childrenError } = await supabase
+  // Step 2: Fetch children of these profiles
+  const { data: children, error: childrenError } = await supabase
     .from('children')
     .select('id, name, parent_id')
     .in('parent_id', profileIds);
 
-  if (childrenError) {
+  if (childrenError || !children) {
     console.error('Error fetching children:', childrenError);
     setLoading(false);
     return;
   }
 
-  // Get child interests
-  const childIds = childrenData.map((child) => child.id);
-
-  const { data: childInterestsData, error: childInterestsError } = await supabase
+  // Step 3: Fetch child interests
+  const childIds = children.map((c) => c.id);
+  const { data: childInterests, error: childInterestsError } = await supabase
     .from('child_interests')
     .select('child_id, interest_id')
     .in('child_id', childIds);
 
-  if (childInterestsError) {
+  if (childInterestsError || !childInterests) {
     console.error('Error fetching child interests:', childInterestsError);
     setLoading(false);
     return;
   }
 
-  // Get interest names
-  const interestIds = [...new Set(childInterestsData.map((ci) => ci.interest_id))];
-
-  const { data: interestsData, error: interestsError } = await supabase
+  // Step 4: Fetch interest names
+  const interestIds = [...new Set(childInterests.map((ci) => ci.interest_id))];
+  const { data: interests, error: interestsError } = await supabase
     .from('interests')
     .select('id, name')
     .in('id', interestIds);
 
-  if (interestsError) {
+  if (interestsError || !interests) {
     console.error('Error fetching interests:', interestsError);
     setLoading(false);
     return;
   }
 
-  const interestsMap = Object.fromEntries(interestsData.map((i) => [i.id, i.name]));
-
-  // Map child interests
-  const childToInterests = childIds.reduce((acc, childId) => {
-    const interests = childInterestsData
-      .filter((ci) => ci.child_id === childId)
-      .map((ci) => interestsMap[ci.interest_id])
-      .filter(Boolean);
-    acc[childId] = interests;
+  const interestMap = Object.fromEntries(interests.map((i) => [i.id, i.name]));
+  const childInterestMap = childInterests.reduce((acc, ci) => {
+    if (!acc[ci.child_id]) acc[ci.child_id] = [];
+    acc[ci.child_id].push(interestMap[ci.interest_id]);
     return acc;
   }, {} as Record<string, string[]>);
 
-  // Construct connection cards (1 per child)
-  const mappedData: SuggestedConnectionProps[] = childrenData.map((child) => {
+  // Step 5: Combine all data into suggestions
+  const suggestions: SuggestedConnectionProps[] = children.map((child) => {
     const parent = profiles.find((p) => p.id === child.parent_id);
     return {
       id: parent?.id ?? '',
-      name: parent?.parent_name ?? 'Unknown',
+      name: parent?.parent_name ?? '',
+      city: parent?.city ?? '',
       childName: child.name,
-      interests: childToInterests[child.id] ?? [],
-      city: parent?.city ?? ''
+      interests: childInterestMap[child.id] ?? [],
     };
   });
 
