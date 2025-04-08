@@ -15,5 +15,30 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storageKey: 'goplaynow-auth',
     storage: localStorage,
     autoRefreshToken: true,
+  },
+  global: {
+    fetch: (...args) => {
+      return fetch(...args).catch(err => {
+        console.error("Supabase fetch error:", err);
+        throw err;
+      });
+    }
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
   }
 });
+
+// Helper function to check if the connection is working
+export const checkSupabaseConnection = async () => {
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) throw error;
+    return { connected: true };
+  } catch (err) {
+    console.error("Supabase connection check failed:", err);
+    return { connected: false, error: err };
+  }
+};

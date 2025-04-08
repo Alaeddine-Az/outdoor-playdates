@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Connection, ParentProfile } from '@/types';
@@ -14,85 +14,91 @@ export function useConnections() {
   const [connectionProfiles, setConnectionProfiles] = useState<Record<string, ParentProfile>>({});
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadConnections = useCallback(async () => {
     if (!user) {
       setLoading(false);
       return;
     }
 
-    async function loadConnections() {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // Fetch all connections related to the user using direct table query
-        const { data, error: connectionsError } = await supabase
-          .from('connections')
-          .select('*')
-          .or(`requester_id.eq.${user.id},recipient_id.eq.${user.id}`);
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Fetch all connections related to the user using direct table query
+      const { data, error: connectionsError } = await supabase
+        .from('connections')
+        .select('*')
+        .or(`requester_id.eq.${user.id},recipient_id.eq.${user.id}`);
 
-        if (connectionsError) throw connectionsError;
-
-        if (data) {
-          // Cast and sort connections by status
-          const allConnections = data as Connection[];
-          
-          const pending = allConnections.filter(c => 
-            c.status === 'pending' && c.recipient_id === user.id
-          );
-          
-          const sent = allConnections.filter(c => 
-            c.status === 'pending' && c.requester_id === user.id
-          );
-          
-          const accepted = allConnections.filter(c => 
-            c.status === 'accepted'
-          );
-
-          setPendingRequests(pending);
-          setSentRequests(sent);
-          setConnections(accepted);
-
-          // Get unique IDs of all connection parties
-          const allProfileIds = new Set<string>();
-          allConnections.forEach((c: Connection) => {
-            allProfileIds.add(c.requester_id);
-            allProfileIds.add(c.recipient_id);
-          });
-          allProfileIds.delete(user.id);
-
-          // Fetch profiles for all connections
-          if (allProfileIds.size > 0) {
-            const { data: profiles, error: profilesError } = await supabase
-              .from('profiles')
-              .select('*')
-              .in('id', Array.from(allProfileIds));
-
-            if (profilesError) throw profilesError;
-
-            const profileMap: Record<string, ParentProfile> = {};
-            profiles?.forEach(profile => {
-              profileMap[profile.id] = profile as ParentProfile;
-            });
-
-            setConnectionProfiles(profileMap);
-          }
-        }
-      } catch (e: any) {
-        console.error('Error loading connections:', e);
-        setError(e.message);
-        toast({
-          title: 'Error loading connections',
-          description: e.message,
-          variant: 'destructive',
-        });
-      } finally {
-        setLoading(false);
+      if (connectionsError) {
+        console.error('Error fetching connections:', connectionsError);
+        throw connectionsError;
       }
-    }
 
-    loadConnections();
+      if (data) {
+        // Cast and sort connections by status
+        const allConnections = data as Connection[];
+        
+        const pending = allConnections.filter(c => 
+          c.status === 'pending' && c.recipient_id === user.id
+        );
+        
+        const sent = allConnections.filter(c => 
+          c.status === 'pending' && c.requester_id === user.id
+        );
+        
+        const accepted = allConnections.filter(c => 
+          c.status === 'accepted'
+        );
+
+        setPendingRequests(pending);
+        setSentRequests(sent);
+        setConnections(accepted);
+
+        // Get unique IDs of all connection parties
+        const allProfileIds = new Set<string>();
+        allConnections.forEach((c: Connection) => {
+          allProfileIds.add(c.requester_id);
+          allProfileIds.add(c.recipient_id);
+        });
+        allProfileIds.delete(user.id);
+
+        // Fetch profiles for all connections
+        if (allProfileIds.size > 0) {
+          const { data: profiles, error: profilesError } = await supabase
+            .from('profiles')
+            .select('*')
+            .in('id', Array.from(allProfileIds));
+
+          if (profilesError) {
+            console.error('Error fetching connection profiles:', profilesError);
+            throw profilesError;
+          }
+
+          const profileMap: Record<string, ParentProfile> = {};
+          profiles?.forEach(profile => {
+            profileMap[profile.id] = profile as ParentProfile;
+          });
+
+          setConnectionProfiles(profileMap);
+        }
+      }
+    } catch (e: any) {
+      console.error('Error loading connections:', e);
+      setError(e.message);
+      toast({
+        title: 'Error loading connections',
+        description: 'Unable to load your connections. Please try refreshing the page.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
+
+  useEffect(() => {
+    loadConnections();
+  }, [loadConnections]);
 
   const sendConnectionRequest = async (recipientId: string) => {
     if (!user) return { success: false, error: 'Not authenticated' };
@@ -215,6 +221,7 @@ export function useConnections() {
     sendConnectionRequest,
     respondToRequest,
     isConnected,
-    hasPendingRequest
+    hasPendingRequest,
+    refreshConnections: loadConnections
   };
 }
