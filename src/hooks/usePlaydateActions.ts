@@ -1,10 +1,12 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
-export const usePlaydateActions = (playdateId: string | undefined, refreshData: () => Promise<void>) => {
+export const usePlaydateActions = (
+  playdateId: string | undefined,
+  refreshData: () => Promise<void>
+) => {
   const { user } = useAuth();
   const [isJoining, setIsJoining] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -32,14 +34,12 @@ export const usePlaydateActions = (playdateId: string | undefined, refreshData: 
         parent_id: user.id,
         status: 'pending'
       });
-      
+
       if (error) throw error;
 
       toast({ title: 'Success', description: 'You have joined the playdate!' });
-      
-      // Immediately refresh the data to show the updated participants
-      await refreshData();
 
+      await refreshData();
     } catch (err: any) {
       console.error('Error joining playdate:', err);
       toast({
@@ -91,9 +91,8 @@ export const usePlaydateActions = (playdateId: string | undefined, refreshData: 
 
       if (error) throw error;
 
-      // Immediately refresh the data to show the updated playdate
       await refreshData();
-      
+
       toast({
         title: 'Success',
         description: 'Playdate updated successfully!',
@@ -111,45 +110,49 @@ export const usePlaydateActions = (playdateId: string | undefined, refreshData: 
   };
 
   const handleRemoveParticipant = async (participantId: string) => {
-  if (!user || !participantId) return;
+    if (!user || !participantId) return;
 
-  setIsRemoving(prev => [...prev, participantId]);
+    console.log("🔍 Attempting to delete participant with ID:", participantId);
+    setIsRemoving(prev => [...prev, participantId]);
 
-  try {
-    const { error } = await supabase
-      .from('playdate_participants')
-      .delete()
-      .eq('participant_id', participantId); // ✅ FIXED HERE
+    try {
+      const { error, data } = await supabase
+        .from('playdate_participants')
+        .delete()
+        .eq('id', participantId); // ✅ This matches your schema
 
-    if (error) throw error;
+      if (error) {
+        console.error("❌ Supabase error when deleting participant:", error);
+        throw error;
+      }
 
-    // Immediately refresh the data to show the updated participants list
-    await refreshData();
+      console.log("✅ Participant deleted from Supabase:", participantId);
 
-    toast({
-      title: 'Success',
-      description: 'Child removed from playdate successfully!'
-    });
-  } catch (err: any) {
-    console.error('Error removing child from playdate:', err);
-    toast({
-      title: 'Failed',
-      description: err.message || 'Could not remove child from playdate.',
-      variant: 'destructive',
-    });
-  } finally {
-    setIsRemoving(prev => prev.filter(id => id !== participantId));
-  }
-};
+      await refreshData();
+
+      toast({
+        title: 'Success',
+        description: 'Child removed from playdate successfully!',
+      });
+    } catch (err: any) {
+      console.error('Error removing child from playdate:', err);
+      toast({
+        title: 'Failed',
+        description: err.message || 'Could not remove child from playdate.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsRemoving(prev => prev.filter(id => id !== participantId));
+    }
+  };
 
   const handlePlaydateCanceled = async () => {
-    // Immediately refresh the data to show the canceled status
     await refreshData();
   };
 
   return {
     isJoining,
-    isUpdating, 
+    isUpdating,
     isProcessing,
     isRemoving,
     setIsProcessing,
