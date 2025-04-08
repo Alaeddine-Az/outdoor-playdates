@@ -109,43 +109,68 @@ export const usePlaydateActions = (
     }
   };
 
-  const handleRemoveParticipant = async (participantId: string) => {
-    if (!user || !participantId) return;
+const handleRemoveParticipant = async (participantId: string, childIdToRemove: string) => {
+  if (!user || !participantId || !childIdToRemove) return;
 
-    console.log("🔍 Attempting to delete participant with ID:", participantId);
-    setIsRemoving(prev => [...prev, participantId]);
+  console.log("🔍 Trying to remove child from participant row:", { participantId, childIdToRemove });
+  setIsRemoving(prev => [...prev, participantId]);
 
-    try {
-      const { error } = await supabase
+  try {
+    // Fetch the current participant row
+    const { data: rows, error: fetchError } = await supabase
+      .from('playdate_participants')
+      .select('child_ids')
+      .eq('id', participantId)
+      .single();
+
+    if (fetchError || !rows) {
+      throw new Error("Could not fetch participant data.");
+    }
+
+    const currentChildIds = rows.child_ids || [];
+
+    const updatedChildIds = currentChildIds.filter((id: string) => id !== childIdToRemove);
+
+    if (updatedChildIds.length === 0) {
+      // No more children left – delete the whole row
+      const { error: deleteError } = await supabase
         .from('playdate_participants')
         .delete()
         .eq('id', participantId);
 
-      if (error) {
-        console.error("❌ Supabase error when deleting participant:", error);
-        throw error;
-      }
+      if (deleteError) throw deleteError;
 
-      console.log("✅ Participant deleted from Supabase:", participantId);
+      console.log("✅ Deleted participant row because no more children remained.");
+    } else {
+      // Update the row with remaining children
+      const { error: updateError } = await supabase
+        .from('playdate_participants')
+        .update({ child_ids: updatedChildIds })
+        .eq('id', participantId);
 
-      // Refresh the data to update the UI
-      await refreshData();
+      if (updateError) throw updateError;
 
-      toast({
-        title: 'Success',
-        description: 'Child removed from playdate successfully!',
-      });
-    } catch (err: any) {
-      console.error('Error removing child from playdate:', err);
-      toast({
-        title: 'Failed',
-        description: err.message || 'Could not remove child from playdate.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsRemoving(prev => prev.filter(id => id !== participantId));
+      console.log("✅ Updated participant row with fewer children:", updatedChildIds);
     }
-  };
+
+    await refreshData();
+
+    toast({
+      title: 'Success',
+      description: 'Child removed from playdate successfully!',
+    });
+
+  } catch (err: any) {
+    console.error('❌ Error removing child from playdate:', err);
+    toast({
+      title: 'Failed',
+      description: err.message || 'Could not remove child from playdate.',
+      variant: 'destructive',
+    });
+  } finally {
+    setIsRemoving(prev => prev.filter(id => id !== participantId));
+  }
+};
 
   const handlePlaydateCanceled = async () => {
     await refreshData();
