@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -93,12 +92,22 @@ const ConnectionCard = ({ id, name, childName, interests, city }: SuggestedConne
   );
 };
 
-const SuggestedConnections = () => {
+interface SuggestedConnectionsProps {
+  connections?: SuggestedConnectionProps[];
+}
+
+const SuggestedConnections = ({ connections: externalConnections }: SuggestedConnectionsProps) => {
   const [connections, setConnections] = useState<SuggestedConnectionProps[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (externalConnections && externalConnections.length > 0) {
+      setConnections(externalConnections);
+      setLoading(false);
+      return;
+    }
+
     const fetchConnections = async () => {
       setLoading(true);
 
@@ -135,7 +144,7 @@ const SuggestedConnections = () => {
     };
 
     fetchConnections();
-  }, []);
+  }, [externalConnections]);
 
   const container = {
     hidden: { opacity: 0 },
