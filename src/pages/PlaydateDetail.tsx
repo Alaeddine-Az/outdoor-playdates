@@ -73,7 +73,7 @@ const PlaydateDetail = () => {
   };
 
   const handleJoin = async (selectedChildIds: string[]) => {
-    await handleJoinPlaydate(selectedChildIds);
+    await handleJoinPlaydate(selectedChildIds, playdate);
   };
 
   if (isLoading) {

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ interface SuggestedConnectionProps {
   name: string;
   childName: string;
   interests: string[];
-  city: string;
+  city?: string; // Make city optional
 }
 
 const ConnectionCard = ({ id, name, childName, interests, city }: SuggestedConnectionProps) => {
@@ -63,10 +64,12 @@ const ConnectionCard = ({ id, name, childName, interests, city }: SuggestedConne
                 <Users className="h-3 w-3 mr-1" /> 
                 <span>{childName}</span>
               </div>
-              <div className="flex items-center">
-                <MapPin className="h-3 w-3 mr-1" /> 
-                <span>{city}</span>
-              </div>
+              {city && (
+                <div className="flex items-center">
+                  <MapPin className="h-3 w-3 mr-1" /> 
+                  <span>{city}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
