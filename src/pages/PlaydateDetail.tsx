@@ -33,10 +33,12 @@ const PlaydateDetail = () => {
     isJoining,
     isUpdating,
     isProcessing,
+    isRemoving,
     setIsProcessing,
     handleJoinPlaydate,
     handleUpdatePlaydate,
-    handlePlaydateCanceled
+    handlePlaydateCanceled,
+    handleRemoveParticipant
   } = usePlaydateActions(id, loadPlaydateData);
 
   const handleUpdatePlaydateSubmit = (values: any) => {
@@ -44,8 +46,8 @@ const PlaydateDetail = () => {
     setIsEditDialogOpen(false);
   };
 
-  const handleParticipantRemoved = async () => {
-    await loadPlaydateData();
+  const handleParticipantRemoved = async (participantId: string) => {
+    await handleRemoveParticipant(participantId);
   };
 
   const handleJoin = async (selectedChildIds: string[]) => {
@@ -97,6 +99,7 @@ const PlaydateDetail = () => {
             isCompleted={isCompleted}
             isCanceled={isCanceled}
             onParticipantRemoved={handleParticipantRemoved}
+            isRemoving={isRemoving}
           />
         </div>
 

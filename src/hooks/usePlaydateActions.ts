@@ -9,6 +9,7 @@ export const usePlaydateActions = (playdateId: string | undefined, refreshData: 
   const [isJoining, setIsJoining] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isRemoving, setIsRemoving] = useState<string[]>([]);
 
   const handleJoinPlaydate = async (selectedChildIds: string[]) => {
     if (!user || selectedChildIds.length === 0 || !playdateId) {
@@ -109,6 +110,38 @@ export const usePlaydateActions = (playdateId: string | undefined, refreshData: 
     }
   };
 
+  const handleRemoveParticipant = async (participantId: string) => {
+    if (!user || !participantId) return;
+
+    setIsRemoving(prev => [...prev, participantId]);
+
+    try {
+      const { error } = await supabase
+        .from('playdate_participants')
+        .delete()
+        .eq('id', participantId);
+
+      if (error) throw error;
+
+      // Immediately refresh the data to show the updated participants list
+      await refreshData();
+
+      toast({
+        title: 'Success',
+        description: 'Child removed from playdate successfully!'
+      });
+    } catch (err: any) {
+      console.error('Error removing child from playdate:', err);
+      toast({
+        title: 'Failed',
+        description: err.message || 'Could not remove child from playdate.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsRemoving(prev => prev.filter(id => id !== participantId));
+    }
+  };
+
   const handlePlaydateCanceled = async () => {
     // Immediately refresh the data to show the canceled status
     await refreshData();
@@ -118,9 +151,11 @@ export const usePlaydateActions = (playdateId: string | undefined, refreshData: 
     isJoining,
     isUpdating, 
     isProcessing,
+    isRemoving,
     setIsProcessing,
     handleJoinPlaydate,
     handleUpdatePlaydate,
-    handlePlaydateCanceled
+    handlePlaydateCanceled,
+    handleRemoveParticipant
   };
 };
