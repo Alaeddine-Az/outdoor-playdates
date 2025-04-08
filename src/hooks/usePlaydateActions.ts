@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -116,10 +117,10 @@ export const usePlaydateActions = (
     setIsRemoving(prev => [...prev, participantId]);
 
     try {
-      const { error, data } = await supabase
+      const { error } = await supabase
         .from('playdate_participants')
         .delete()
-        .eq('id', participantId); // ✅ This matches your schema
+        .eq('id', participantId);
 
       if (error) {
         console.error("❌ Supabase error when deleting participant:", error);
@@ -128,6 +129,7 @@ export const usePlaydateActions = (
 
       console.log("✅ Participant deleted from Supabase:", participantId);
 
+      // Refresh the data to update the UI
       await refreshData();
 
       toast({

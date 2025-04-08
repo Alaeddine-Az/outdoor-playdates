@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PlaydateParticipants } from '@/components/playdates/detail/PlaydateParticipants';
@@ -40,10 +41,10 @@ const PlaydateDetail = () => {
     handleRemoveParticipant
   } = usePlaydateActions(id, loadPlaydateData);
 
-  // ✅ Step 1: Local participantDetails state
+  // Local participantDetails state
   const [localParticipantDetails, setLocalParticipantDetails] = useState(participantDetails);
 
-  // ✅ Step 2: Sync when the hook value changes
+  // Sync when the hook value changes
   useEffect(() => {
     setLocalParticipantDetails(participantDetails);
   }, [participantDetails]);
@@ -53,10 +54,12 @@ const PlaydateDetail = () => {
     setIsEditDialogOpen(false);
   };
 
-  // ✅ Step 3: Remove and update local state
+  // Handle removing a participant
   const handleParticipantRemoved = async (participantId: string) => {
+    // Call the hook function to remove from database
     await handleRemoveParticipant(participantId);
-
+    
+    // Update local state immediately for a responsive UI
     setLocalParticipantDetails(prev => {
       const updated = { ...prev };
       for (const key in updated) {
@@ -113,7 +116,7 @@ const PlaydateDetail = () => {
       <div className="grid md:grid-cols-3 gap-6 mt-6">
         <div className="md:col-span-2 space-y-6">
           <PlaydateParticipants 
-            participantDetails={localParticipantDetails} // ✅ use local state
+            participantDetails={localParticipantDetails} 
             playdateId={id || ''}
             isCompleted={isCompleted}
             isCanceled={isCanceled}
