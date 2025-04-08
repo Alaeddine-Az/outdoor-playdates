@@ -1,10 +1,11 @@
+
 import React, { useEffect, useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, MapPin, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SuggestedConnectionProps {
   id: string;
