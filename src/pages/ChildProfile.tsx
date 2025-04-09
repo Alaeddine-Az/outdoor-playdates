@@ -131,7 +131,8 @@ const ChildProfilePage = () => {
             {/* Interests section */}
             {interests.length > 0 && (
               <div className="mb-4">
-                <div className="text-sm font-medium mb-2">Interests:</div>
+              <div className="text-sm font-medium mb-2">Interests:</div>
+              {interests.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {interests.map((interest, index) => (
                     <Badge
@@ -143,7 +144,10 @@ const ChildProfilePage = () => {
                     </Badge>
                   ))}
                 </div>
-              </div>
+              ) : (
+                <div className="text-muted-foreground text-sm italic">No interests found.</div>
+              )}
+            </div>
             )}
 
             <div className="mb-4">
