@@ -123,29 +123,33 @@ export const useDashboard = () => {
           const realConnections: ConnectionData[] = Object.entries(parentChildMap).map(
             ([parentId, children]) => {
               const parent = profiles.find(p => p.id === parentId);
-              const firstChild = children[0];
-
-              const allInterests = children.flatMap(child => childInterestMap[child.id] ?? []);
-              const uniqueInterests = [...new Set(allInterests)];
+              const firstTwoChildren = children.slice(0, 2);
+              const firstChild = firstTwoChildren[0];
 
               const childName = children.length === 1
                 ? `${firstChild.name} (${firstChild.age})`
                 : `${firstChild.name} (${firstChild.age}) + ${children.length - 1} more`;
+
+              // Show interests from only first two children
+              const interestsFromFirstTwo = firstTwoChildren.flatMap(
+                child => childInterestMap[child.id] ?? []
+              );
+              const uniqueInterests = [...new Set(interestsFromFirstTwo)];
 
               return {
                 id: parent?.id ?? '',
                 name: parent?.parent_name ?? '',
                 childName,
                 interests: uniqueInterests,
-                distance: '' // Optional
+                distance: '' // optional
               };
             }
           );
 
           // 🎲 Randomize and limit to 3
           const limitedConnections = realConnections
-            .sort(() => 0.5 - Math.random()) // Shuffle
-            .slice(0, 3); // Limit
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 3);
 
           setSuggestedConnections(limitedConnections);
 
@@ -219,7 +223,7 @@ export const useDashboard = () => {
 
           setUpcomingPlaydates(formattedPlaydates);
 
-          // Static events for now
+          // Static nearby events
           setNearbyEvents([
             {
               title: 'Community Playground Day',
