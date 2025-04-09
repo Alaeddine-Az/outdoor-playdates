@@ -2,10 +2,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
 
 const HeaderLogo = () => {
+  const { user } = useAuth();
+  
   return (
-    <Link to="/" className="flex items-center space-x-2">
+    <Link to={user ? "/dashboard" : "/"} className="flex items-center space-x-2">
       <motion.div 
         className="w-8 h-8 rounded-full bg-play-orange flex items-center justify-center shadow-sm"
         whileHover={{ rotate: [0, -10, 10, -10, 0] }}
