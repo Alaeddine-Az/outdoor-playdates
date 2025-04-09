@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,7 @@ interface SuggestedConnectionProps {
   name: string;
   childName: string;
   interests: string[];
-  city?: string; // Make city optional
+  city?: string;
 }
 
 const ConnectionCard = ({ id, name, childName, interests, city }: SuggestedConnectionProps) => {
@@ -81,16 +80,18 @@ const ConnectionCard = ({ id, name, childName, interests, city }: SuggestedConne
         </Button>
       </div>
 
-      <div className="flex mt-3 flex-wrap gap-1.5">
-        {interests.map((interest, index) => (
-          <span 
-            key={index} 
-            className="text-xs px-2 py-1 rounded-full bg-play-lime/30 text-green-700 font-medium"
-          >
-            {interest}
-          </span>
-        ))}
-      </div>
+      {interests?.length > 0 && (
+        <div className="flex mt-3 flex-wrap gap-1.5">
+          {interests.map((interest, index) => (
+            <span 
+              key={index} 
+              className="text-xs px-2 py-1 rounded-full bg-play-lime/30 text-green-700 font-medium"
+            >
+              {interest}
+            </span>
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 };
@@ -112,93 +113,91 @@ const SuggestedConnections = ({ connections: externalConnections }: SuggestedCon
     }
 
     const fetchConnections = async () => {
-  setLoading(true);
+      setLoading(true);
 
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-  if (userError || !user?.id) {
-    console.error('Error getting current user:', userError);
-    setLoading(false);
-    return;
-  }
+      if (userError || !user?.id) {
+        console.error('Error getting current user:', userError);
+        setLoading(false);
+        return;
+      }
 
-  // Step 1: Fetch other profiles (exclude current user)
-  const { data: profiles, error: profilesError } = await supabase
-    .from('profiles')
-    .select('id, parent_name, city')
-    .neq('id', user.id);
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, parent_name, city')
+        .neq('id', user.id);
 
-  if (profilesError || !profiles) {
-    console.error('Error fetching profiles:', profilesError);
-    setLoading(false);
-    return;
-  }
+      if (profilesError || !profiles) {
+        console.error('Error fetching profiles:', profilesError);
+        setLoading(false);
+        return;
+      }
 
-  const profileIds = profiles.map((p) => p.id);
+      const profileIds = profiles.map((p) => p.id);
 
-  // Step 2: Fetch children of these profiles
-  const { data: children, error: childrenError } = await supabase
-    .from('children')
-    .select('id, name, parent_id')
-    .in('parent_id', profileIds);
+      const { data: children, error: childrenError } = await supabase
+        .from('children')
+        .select('id, name, age, parent_id')
+        .in('parent_id', profileIds);
 
-  if (childrenError || !children) {
-    console.error('Error fetching children:', childrenError);
-    setLoading(false);
-    return;
-  }
+      if (childrenError || !children) {
+        console.error('Error fetching children:', childrenError);
+        setLoading(false);
+        return;
+      }
 
-  // Step 3: Fetch child interests
-  const childIds = children.map((c) => c.id);
-  const { data: childInterests, error: childInterestsError } = await supabase
-    .from('child_interests')
-    .select('child_id, interest_id')
-    .in('child_id', childIds);
+      const childIds = children.map((c) => c.id);
 
-  if (childInterestsError || !childInterests) {
-    console.error('Error fetching child interests:', childInterestsError);
-    setLoading(false);
-    return;
-  }
+      const { data: childInterests, error: childInterestsError } = await supabase
+        .from('child_interests')
+        .select('child_id, interest_id')
+        .in('child_id', childIds);
 
-  // Step 4: Fetch interest names
-  const interestIds = [...new Set(childInterests.map((ci) => ci.interest_id))];
-  const { data: interests, error: interestsError } = await supabase
-    .from('interests')
-    .select('id, name')
-    .in('id', interestIds);
+      if (childInterestsError || !childInterests) {
+        console.error('Error fetching child interests:', childInterestsError);
+        setLoading(false);
+        return;
+      }
 
-  if (interestsError || !interests) {
-    console.error('Error fetching interests:', interestsError);
-    setLoading(false);
-    return;
-  }
+      const interestIds = [...new Set(childInterests.map((ci) => ci.interest_id))];
+      const { data: interests, error: interestsError } = await supabase
+        .from('interests')
+        .select('id, name')
+        .in('id', interestIds);
 
-  const interestMap = Object.fromEntries(interests.map((i) => [i.id, i.name]));
-  const childInterestMap = childInterests.reduce((acc, ci) => {
-    if (!acc[ci.child_id]) acc[ci.child_id] = [];
-    acc[ci.child_id].push(interestMap[ci.interest_id]);
-    return acc;
-  }, {} as Record<string, string[]>);
+      if (interestsError || !interests) {
+        console.error('Error fetching interests:', interestsError);
+        setLoading(false);
+        return;
+      }
 
-  // Step 5: Combine all data into suggestions
-  const suggestions: SuggestedConnectionProps[] = children.map((child) => {
-    const parent = profiles.find((p) => p.id === child.parent_id);
-    return {
-      id: parent?.id ?? '',
-      name: parent?.parent_name ?? '',
-      city: parent?.city ?? '',
-      childName: child.name,
-      interests: childInterestMap[child.id] ?? [],
+      const interestMap = Object.fromEntries(interests.map((i) => [i.id, i.name]));
+      const childInterestMap = childInterests.reduce((acc, ci) => {
+        if (!acc[ci.child_id]) acc[ci.child_id] = [];
+        acc[ci.child_id].push(interestMap[ci.interest_id]);
+        return acc;
+      }, {} as Record<string, string[]>);
+
+      const suggestions: SuggestedConnectionProps[] = children.map((child) => {
+        const parent = profiles.find((p) => p.id === child.parent_id);
+        return {
+          id: parent?.id ?? '',
+          name: parent?.parent_name ?? '',
+          city: parent?.city ?? '',
+          childName: `${child.name} (${child.age})`,
+          interests: childInterestMap[child.id] ?? [],
+        };
+      });
+
+      console.log('✅ Suggestions with interests:', suggestions);
+
+      setConnections(suggestions);
+      setLoading(false);
     };
-  });
-
-  setConnections(mappedData);
-  setLoading(false);
-};
 
     fetchConnections();
   }, [externalConnections]);
