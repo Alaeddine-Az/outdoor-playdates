@@ -59,7 +59,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col px-6 pt-6">
+      <div className="flex flex-1 flex-col px-4 sm:px-6 pt-6">
         {children || <Outlet />}
       </div>
     </div>
