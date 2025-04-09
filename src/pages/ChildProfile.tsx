@@ -16,6 +16,7 @@ const ChildProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [child, setChild] = useState<ChildProfile | null>(null);
   const [parent, setParent] = useState<ParentProfile | null>(null);
+  const [interests, setInterests] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -25,6 +26,7 @@ const ChildProfilePage = () => {
       try {
         setLoading(true);
 
+        // Fetch child data
         const { data: childData, error: childError } = await supabase
           .from('children')
           .select('*')
@@ -34,6 +36,7 @@ const ChildProfilePage = () => {
         if (childError) throw childError;
         setChild(childData);
 
+        // Fetch parent
         const { data: parentData, error: parentError } = await supabase
           .from('profiles')
           .select('*')
@@ -42,6 +45,28 @@ const ChildProfilePage = () => {
 
         if (parentError) throw parentError;
         setParent(parentData);
+
+        // Fetch child interests
+        const { data: childInterests, error: childInterestsError } = await supabase
+          .from('child_interests')
+          .select('interest_id')
+          .eq('child_id', id);
+
+        if (childInterestsError) throw childInterestsError;
+
+        const interestIds = childInterests.map((ci) => ci.interest_id);
+
+        if (interestIds.length > 0) {
+          const { data: interestNames, error: interestNamesError } = await supabase
+            .from('interests')
+            .select('name')
+            .in('id', interestIds);
+
+          if (interestNamesError) throw interestNamesError;
+          setInterests(interestNames.map((i) => i.name));
+        } else {
+          setInterests([]);
+        }
       } catch (e: any) {
         console.error('Error loading child profile:', e);
         setError(e.message);
@@ -101,6 +126,24 @@ const ChildProfilePage = () => {
 
             {child.bio && (
               <p className="text-muted-foreground mb-4">{child.bio}</p>
+            )}
+
+            {/* Interests section */}
+            {interests.length > 0 && (
+              <div className="mb-4">
+                <div className="text-sm font-medium mb-2">Interests:</div>
+                <div className="flex flex-wrap gap-2">
+                  {interests.map((interest, index) => (
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="bg-green-100 text-green-800 rounded-full px-3 py-1 text-sm"
+                    >
+                      {interest}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
             )}
 
             <div className="mb-4">
