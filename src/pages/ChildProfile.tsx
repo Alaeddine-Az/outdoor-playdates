@@ -88,6 +88,14 @@ if (interestIds.length > 0) {
   setInterests([]);
 }
 
+  } catch (e: any) {
+  console.error('❌ Error loading child profile:', e);
+  setError(e.message);
+} finally {
+  setLoading(false);
+}
+
+
   const isParent = user && parent && user.id === parent.id;
 
   if (loading) {
