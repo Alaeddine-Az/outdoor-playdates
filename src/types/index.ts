@@ -1,4 +1,3 @@
-
 export interface ParentProfile {
   id: string;
   parent_name: string;
@@ -64,7 +63,6 @@ export interface EventParticipant {
   joined_at: string;
 }
 
-// Update the PlaydateParticipant interface to match the database structure
 export interface PlaydateParticipant {
   id: string;
   playdate_id: string;
@@ -75,7 +73,6 @@ export interface PlaydateParticipant {
   updated_at: string;
 }
 
-// Add Playdate interface to represent the playdate structure
 export interface Playdate {
   id: string;
   title: string;
@@ -88,4 +85,10 @@ export interface Playdate {
   status?: string; // Add status field to match the database
   created_at: string;
   updated_at: string;
+}
+
+export interface DashboardEvent {
+  title: string;
+  date: string;
+  location: string;
 }

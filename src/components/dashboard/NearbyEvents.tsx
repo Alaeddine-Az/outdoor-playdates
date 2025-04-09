@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, MapPin, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { DashboardEvent } from '@/types';
 
 interface EventCardProps {
   title: string;
@@ -72,7 +73,7 @@ const EventCard = ({ title, date, location }: EventCardProps) => {
 };
 
 interface NearbyEventsProps {
-  events: EventCardProps[];
+  events: DashboardEvent[];
 }
 
 const NearbyEvents = ({ events }: NearbyEventsProps) => {
