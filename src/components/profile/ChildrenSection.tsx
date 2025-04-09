@@ -114,7 +114,23 @@ const ChildrenSection = ({ children }: ChildrenSectionProps) => {
             <AccordionItem value={child.id} className="border-0">
               <CardHeader className="p-0">
                 <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                  <CardTitle className="text-left">{child.name}</CardTitle>
+                  <div className="text-left">
+                    <CardTitle>{child.name}</CardTitle>
+                    <p className="text-sm text-muted-foreground">{child.age} years old</p>
+                    {childInterestsMap[child.id] && childInterestsMap[child.id].length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {childInterestsMap[child.id].map((interest) => (
+                          <Badge
+                            key={interest}
+                            variant="secondary"
+                            className="rounded-full px-2 py-1 text-xs"
+                          >
+                            {interest}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </AccordionTrigger>
               </CardHeader>
 
