@@ -138,25 +138,21 @@ const ChildProfilePage = () => {
 
             {/* Interests section */}
             {interests.length > 0 && (
-              <div className="mb-4">
-              <div className="text-sm font-medium mb-2">Interests:</div>
-              {interests.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {interests.map((interest, index) => (
-                    <Badge
-                      key={index}
-                      variant="secondary"
-                      className="bg-green-100 text-green-800 rounded-full px-3 py-1 text-sm"
-                    >
-                      {interest}
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-muted-foreground text-sm italic">No interests found.</div>
-              )}
-            </div>
-            )}
+  <div className="mb-4">
+    <div className="text-sm font-medium mb-2">Interests:</div>
+    <div className="flex flex-wrap gap-2">
+      {interests.map((interest, index) => (
+        <Badge
+          key={index}
+          variant="secondary"
+          className="bg-green-100 text-green-800 rounded-full px-3 py-1 text-sm"
+        >
+          {interest}
+        </Badge>
+      ))}
+    </div>
+  </div>
+)}
 
             <div className="mb-4">
               <div className="text-sm font-medium mb-2">Parent:</div>
