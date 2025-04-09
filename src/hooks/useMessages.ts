@@ -18,6 +18,8 @@ export function useMessages(otherId?: string) {
       return;
     }
 
+    let channel: any;
+
     async function loadMessages() {
       setLoading(true);
       setError(null);
@@ -75,7 +77,7 @@ export function useMessages(otherId?: string) {
         }
 
         // Set up real-time subscription for new messages
-        const channel = supabase
+        channel = supabase
           .channel('messages_channel')
           .on('postgres_changes', {
             event: 'INSERT',
@@ -97,11 +99,6 @@ export function useMessages(otherId?: string) {
           .subscribe();
 
         setLoading(false);
-        
-        // Fix the issue by returning a cleanup function properly
-        return () => {
-          supabase.removeChannel(channel);
-        };
       } catch (e: any) {
         console.error('Error loading messages:', e);
         setError(e.message);
@@ -114,13 +111,14 @@ export function useMessages(otherId?: string) {
       }
     }
 
-    // Call loadMessages and store its return value
-    const cleanupFn = loadMessages();
+    // Call loadMessages without trying to get a return value
+    loadMessages();
     
-    // Use the returned cleanup function in the useEffect cleanup
+    // Clean up function for useEffect
     return () => {
-      if (cleanupFn && typeof cleanupFn === 'function') {
-        cleanupFn();
+      // Only unsubscribe if the channel exists
+      if (channel) {
+        supabase.removeChannel(channel);
       }
     };
   }, [user, otherId]);
