@@ -56,10 +56,99 @@ export const useDashboard = () => {
         setLoading(true);
 
         if (user) {
+          // Fetch accepted connections to exclude from suggestions
+          const { data: acceptedConnections, error: connectionsError } = await supabase
+            .from('connections')
+            .select('requester_id, recipient_id')
+            .or(`requester_id.eq.${user.id},recipient_id.eq.${user.id}`)
+            .eq('status', 'accepted');
+
+          if (connectionsError) throw connectionsError;
+
+          const connectedUserIds = acceptedConnections.map(conn =>
+            conn.requester_id === user.id ? conn.recipient_id : conn.requester_id
+          );
+
+          // Fetch all profiles and exclude self + connected users
+          const { data: allProfiles, error: profilesError } = await supabase
+            .from('profiles')
+            .select('id, parent_name, city');
+
+          if (profilesError || !allProfiles) throw profilesError;
+
+          const profiles = allProfiles.filter(
+            p => p.id !== user.id && !connectedUserIds.includes(p.id)
+          );
+
+          const profileIds = profiles.map(p => p.id);
+
+          const { data: childrenData, error: childrenError } = await supabase
+            .from('children')
+            .select('id, name, age, parent_id')
+            .in('parent_id', profileIds);
+
+          if (childrenError || !childrenData) throw childrenError;
+
+          const childIds = childrenData.map(c => c.id);
+
+          const { data: childInterests, error: childInterestsError } = await supabase
+            .from('child_interests')
+            .select('child_id, interest_id')
+            .in('child_id', childIds);
+
+          if (childInterestsError || !childInterests) throw childInterestsError;
+
+          const interestIds = [...new Set(childInterests.map(ci => ci.interest_id))];
+
+          const { data: interests, error: interestsError } = await supabase
+            .from('interests')
+            .select('id, name')
+            .in('id', interestIds);
+
+          if (interestsError || !interests) throw interestsError;
+
+          const interestMap = Object.fromEntries(interests.map(i => [i.id, i.name]));
+          const childInterestMap = childInterests.reduce((acc, ci) => {
+            if (!acc[ci.child_id]) acc[ci.child_id] = [];
+            acc[ci.child_id].push(interestMap[ci.interest_id]);
+            return acc;
+          }, {} as Record<string, string[]>);
+
+          // Group children by parent
+          const parentChildMap = childrenData.reduce((acc, child) => {
+            if (!acc[child.parent_id]) acc[child.parent_id] = [];
+            acc[child.parent_id].push(child);
+            return acc;
+          }, {} as Record<string, typeof childrenData>);
+
+          const realConnections: ConnectionData[] = Object.entries(parentChildMap).map(
+            ([parentId, children]) => {
+              const parent = profiles.find(p => p.id === parentId);
+              const firstChild = children[0];
+
+              const allInterests = children.flatMap(child => childInterestMap[child.id] ?? []);
+              const uniqueInterests = [...new Set(allInterests)];
+
+              const childName = children.length === 1
+                ? `${firstChild.name} (${firstChild.age})`
+                : `${firstChild.name} (${firstChild.age}) + ${children.length - 1} more`;
+
+              return {
+                id: parent?.id ?? '',
+                name: parent?.parent_name ?? '',
+                childName,
+                interests: uniqueInterests,
+                distance: '' // Optional: use ZIP or location later
+              };
+            }
+          );
+
+          setSuggestedConnections(realConnections);
+
           // Fetch playdates
           const { data: playdatesData, error: playdatesError } = await supabase
             .from('playdates')
-            .select('*, playdate_participants(*), profiles:creator_id(parent_name)') 
+            .select('*, playdate_participants(*), profiles:creator_id(parent_name)')
             .order('created_at', { ascending: false });
 
           if (playdatesError) throw playdatesError;
@@ -120,81 +209,7 @@ export const useDashboard = () => {
 
           setUpcomingPlaydates(formattedPlaydates);
 
-          // Suggested connections
-          const { data: profiles, error: profilesError } = await supabase
-            .from('profiles')
-            .select('id, parent_name, city')
-            .neq('id', user.id);
-
-          if (profilesError || !profiles) throw profilesError;
-
-          const profileIds = profiles.map(p => p.id);
-
-          const { data: childrenData, error: childrenError } = await supabase
-            .from('children')
-            .select('id, name, age, parent_id')
-            .in('parent_id', profileIds);
-
-          if (childrenError || !childrenData) throw childrenError;
-
-          const childIds = childrenData.map(c => c.id);
-
-          const { data: childInterests, error: childInterestsError } = await supabase
-            .from('child_interests')
-            .select('child_id, interest_id')
-            .in('child_id', childIds);
-
-          if (childInterestsError || !childInterests) throw childInterestsError;
-
-          const interestIds = [...new Set(childInterests.map(ci => ci.interest_id))];
-
-          const { data: interests, error: interestsError } = await supabase
-            .from('interests')
-            .select('id, name')
-            .in('id', interestIds);
-
-          if (interestsError || !interests) throw interestsError;
-
-          const interestMap = Object.fromEntries(interests.map(i => [i.id, i.name]));
-          const childInterestMap = childInterests.reduce((acc, ci) => {
-            if (!acc[ci.child_id]) acc[ci.child_id] = [];
-            acc[ci.child_id].push(interestMap[ci.interest_id]);
-            return acc;
-          }, {} as Record<string, string[]>);
-
-          // Group children by parent
-          const parentChildMap = childrenData.reduce((acc, child) => {
-            if (!acc[child.parent_id]) acc[child.parent_id] = [];
-            acc[child.parent_id].push(child);
-            return acc;
-          }, {} as Record<string, typeof childrenData>);
-
-          // One suggestion per parent
-          const realConnections: ConnectionData[] = Object.entries(parentChildMap).map(
-            ([parentId, children]) => {
-              const parent = profiles.find(p => p.id === parentId);
-              const firstChild = children[0];
-
-              const allInterests = children.flatMap(child => childInterestMap[child.id] ?? []);
-              const uniqueInterests = [...new Set(allInterests)];
-
-              const childName = children.length === 1
-                ? `${firstChild.name} (${firstChild.age})`
-                : `${firstChild.name} (${firstChild.age}) + ${children.length - 1} more`;
-
-              return {
-                id: parent?.id ?? '',
-                name: parent?.parent_name ?? '',
-                childName,
-                interests: uniqueInterests,
-                distance: '' // optional: can add later
-              };
-            }
-          );
-
-          setSuggestedConnections(realConnections);
-
-          // Nearby Events (still static)
+          // Static nearby events for now
           setNearbyEvents([
             {
               title: 'Community Playground Day',
