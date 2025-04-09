@@ -67,26 +67,26 @@ const ChildProfilePage = () => {
           return;
         }
 
-        // Step 4: Get interest names
-        const { data: interestNames, error: interestNamesError } = await supabase
-          .from('interests')
-          .select('name')
-          .in('id', interestIds);
+       // Step 4: Get interest names
+if (interestIds.length > 0) {
+  const { data: interestNames, error: interestNamesError } = await supabase
+    .from('interests')
+    .select('name')
+    .in('id', interestIds);
 
-        if (interestNamesError) throw interestNamesError;
-        console.log('✅ interests:', interestNames);
-
-        setInterests(interestNames.map(i => i.name));
-      } catch (e: any) {
-        console.error('❌ Error loading child profile:', e);
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadChildProfile();
-  }, [id]);
+  if (interestNamesError) {
+    console.error('❌ Error fetching interests:', interestNamesError);
+    setInterests([]); // fallback to empty to avoid render issues
+  } else {
+    console.log('✅ interests fetched from Supabase:', interestNames);
+    const extracted = interestNames.map(i => i.name);
+    console.log('🎯 Final interests in state:', extracted);
+    setInterests(extracted);
+  }
+} else {
+  console.warn('⚠️ No interest IDs found for this child.');
+  setInterests([]);
+}
 
   const isParent = user && parent && user.id === parent.id;
 
