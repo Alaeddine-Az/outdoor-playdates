@@ -1,228 +1,75 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
 import { ChildProfile } from '@/types';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Link } from 'react-router-dom';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2 } from 'lucide-react';
-import { useChildRemoval } from '@/hooks/useChildRemoval';
-import { supabase } from '@/integrations/supabase/client';
-import { 
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { Card, CardContent } from '@/components/ui/card';
 
-interface ChildrenSectionProps {
+interface ChildrenListProps {
   children: ChildProfile[];
+  parentId: string;
+  isCurrentUser: boolean;
 }
 
-const AGE_OPTIONS = Array.from({ length: 18 }, (_, i) => `${i + 1}`);
-
-const ChildrenSection = ({ children }: ChildrenSectionProps) => {
-  const { removeChild, isRemoving } = useChildRemoval();
-  const [childInterestsMap, setChildInterestsMap] = useState<Record<string, string[]>>({});
-
-  const handleRemoveChild = async (childId: string, childName: string) => {
-    await removeChild(childId, childName);
-  };
-
-  useEffect(() => {
-    async function fetchChildInterests() {
-      const childIds = children.map(c => c.id);
-      if (childIds.length === 0) return;
-
-      const { data: interestsData, error } = await supabase
-        .from('child_interests')
-        .select('child_id, interest_id');
-
-      if (error) {
-        console.error('Error fetching child interests:', error);
-        return;
-      }
-
-      const interestIds = [...new Set(interestsData.map(ci => ci.interest_id))];
-      const { data: interestNames, error: interestNameError } = await supabase
-        .from('interests')
-        .select('id, name')
-        .in('id', interestIds);
-
-      if (interestNameError) {
-        console.error('Error fetching interest names:', interestNameError);
-        return;
-      }
-
-      const interestMap = Object.fromEntries(interestNames.map(i => [i.id, i.name]));
-      const groupedInterests: Record<string, string[]> = {};
-
-      interestsData.forEach(({ child_id, interest_id }) => {
-        if (!groupedInterests[child_id]) groupedInterests[child_id] = [];
-        if (interestMap[interest_id]) groupedInterests[child_id].push(interestMap[interest_id]);
-      });
-
-      setChildInterestsMap(groupedInterests);
-    }
-
-    fetchChildInterests();
-  }, [children]);
-
+export default function ChildrenList({ children, parentId, isCurrentUser }: ChildrenListProps) {
   if (children.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground mb-4">You haven't added any children to your profile yet.</p>
-        <Button asChild>
-          <Link to="/add-child">Add Your First Child</Link>
-        </Button>
+      <div className="p-6 text-center text-muted-foreground">
+        No children have been added yet.
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Children Profiles</h2>
-        <Button asChild variant="outline" className="gap-1">
-          <Link to="/add-child">
-            <Plus className="h-4 w-4" /> Add Child
-          </Link>
-        </Button>
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {children.map((child) => (
+        <Card key={child.id} className="overflow-hidden hover:shadow-md transition-shadow">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <Avatar className="h-12 w-12">
+                <AvatarFallback className="bg-secondary/10 text-secondary">
+                  {child.name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <Link to={`/child/${child.id}`} className="font-medium hover:text-primary transition-colors">
+                  {child.name}
+                </Link>
+                <p className="text-sm text-muted-foreground">{child.age} years old</p>
 
-      <Accordion type="multiple" className="space-y-4">
-        {children.map((child) => (
-          <Card key={child.id} className="border rounded-lg overflow-hidden">
-            <AccordionItem value={child.id} className="border-0">
-              <CardHeader className="p-0">
-                <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                  <div className="text-left">
-                    <CardTitle>{child.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{child.age} years old</p>
-                    {childInterestsMap[child.id] && childInterestsMap[child.id].length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {childInterestsMap[child.id].map((interest) => (
-                          <Badge
-                            key={interest}
-                            variant="secondary"
-                            className="rounded-full px-2 py-1 text-xs"
-                          >
-                            {interest}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </AccordionTrigger>
-              </CardHeader>
-
-              <AccordionContent>
-                <CardContent className="space-y-4 pt-2">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <Label className="text-base font-medium">Child's Name</Label>
-                      <Input defaultValue={child.name} readOnly />
-                    </div>
-                    <div className="space-y-3">
-                      <Label className="text-base font-medium">Age</Label>
-                      <select
-                        defaultValue={child.age}
-                        disabled
-                        className="flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm"
+                {/* Show interests if available */}
+                {child.interests && child.interests.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {child.interests.slice(0, 2).map((interest) => (
+                      <Badge
+                        key={interest}
+                        className="text-xs bg-green-100 text-green-700 rounded-full px-2 py-0.5"
                       >
-                        <option>Select age</option>
-                        {AGE_OPTIONS.map(age => (
-                          <option key={age} value={age}>{age}</option>
-                        ))}
-                      </select>
-                    </div>
+                        {interest}
+                      </Badge>
+                    ))}
                   </div>
-
-                  <div className="space-y-3">
-                    <Label className="text-base font-medium">Interests</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {(childInterestsMap[child.id] || []).map((interest) => (
-                        <Badge
-                          key={interest}
-                          variant="secondary"
-                          className="rounded-full py-1 px-3"
-                        >
-                          {interest}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label className="text-base font-medium">Description</Label>
-                    <Textarea
-                      defaultValue={child.bio || ''}
-                      readOnly
-                      className="min-h-[100px] bg-muted"
-                    />
-                  </div>
-
-                  <div className="flex justify-between items-center pt-2">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link to={`/edit-child/${child.id}`}>Edit Child</Link>
-                    </Button>
-
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          disabled={isRemoving}
-                          className="gap-1"
-                        >
-                          <Trash2 className="h-4 w-4" /> Remove
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently remove {child.name}'s profile from your account. This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            onClick={() => handleRemoveChild(child.id, child.name)}
-                          >
-                            {isRemoving ? "Removing..." : "Remove"}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </CardContent>
-              </AccordionContent>
-            </AccordionItem>
-          </Card>
-        ))}
-      </Accordion>
+                )}
+              </div>
+            </div>
+            
+            {child.bio && (
+              <p className="text-sm text-muted-foreground mb-3">{child.bio}</p>
+            )}
+            
+            {isCurrentUser && (
+              <div className="flex justify-end">
+                <Link 
+                  to={`/edit-child/${child.id}`}
+                  className="text-xs text-primary hover:underline"
+                >
+                  Edit Profile
+                </Link>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
-};
-
-export default ChildrenSection;
+}
