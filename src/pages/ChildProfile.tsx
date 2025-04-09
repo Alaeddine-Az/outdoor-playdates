@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -7,12 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Edit, User } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
-import { useState, useEffect } from 'react';
 import { ChildProfile, ParentProfile } from '@/types';
 
 const ChildProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+
   const [loading, setLoading] = useState(true);
   const [child, setChild] = useState<ChildProfile | null>(null);
   const [parent, setParent] = useState<ParentProfile | null>(null);
@@ -22,13 +22,12 @@ const ChildProfilePage = () => {
   useEffect(() => {
     async function loadChildProfile() {
       if (!id) return;
+      const cleanChildId = id.trim();
 
       try {
         setLoading(true);
-        const cleanChildId = id.trim();
-        console.log('🔍 Clean child ID:', `"${cleanChildId}"`);
 
-        // Step 1: Get the child
+        // Step 1: Load child
         const { data: childData, error: childError } = await supabase
           .from('children')
           .select('*')
@@ -39,7 +38,7 @@ const ChildProfilePage = () => {
         setChild(childData);
         console.log('✅ Child loaded:', childData);
 
-        // Step 2: Get parent
+        // Step 2: Load parent
         const { data: parentData, error: parentError } = await supabase
           .from('profiles')
           .select('*')
@@ -50,51 +49,46 @@ const ChildProfilePage = () => {
         setParent(parentData);
         console.log('✅ Parent loaded:', parentData);
 
-        // Step 3: Get child interests
+        // Step 3: Get child's interest IDs
         const { data: childInterests, error: childInterestsError } = await supabase
           .from('child_interests')
           .select('interest_id')
           .eq('child_id', cleanChildId);
 
         if (childInterestsError) throw childInterestsError;
-        console.log('✅ child_interests:', childInterests);
-
         const interestIds = childInterests.map(ci => ci.interest_id);
         console.log('🎯 interestIds:', interestIds);
 
-        if (interestIds.length === 0) {
+        // Step 4: Fetch interest names
+        if (interestIds.length > 0) {
+          const { data: interestNames, error: interestNamesError } = await supabase
+            .from('interests')
+            .select('name')
+            .in('id', interestIds);
+
+          if (interestNamesError) {
+            console.error('❌ Error fetching interests:', interestNamesError);
+            setInterests([]);
+          } else {
+            const names = interestNames.map(i => i.name);
+            console.log('✅ Final interests:', names);
+            setInterests(names);
+          }
+        } else {
+          console.warn('⚠️ No interests found for this child.');
           setInterests([]);
-          return;
         }
 
-       // Step 4: Get interest names
-if (interestIds.length > 0) {
-  const { data: interestNames, error: interestNamesError } = await supabase
-    .from('interests')
-    .select('name')
-    .in('id', interestIds);
+      } catch (e: any) {
+        console.error('❌ Error loading child profile:', e);
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  if (interestNamesError) {
-    console.error('❌ Error fetching interests:', interestNamesError);
-    setInterests([]); // fallback to empty to avoid render issues
-  } else {
-    console.log('✅ interests fetched from Supabase:', interestNames);
-    const extracted = interestNames.map(i => i.name);
-    console.log('🎯 Final interests in state:', extracted);
-    setInterests(extracted);
-  }
-} else {
-  console.warn('⚠️ No interest IDs found for this child.');
-  setInterests([]);
-}
-
-  } catch (e: any) {
-  console.error('❌ Error loading child profile:', e);
-  setError(e.message);
-} finally {
-  setLoading(false);
-}
-
+    loadChildProfile();
+  }, [id]);
 
   const isParent = user && parent && user.id === parent.id;
 
@@ -146,7 +140,7 @@ if (interestIds.length > 0) {
               <p className="text-muted-foreground mb-4">{child.bio}</p>
             )}
 
-            {/* ✅ Interests Section */}
+            {/* ✅ Interests */}
             <div className="mb-4">
               <div className="text-sm font-medium mb-2">Interests:</div>
               {interests.length > 0 ? (
@@ -166,6 +160,7 @@ if (interestIds.length > 0) {
               )}
             </div>
 
+            {/* ✅ Parent Info */}
             <div className="mb-4">
               <div className="text-sm font-medium mb-2">Parent:</div>
               <Link
@@ -177,6 +172,7 @@ if (interestIds.length > 0) {
               </Link>
             </div>
 
+            {/* ✅ Edit Button */}
             {isParent && (
               <Button asChild variant="outline">
                 <Link to={`/edit-child/${child.id}`}>
