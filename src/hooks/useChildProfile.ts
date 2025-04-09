@@ -20,7 +20,6 @@ export const useChildProfile = (childId?: string) => {
   const [customInterest, setCustomInterest] = useState('');
   const [loading, setLoading] = useState(!isNewChild);
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchChild = async () => {
@@ -34,10 +33,7 @@ export const useChildProfile = (childId?: string) => {
           .eq('parent_id', user.id)
           .single();
         
-        if (error) {
-          setError(error.message);
-          throw error;
-        }
+        if (error) throw error;
         
         if (data) {
           setChild({
@@ -56,10 +52,7 @@ export const useChildProfile = (childId?: string) => {
             .select('interests(name)')
             .eq('child_id', childId);
           
-          if (interestsError) {
-            setError(interestsError.message);
-            throw interestsError;
-          }
+          if (interestsError) throw interestsError;
           
           if (interestsData) {
             const interests = interestsData.map((item: any) => item.interests.name);
@@ -68,7 +61,6 @@ export const useChildProfile = (childId?: string) => {
         }
       } catch (error: any) {
         console.error('Error fetching child:', error);
-        setError(error.message);
         toast({
           title: "Error loading child",
           description: error.message,
@@ -218,7 +210,6 @@ export const useChildProfile = (childId?: string) => {
     loading,
     isSaving,
     handleSave,
-    isNewChild,
-    error
+    isNewChild
   };
 };

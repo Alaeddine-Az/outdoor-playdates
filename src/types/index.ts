@@ -1,3 +1,4 @@
+
 export interface ParentProfile {
   id: string;
   parent_name: string;
@@ -18,7 +19,6 @@ export interface ChildProfile {
   age: string;
   bio?: string;
   parent_id: string;
-  interests?: string[]; // Added this property
   created_at: string;
   updated_at: string;
 }
