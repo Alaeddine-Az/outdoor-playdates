@@ -20,71 +20,73 @@ const ChildProfilePage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-  async function loadChildProfile() {
-    if (!id) return;
+    async function loadChildProfile() {
+      if (!id) return;
 
-    try {
-      setLoading(true);
+      try {
+        setLoading(true);
+        const cleanChildId = id.trim();
+        console.log('🔍 Clean child ID:', `"${cleanChildId}"`);
 
-      // STEP 1 — Get the child
-      const { data: childData, error: childError } = await supabase
-        .from('children')
-        .select('*')
-        .eq('id', id)
-        .single();
+        // Step 1: Get the child
+        const { data: childData, error: childError } = await supabase
+          .from('children')
+          .select('*')
+          .eq('id', cleanChildId)
+          .single();
 
-      if (childError) throw childError;
-      setChild(childData);
-      console.log('✅ Child loaded:', childData);
+        if (childError) throw childError;
+        setChild(childData);
+        console.log('✅ Child loaded:', childData);
 
-      // STEP 2 — Get parent
-      const { data: parentData, error: parentError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', childData.parent_id)
-        .single();
+        // Step 2: Get parent
+        const { data: parentData, error: parentError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', childData.parent_id)
+          .single();
 
-      if (parentError) throw parentError;
-      setParent(parentData);
-      console.log('✅ Parent loaded:', parentData);
+        if (parentError) throw parentError;
+        setParent(parentData);
+        console.log('✅ Parent loaded:', parentData);
 
-      // STEP 3 — Get interest IDs from child_interests
-      const { data: childInterests, error: childInterestsError } = await supabase
-        .from('child_interests')
-        .select('interest_id')
-        .eq('child_id', id);
+        // Step 3: Get child interests
+        const { data: childInterests, error: childInterestsError } = await supabase
+          .from('child_interests')
+          .select('interest_id')
+          .eq('child_id', cleanChildId);
 
-      if (childInterestsError) throw childInterestsError;
-      console.log('✅ child_interests:', childInterests);
+        if (childInterestsError) throw childInterestsError;
+        console.log('✅ child_interests:', childInterests);
 
-      const interestIds = childInterests.map(ci => ci.interest_id);
-      console.log('🎯 interestIds:', interestIds);
+        const interestIds = childInterests.map(ci => ci.interest_id);
+        console.log('🎯 interestIds:', interestIds);
 
-      if (interestIds.length === 0) {
-        setInterests([]);
-        return;
+        if (interestIds.length === 0) {
+          setInterests([]);
+          return;
+        }
+
+        // Step 4: Get interest names
+        const { data: interestNames, error: interestNamesError } = await supabase
+          .from('interests')
+          .select('name')
+          .in('id', interestIds);
+
+        if (interestNamesError) throw interestNamesError;
+        console.log('✅ interests:', interestNames);
+
+        setInterests(interestNames.map(i => i.name));
+      } catch (e: any) {
+        console.error('❌ Error loading child profile:', e);
+        setError(e.message);
+      } finally {
+        setLoading(false);
       }
-
-      // STEP 4 — Fetch interest names
-      const { data: interestNames, error: interestNamesError } = await supabase
-        .from('interests')
-        .select('name')
-        .in('id', interestIds);
-
-      if (interestNamesError) throw interestNamesError;
-      console.log('✅ interests:', interestNames);
-
-      setInterests(interestNames.map(i => i.name));
-    } catch (e: any) {
-      console.error('❌ Error loading profile:', e);
-      setError(e.message);
-    } finally {
-      setLoading(false);
     }
-  }
 
-  loadChildProfile();
-}, [id]);
+    loadChildProfile();
+  }, [id]);
 
   const isParent = user && parent && user.id === parent.id;
 
@@ -136,23 +138,25 @@ const ChildProfilePage = () => {
               <p className="text-muted-foreground mb-4">{child.bio}</p>
             )}
 
-            {/* Interests section */}
-            {interests.length > 0 && (
-  <div className="mb-4">
-    <div className="text-sm font-medium mb-2">Interests:</div>
-    <div className="flex flex-wrap gap-2">
-      {interests.map((interest, index) => (
-        <Badge
-          key={index}
-          variant="secondary"
-          className="bg-green-100 text-green-800 rounded-full px-3 py-1 text-sm"
-        >
-          {interest}
-        </Badge>
-      ))}
-    </div>
-  </div>
-)}
+            {/* ✅ Interests Section */}
+            <div className="mb-4">
+              <div className="text-sm font-medium mb-2">Interests:</div>
+              {interests.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {interests.map((interest, index) => (
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="bg-green-100 text-green-800 rounded-full px-3 py-1 text-sm"
+                    >
+                      {interest}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-muted-foreground text-sm italic">No interests found.</div>
+              )}
+            </div>
 
             <div className="mb-4">
               <div className="text-sm font-medium mb-2">Parent:</div>
