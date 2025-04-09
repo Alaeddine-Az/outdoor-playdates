@@ -52,11 +52,10 @@ export const useDashboard = () => {
 
     const fetchDashboardData = async () => {
       try {
-        console.log("Loading dashboard data for user:", user?.id);
         setLoading(true);
 
         if (user) {
-          // Fetch accepted connections to exclude from suggestions
+          // Get accepted connections to exclude
           const { data: acceptedConnections, error: connectionsError } = await supabase
             .from('connections')
             .select('requester_id, recipient_id')
@@ -69,7 +68,7 @@ export const useDashboard = () => {
             conn.requester_id === user.id ? conn.recipient_id : conn.requester_id
           );
 
-          // Fetch all profiles and exclude self + connected users
+          // Get all profiles and filter
           const { data: allProfiles, error: profilesError } = await supabase
             .from('profiles')
             .select('id, parent_name, city');
@@ -138,12 +137,17 @@ export const useDashboard = () => {
                 name: parent?.parent_name ?? '',
                 childName,
                 interests: uniqueInterests,
-                distance: '' // Optional: use ZIP or location later
+                distance: '' // Optional
               };
             }
           );
 
-          setSuggestedConnections(realConnections);
+          // 🎲 Randomize and limit to 3
+          const limitedConnections = realConnections
+            .sort(() => 0.5 - Math.random()) // Shuffle
+            .slice(0, 3); // Limit
+
+          setSuggestedConnections(limitedConnections);
 
           // Fetch playdates
           const { data: playdatesData, error: playdatesError } = await supabase
@@ -172,7 +176,13 @@ export const useDashboard = () => {
                   day: 'numeric'
                 });
 
-                timeStr = `${startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} - ${endDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+                timeStr = `${startDate.toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit'
+                })} - ${endDate.toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit'
+                })}`;
 
                 if (startDate > now) status = 'upcoming';
                 else if (endDate < now) status = 'completed';
@@ -209,7 +219,7 @@ export const useDashboard = () => {
 
           setUpcomingPlaydates(formattedPlaydates);
 
-          // Static nearby events for now
+          // Static events for now
           setNearbyEvents([
             {
               title: 'Community Playground Day',
