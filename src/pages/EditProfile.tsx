@@ -11,7 +11,6 @@ import PersonalInfoForm from '@/components/profile/PersonalInfoForm';
 import InterestsSelector from '@/components/profile/InterestsSelector';
 import ChildrenSection from '@/components/profile/ChildrenSection';
 
-// Common parent interests for selection
 const COMMON_INTERESTS = [
   'Arts & Crafts', 'Sports', 'Nature', 'Music', 'Reading',
   'STEM', 'Cooking', 'Games', 'Animals', 'Travel',
@@ -135,7 +134,11 @@ const EditProfile = () => {
 
         {/* Children Section */}
         <section>
-          <ChildrenSection children={children} />
+          <ChildrenSection 
+            children={children} 
+            parentId={user?.id || ''}
+            isCurrentUser={true}
+          />
         </section>
 
         {/* Save Button */}

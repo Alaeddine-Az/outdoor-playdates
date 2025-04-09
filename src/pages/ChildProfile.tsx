@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -5,11 +6,12 @@ import { useChildProfile } from '@/hooks/useChildProfile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronLeft } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 const ChildProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { child, loading, error } = useChildProfile(id || '');
+  const { child, loading } = useChildProfile(id || '');
 
   // Improved back navigation
   const handleGoBack = () => {
@@ -49,18 +51,7 @@ const ChildProfile = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="container py-6 space-y-6">
-        <Button variant="ghost" className="flex items-center gap-2 mb-4" onClick={handleGoBack}>
-          <ChevronLeft className="h-4 w-4" /> Back
-        </Button>
-        <div className="text-red-500">Error loading child profile.</div>
-      </div>
-    );
-  }
-
-  if (!child) {
+  if (!child || !child.id) {
     return (
       <div className="container py-6 space-y-6">
         <Button variant="ghost" className="flex items-center gap-2 mb-4" onClick={handleGoBack}>
