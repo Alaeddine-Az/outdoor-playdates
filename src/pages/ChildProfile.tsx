@@ -11,7 +11,7 @@ import { toast } from '@/components/ui/use-toast';
 const ChildProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { child, loading } = useChildProfile(id || '');
+  const { child, loading, error } = useChildProfile(id || '');
 
   // Improved back navigation
   const handleGoBack = () => {
@@ -47,6 +47,17 @@ const ChildProfile = () => {
             <Skeleton className="h-4 w-4/6" />
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container py-6 space-y-6">
+        <Button variant="ghost" className="flex items-center gap-2 mb-4" onClick={handleGoBack}>
+          <ChevronLeft className="h-4 w-4" /> Back
+        </Button>
+        <div className="text-red-500">Error loading child profile: {error}</div>
       </div>
     );
   }
