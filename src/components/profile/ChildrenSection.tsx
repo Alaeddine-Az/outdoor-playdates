@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChildProfile } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2 } from 'lucide-react';
 import { useChildRemoval } from '@/hooks/useChildRemoval';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Card,
   CardContent,
@@ -32,7 +32,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { XCircle, Plus as PlusIcon } from 'lucide-react';
 
 interface ChildrenSectionProps {
   children: ChildProfile[];
@@ -40,19 +39,52 @@ interface ChildrenSectionProps {
 
 const AGE_OPTIONS = Array.from({ length: 18 }, (_, i) => `${i + 1}`);
 
-// Common child interests for selection
-const COMMON_CHILD_INTERESTS = [
-  'Drawing', 'Sports', 'Soccer', 'Nature', 'Music', 'Reading',
-  'Science', 'Building', 'Dolls', 'Cars', 'Animals',
-  'Swimming', 'Biking', 'Running', 'Playgrounds', 'Dinosaurs'
-];
-
 const ChildrenSection = ({ children }: ChildrenSectionProps) => {
   const { removeChild, isRemoving } = useChildRemoval();
+  const [childInterestsMap, setChildInterestsMap] = useState<Record<string, string[]>>({});
 
   const handleRemoveChild = async (childId: string, childName: string) => {
     await removeChild(childId, childName);
   };
+
+  useEffect(() => {
+    async function fetchChildInterests() {
+      const childIds = children.map(c => c.id);
+      if (childIds.length === 0) return;
+
+      const { data: interestsData, error } = await supabase
+        .from('child_interests')
+        .select('child_id, interest_id');
+
+      if (error) {
+        console.error('Error fetching child interests:', error);
+        return;
+      }
+
+      const interestIds = [...new Set(interestsData.map(ci => ci.interest_id))];
+      const { data: interestNames, error: interestNameError } = await supabase
+        .from('interests')
+        .select('id, name')
+        .in('id', interestIds);
+
+      if (interestNameError) {
+        console.error('Error fetching interest names:', interestNameError);
+        return;
+      }
+
+      const interestMap = Object.fromEntries(interestNames.map(i => [i.id, i.name]));
+      const groupedInterests: Record<string, string[]> = {};
+
+      interestsData.forEach(({ child_id, interest_id }) => {
+        if (!groupedInterests[child_id]) groupedInterests[child_id] = [];
+        if (interestMap[interest_id]) groupedInterests[child_id].push(interestMap[interest_id]);
+      });
+
+      setChildInterestsMap(groupedInterests);
+    }
+
+    fetchChildInterests();
+  }, [children]);
 
   if (children.length === 0) {
     return (
@@ -71,43 +103,34 @@ const ChildrenSection = ({ children }: ChildrenSectionProps) => {
         <h2 className="text-xl font-bold">Children Profiles</h2>
         <Button asChild variant="outline" className="gap-1">
           <Link to="/add-child">
-            <PlusIcon className="h-4 w-4" /> Add Child
+            <Plus className="h-4 w-4" /> Add Child
           </Link>
         </Button>
       </div>
-      
+
       <Accordion type="multiple" className="space-y-4">
-        {children.map((child, index) => (
+        {children.map((child) => (
           <Card key={child.id} className="border rounded-lg overflow-hidden">
-            <AccordionItem 
-              value={child.id}
-              className="border-0"
-            >
+            <AccordionItem value={child.id} className="border-0">
               <CardHeader className="p-0">
                 <AccordionTrigger className="px-6 py-4 hover:no-underline">
                   <CardTitle className="text-left">{child.name}</CardTitle>
                 </AccordionTrigger>
               </CardHeader>
-              
+
               <AccordionContent>
                 <CardContent className="space-y-4 pt-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <Label htmlFor={`child-name-${child.id}`} className="text-base font-medium">Child's Name</Label>
-                      <Input 
-                        id={`child-name-${child.id}`} 
-                        defaultValue={child.name}
-                        readOnly
-                      />
+                      <Label className="text-base font-medium">Child's Name</Label>
+                      <Input defaultValue={child.name} readOnly />
                     </div>
-                    
                     <div className="space-y-3">
-                      <Label htmlFor={`child-age-${child.id}`} className="text-base font-medium">Age</Label>
+                      <Label className="text-base font-medium">Age</Label>
                       <select
-                        id={`child-age-${child.id}`}
                         defaultValue={child.age}
                         disabled
-                        className="flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm"
                       >
                         <option>Select age</option>
                         {AGE_OPTIONS.map(age => (
@@ -116,13 +139,12 @@ const ChildrenSection = ({ children }: ChildrenSectionProps) => {
                       </select>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <Label className="text-base font-medium">Interests</Label>
                     <div className="flex flex-wrap gap-2">
-                      {/* Display child interests as read-only badges */}
-                      {['Drawing', 'Soccer'].map((interest) => (
-                        <Badge 
+                      {(childInterestsMap[child.id] || []).map((interest) => (
+                        <Badge
                           key={interest}
                           variant="secondary"
                           className="rounded-full py-1 px-3"
@@ -132,32 +154,25 @@ const ChildrenSection = ({ children }: ChildrenSectionProps) => {
                       ))}
                     </div>
                   </div>
-                  
+
                   <div className="space-y-3">
-                    <Label htmlFor={`child-description-${child.id}`} className="text-base font-medium">Description</Label>
-                    <Textarea 
-                      id={`child-description-${child.id}`} 
+                    <Label className="text-base font-medium">Description</Label>
+                    <Textarea
                       defaultValue={child.bio || ''}
                       readOnly
                       className="min-h-[100px] bg-muted"
                     />
                   </div>
-                  
+
                   <div className="flex justify-between items-center pt-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      asChild
-                    >
-                      <Link to={`/edit-child/${child.id}`}>
-                        Edit Child
-                      </Link>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to={`/edit-child/${child.id}`}>Edit Child</Link>
                     </Button>
-                    
+
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button 
-                          variant="destructive" 
+                        <Button
+                          variant="destructive"
                           size="sm"
                           disabled={isRemoving}
                           className="gap-1"
@@ -169,8 +184,7 @@ const ChildrenSection = ({ children }: ChildrenSectionProps) => {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This will permanently remove {child.name}'s profile from your account.
-                            This action cannot be undone.
+                            This will permanently remove {child.name}'s profile from your account. This action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
