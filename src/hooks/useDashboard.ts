@@ -56,7 +56,7 @@ export const useDashboard = () => {
         setLoading(true);
 
         if (user) {
-          // PLAYDATES
+          // Fetch playdates
           const { data: playdatesData, error: playdatesError } = await supabase
             .from('playdates')
             .select('*, playdate_participants(*), profiles:creator_id(parent_name)') 
@@ -120,7 +120,7 @@ export const useDashboard = () => {
 
           setUpcomingPlaydates(formattedPlaydates);
 
-          // SUGGESTED CONNECTIONS
+          // Suggested connections
           const { data: profiles, error: profilesError } = await supabase
             .from('profiles')
             .select('id, parent_name, city')
@@ -162,20 +162,39 @@ export const useDashboard = () => {
             return acc;
           }, {} as Record<string, string[]>);
 
-          const realConnections: ConnectionData[] = childrenData.map(child => {
-            const parent = profiles.find(p => p.id === child.parent_id);
-            return {
-              id: parent?.id ?? '',
-              name: parent?.parent_name ?? '',
-              childName: `${child.name} (${child.age})`,
-              interests: childInterestMap[child.id] ?? [],
-              distance: '' // Optional: Add distance logic later
-            };
-          });
+          // Group children by parent
+          const parentChildMap = childrenData.reduce((acc, child) => {
+            if (!acc[child.parent_id]) acc[child.parent_id] = [];
+            acc[child.parent_id].push(child);
+            return acc;
+          }, {} as Record<string, typeof childrenData>);
+
+          // One suggestion per parent
+          const realConnections: ConnectionData[] = Object.entries(parentChildMap).map(
+            ([parentId, children]) => {
+              const parent = profiles.find(p => p.id === parentId);
+              const firstChild = children[0];
+
+              const allInterests = children.flatMap(child => childInterestMap[child.id] ?? []);
+              const uniqueInterests = [...new Set(allInterests)];
+
+              const childName = children.length === 1
+                ? `${firstChild.name} (${firstChild.age})`
+                : `${firstChild.name} (${firstChild.age}) + ${children.length - 1} more`;
+
+              return {
+                id: parent?.id ?? '',
+                name: parent?.parent_name ?? '',
+                childName,
+                interests: uniqueInterests,
+                distance: '' // optional: can add later
+              };
+            }
+          );
 
           setSuggestedConnections(realConnections);
 
-          // NEARBY EVENTS (still mocked for now)
+          // Nearby Events (still static)
           setNearbyEvents([
             {
               title: 'Community Playground Day',
