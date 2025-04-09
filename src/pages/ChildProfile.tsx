@@ -20,63 +20,71 @@ const ChildProfilePage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadChildProfile() {
-      if (!id) return;
+  async function loadChildProfile() {
+    if (!id) return;
 
-      try {
-        setLoading(true);
+    try {
+      setLoading(true);
 
-        // Fetch child data
-        const { data: childData, error: childError } = await supabase
-          .from('children')
-          .select('*')
-          .eq('id', id)
-          .single();
+      // STEP 1 — Get the child
+      const { data: childData, error: childError } = await supabase
+        .from('children')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-        if (childError) throw childError;
-        setChild(childData);
+      if (childError) throw childError;
+      setChild(childData);
+      console.log('✅ Child loaded:', childData);
 
-        // Fetch parent
-        const { data: parentData, error: parentError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', childData.parent_id)
-          .single();
+      // STEP 2 — Get parent
+      const { data: parentData, error: parentError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', childData.parent_id)
+        .single();
 
-        if (parentError) throw parentError;
-        setParent(parentData);
+      if (parentError) throw parentError;
+      setParent(parentData);
+      console.log('✅ Parent loaded:', parentData);
 
-        // Fetch child interests
-        const { data: childInterests, error: childInterestsError } = await supabase
-          .from('child_interests')
-          .select('interest_id')
-          .eq('child_id', id);
+      // STEP 3 — Get interest IDs from child_interests
+      const { data: childInterests, error: childInterestsError } = await supabase
+        .from('child_interests')
+        .select('interest_id')
+        .eq('child_id', id);
 
-        if (childInterestsError) throw childInterestsError;
+      if (childInterestsError) throw childInterestsError;
+      console.log('✅ child_interests:', childInterests);
 
-        const interestIds = childInterests.map((ci) => ci.interest_id);
+      const interestIds = childInterests.map(ci => ci.interest_id);
+      console.log('🎯 interestIds:', interestIds);
 
-        if (interestIds.length > 0) {
-          const { data: interestNames, error: interestNamesError } = await supabase
-            .from('interests')
-            .select('name')
-            .in('id', interestIds);
-
-          if (interestNamesError) throw interestNamesError;
-          setInterests(interestNames.map((i) => i.name));
-        } else {
-          setInterests([]);
-        }
-      } catch (e: any) {
-        console.error('Error loading child profile:', e);
-        setError(e.message);
-      } finally {
-        setLoading(false);
+      if (interestIds.length === 0) {
+        setInterests([]);
+        return;
       }
-    }
 
-    loadChildProfile();
-  }, [id]);
+      // STEP 4 — Fetch interest names
+      const { data: interestNames, error: interestNamesError } = await supabase
+        .from('interests')
+        .select('name')
+        .in('id', interestIds);
+
+      if (interestNamesError) throw interestNamesError;
+      console.log('✅ interests:', interestNames);
+
+      setInterests(interestNames.map(i => i.name));
+    } catch (e: any) {
+      console.error('❌ Error loading profile:', e);
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  loadChildProfile();
+}, [id]);
 
   const isParent = user && parent && user.id === parent.id;
 
