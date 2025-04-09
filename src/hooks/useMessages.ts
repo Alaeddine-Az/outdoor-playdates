@@ -96,6 +96,8 @@ export function useMessages(otherId?: string) {
           })
           .subscribe();
 
+        setLoading(false);
+        
         return () => {
           supabase.removeChannel(channel);
         };
@@ -107,12 +109,17 @@ export function useMessages(otherId?: string) {
           description: e.message,
           variant: 'destructive',
         });
-      } finally {
         setLoading(false);
       }
     }
 
-    loadMessages();
+    const cleanup = loadMessages();
+    
+    return () => {
+      if (cleanup && typeof cleanup === 'function') {
+        cleanup();
+      }
+    };
   }, [user, otherId]);
 
   const sendMessage = async (content: string) => {
@@ -130,10 +137,6 @@ export function useMessages(otherId?: string) {
         .select();
 
       if (error) throw error;
-
-      if (data) {
-        setMessages(prev => [...prev, data[0] as Message]);
-      }
       
       return { success: true };
     } catch (e: any) {
