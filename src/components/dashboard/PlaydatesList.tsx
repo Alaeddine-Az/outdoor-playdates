@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CalendarDays, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -12,6 +13,9 @@ interface Playdate {
   location: string;
   families: number;
   status?: string;
+  host?: string;
+  host_id?: string;
+  start_time?: string; // Added to help with sorting
 }
 
 interface PlaydatesListProps {
@@ -20,6 +24,7 @@ interface PlaydatesListProps {
   showNewButton?: boolean;
   viewAllLink?: string;
   className?: string;
+  limit?: number; // Added limit prop
 }
 
 const PlaydatesList = ({
@@ -28,7 +33,19 @@ const PlaydatesList = ({
   showNewButton = false,
   viewAllLink,
   className = '',
+  limit = 6, // Default to 6 playdates
 }: PlaydatesListProps) => {
+  // Sort playdates by start_time if available, otherwise use the current order
+  const sortedPlaydates = [...playdates].sort((a, b) => {
+    if (a.start_time && b.start_time) {
+      return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
+    }
+    return 0;
+  });
+
+  // Limit the number of playdates to display
+  const limitedPlaydates = sortedPlaydates.slice(0, limit);
+
   return (
     <div
       className={cn(
@@ -56,8 +73,8 @@ const PlaydatesList = ({
       </div>
 
       <div className="space-y-4">
-        {playdates.length > 0 ? (
-          playdates.map((playdate) => (
+        {limitedPlaydates.length > 0 ? (
+          limitedPlaydates.map((playdate) => (
             <PlaydateCard key={playdate.id} playdate={playdate} />
           ))
         ) : (
@@ -67,7 +84,7 @@ const PlaydatesList = ({
         )}
       </div>
 
-      {viewAllLink && playdates.length > 0 && (
+      {viewAllLink && playdates.length > limit && (
         <div className="text-right mt-4">
           <Link
             to={viewAllLink}

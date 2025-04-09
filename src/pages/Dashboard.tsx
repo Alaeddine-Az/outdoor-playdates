@@ -120,6 +120,7 @@ const Dashboard = () => {
               playdates={upcomingPlaydates}
               showNewButton={true}
               viewAllLink="/playdates"
+              limit={6}
             />
           </div>
           <div className="space-y-6">

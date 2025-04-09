@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -16,6 +15,7 @@ interface PlaydateData {
   families: number;
   status: 'upcoming' | 'pending' | 'completed';
   host?: string;
+  start_time?: string;
 }
 
 interface ConnectionData {
@@ -154,7 +154,9 @@ export const useDashboard = () => {
           const { data: playdatesData, error: playdatesError } = await supabase
             .from('playdates')
             .select('*, playdate_participants(*), profiles:creator_id(parent_name)')
-            .order('created_at', { ascending: false });
+            .gt('start_time', new Date().toISOString())
+            .order('start_time', { ascending: true })
+            .limit(10);
 
           if (playdatesError) throw playdatesError;
 
@@ -200,7 +202,9 @@ export const useDashboard = () => {
                 attendees: 1,
                 families: 1,
                 status,
-                host: hostName
+                host: hostName,
+                host_id: playdate.creator_id,
+                start_time: playdate.start_time
               };
             } catch (err) {
               console.error("Error processing playdate:", err, playdate);
@@ -213,12 +217,23 @@ export const useDashboard = () => {
                 attendees: 1,
                 families: 1,
                 status: 'pending' as const,
-                host: playdate.profiles?.parent_name || 'Unknown Host'
+                host: playdate.profiles?.parent_name || 'Unknown Host',
+                host_id: playdate.creator_id
               };
             }
           });
 
-          setUpcomingPlaydates(formattedPlaydates);
+          // Sort by start_time (closest first) and limit to 6
+          const sortedPlaydates = formattedPlaydates
+            .sort((a, b) => {
+              if (a.start_time && b.start_time) {
+                return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
+              }
+              return 0;
+            })
+            .slice(0, 6);
+
+          setUpcomingPlaydates(sortedPlaydates);
 
           // Fetch real upcoming events from database
           const { data: eventsData, error: eventsError } = await supabase
@@ -241,7 +256,7 @@ export const useDashboard = () => {
                     title: event.title,
                     date: format(startTime, 'MMM d'),
                     location: event.city || event.location,
-                    rawDate: event.start_time // Used for sorting
+                    rawDate: event.start_time
                   };
                 } catch (e) {
                   console.error("Error parsing event date:", e);
