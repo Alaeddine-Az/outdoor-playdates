@@ -1,3 +1,4 @@
+
 export interface ParentProfile {
   id: string;
   parent_name: string;
@@ -17,6 +18,7 @@ export interface ChildProfile {
   name: string;
   age: string;
   bio?: string;
+  interests?: string[]; // Add the missing interests field
   parent_id: string;
   created_at: string;
   updated_at: string;

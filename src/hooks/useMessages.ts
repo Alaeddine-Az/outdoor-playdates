@@ -98,6 +98,7 @@ export function useMessages(otherId?: string) {
 
         setLoading(false);
         
+        // Fix the issue by returning a cleanup function properly
         return () => {
           supabase.removeChannel(channel);
         };
@@ -113,11 +114,13 @@ export function useMessages(otherId?: string) {
       }
     }
 
-    const cleanup = loadMessages();
+    // Call loadMessages and store its return value
+    const cleanupFn = loadMessages();
     
+    // Use the returned cleanup function in the useEffect cleanup
     return () => {
-      if (cleanup && typeof cleanup === 'function') {
-        cleanup();
+      if (cleanupFn && typeof cleanupFn === 'function') {
+        cleanupFn();
       }
     };
   }, [user, otherId]);
