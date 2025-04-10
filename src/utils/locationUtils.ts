@@ -56,18 +56,23 @@ export function getNearbyPlaydates(
   maxDistance: number = 10
 ): any[] {
   if (!userLat || !userLon || !playdates?.length) return [];
-  
-  return playdates
-    .filter(playdate => playdate.latitude && playdate.longitude)
-    .map(playdate => {
-      const distance = getDistanceInKm(
-        userLat, 
-        userLon, 
-        parseFloat(playdate.latitude), 
-        parseFloat(playdate.longitude)
-      );
-      return { ...playdate, distance };
-    })
-    .filter(playdate => playdate.distance <= maxDistance)
-    .sort((a, b) => a.distance - b.distance);
+
+  const results = [];
+
+  for (const playdate of playdates) {
+    if (playdate.latitude == null || playdate.longitude == null) {
+      console.warn(`❌ Skipping ${playdate.title} - missing coordinates`);
+      continue;
+    }
+
+    const distance = getDistanceInKm(userLat, userLon, playdate.latitude, playdate.longitude);
+    console.log(`📏 ${playdate.title}: ${distance.toFixed(2)} km`);
+
+    if (distance <= maxDistance) {
+      results.push({ ...playdate, distance });
+    }
+  }
+
+  results.sort((a, b) => a.distance - b.distance);
+  return results;
 }
