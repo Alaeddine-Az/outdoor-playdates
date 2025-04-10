@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -266,8 +265,11 @@ export const useDashboard = (userLocation?: LocationData) => {
                 status: 'pending' as const,
                 host: playdate.profiles?.parent_name || 'Unknown Host',
                 host_id: playdate.creator_id,
+                start_time: undefined,
+                latitude: undefined,
+                longitude: undefined,
                 distance: undefined // Initialize with undefined
-              };
+              } as PlaydateData;
             }
           });
 
