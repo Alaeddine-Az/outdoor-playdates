@@ -1,4 +1,3 @@
-
 import React from 'react';
 import AppLayout from '@/components/AppLayout';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -106,62 +105,61 @@ const GroupDetail = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Main content */}
-          <div className="md:col-span-2 space-y-6">
-            <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
-              <div className="flex flex-col md:flex-row gap-6">
-                <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                  <Users className="h-8 w-8" />
+        <section className="bg-white rounded-xl shadow-soft border border-muted p-6 mb-6">
+          <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+              <Users className="h-8 w-8" />
+            </div>
+            
+            <div className="flex-grow">
+              <div className="flex items-start justify-between flex-wrap gap-3">
+                <h1 className="text-2xl font-bold">{groupData.name}</h1>
+                <Badge variant="outline" className="bg-primary/5 border-primary/20 text-primary">
+                  {groupData.type} Group
+                </Badge>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div className="flex items-center text-muted-foreground">
+                  <Users className="h-5 w-5 mr-2" />
+                  <span>{groupData.members.length} members</span>
                 </div>
-                
-                <div className="flex-grow">
-                  <div className="flex items-start justify-between flex-wrap gap-3">
-                    <h1 className="text-2xl font-bold">{groupData.name}</h1>
-                    <Badge variant="outline" className="bg-primary/5 border-primary/20 text-primary">
-                      {groupData.type} Group
-                    </Badge>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div className="flex items-center text-muted-foreground">
-                      <Users className="h-5 w-5 mr-2" />
-                      <span>{groupData.members.length} members</span>
-                    </div>
-                    <div className="flex items-center text-muted-foreground">
-                      <Globe className="h-5 w-5 mr-2" />
-                      <span>{groupData.location}</span>
-                    </div>
-                    <div className="flex items-center text-muted-foreground">
-                      <Calendar className="h-5 w-5 mr-2" />
-                      <span>Created {groupData.created}</span>
-                    </div>
-                    <div className="flex items-center text-muted-foreground">
-                      <Info className="h-5 w-5 mr-2" />
-                      <span>{groupData.upcoming} upcoming playdates</span>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-5 pt-5 border-t border-muted">
-                    <h3 className="font-medium mb-2">About This Group</h3>
-                    <p className="text-muted-foreground">{groupData.description}</p>
-                  </div>
+                <div className="flex items-center text-muted-foreground">
+                  <Globe className="h-5 w-5 mr-2" />
+                  <span>{groupData.location}</span>
+                </div>
+                <div className="flex items-center text-muted-foreground">
+                  <Calendar className="h-5 w-5 mr-2" />
+                  <span>Created {groupData.created}</span>
+                </div>
+                <div className="flex items-center text-muted-foreground">
+                  <Info className="h-5 w-5 mr-2" />
+                  <span>{groupData.upcoming} upcoming playdates</span>
                 </div>
               </div>
               
-              <div className="mt-6 pt-6 border-t border-muted flex flex-col sm:flex-row gap-3">
-                <Button className="button-glow bg-primary hover:bg-primary/90 text-white rounded-xl w-full sm:w-auto">
-                  <Plus className="h-4 w-4 mr-2" /> Join Group
-                </Button>
-                <Button variant="outline" className="rounded-xl w-full sm:w-auto">
-                  <MessageCircle className="h-4 w-4 mr-2" /> Message Admin
-                </Button>
-                <Button variant="ghost" className="text-muted-foreground w-full sm:w-auto">
-                  <Bell className="h-4 w-4 mr-2" /> Get Notifications
-                </Button>
+              <div className="mt-5 pt-5 border-t border-muted">
+                <h3 className="font-medium mb-2">About This Group</h3>
+                <p className="text-muted-foreground">{groupData.description}</p>
               </div>
-            </section>
-            
+            </div>
+          </div>
+          
+          <div className="mt-6 pt-6 border-t border-muted flex flex-col sm:flex-row gap-3">
+            <Button className="button-glow bg-primary hover:bg-primary/90 text-white rounded-xl w-full sm:w-auto">
+              <Plus className="h-4 w-4 mr-2" /> Join Group
+            </Button>
+            <Button variant="outline" className="rounded-xl w-full sm:w-auto">
+              <MessageCircle className="h-4 w-4 mr-2" /> Message Admin
+            </Button>
+            <Button variant="ghost" className="text-muted-foreground w-full sm:w-auto">
+              <Bell className="h-4 w-4 mr-2" /> Get Notifications
+            </Button>
+          </div>
+        </section>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2 space-y-6">
             <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
               <h2 className="text-xl font-medium mb-4">Upcoming Playdates</h2>
               <div className="space-y-3">
@@ -211,7 +209,6 @@ const GroupDetail = () => {
             </section>
           </div>
           
-          {/* Sidebar */}
           <div className="space-y-6">
             <section className="bg-white rounded-xl shadow-soft border border-muted p-6">
               <h2 className="text-lg font-medium mb-4">Group Admins & Moderators</h2>
