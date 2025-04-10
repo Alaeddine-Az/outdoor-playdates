@@ -52,14 +52,29 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
       try {
         setLoading(true);
 
-        const { data: upcomingPlaydates, error: upcomingError } = await supabase
+        // First check if latitude/longitude columns are available
+        const { data: testData, error: testError } = await supabase
           .from('playdates')
-          .select('*')
+          .select('latitude, longitude')
+          .limit(1);
+
+        const hasLocationColumns = !(testError && testError.message.includes("column 'latitude' does not exist"));
+
+        // Fetch upcoming playdates
+        let upcomingPlaydatesQuery = supabase.from('playdates').select('*');
+        if (hasLocationColumns) {
+          console.log("Using playdates query with location columns");
+        } else {
+          console.log("Using playdates query without location columns");
+        }
+
+        const { data: upcomingPlaydates, error: upcomingError } = await upcomingPlaydatesQuery
           .gt('start_time', new Date().toISOString())
           .order('start_time', { ascending: true });
 
         if (upcomingError) throw upcomingError;
 
+        // Fetch past playdates
         const { data: pastPlaydatesData, error: pastError } = await supabase
           .from('playdates')
           .select('*')
@@ -157,13 +172,23 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
 
         // Find nearby playdates if user location is available
         let formattedNearby: Playdate[] = [];
-        if (userLocation?.latitude && userLocation?.longitude) {
-          formattedNearby = getNearbyPlaydates(
-            userLocation.latitude,
-            userLocation.longitude,
-            formattedUpcoming,
-            maxDistance
+        if (userLocation?.latitude && userLocation?.longitude && hasLocationColumns) {
+          // Filter playdate with valid coordinates
+          const playdatesWithCoords = formattedUpcoming.filter(
+            p => p.latitude !== undefined && p.longitude !== undefined && 
+            p.latitude !== null && p.longitude !== null
           );
+          
+          if (playdatesWithCoords.length > 0) {
+            formattedNearby = getNearbyPlaydates(
+              userLocation.latitude,
+              userLocation.longitude,
+              playdatesWithCoords,
+              maxDistance
+            );
+          } else {
+            console.log("No playdates found with valid coordinates");
+          }
         }
 
         setAllPlaydates(formattedUpcoming);

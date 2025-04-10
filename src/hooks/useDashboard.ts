@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -164,14 +165,41 @@ export const useDashboard = (userLocation?: LocationData) => {
           setSuggestedConnections(limitedConnections);
 
           // Fetch playdates
-          const { data: playdatesData, error: playdatesError } = await supabase
+          const query = supabase
             .from('playdates')
-            .select('*, playdate_participants(*), profiles:creator_id(parent_name), latitude, longitude')
+            .select('*, profiles:creator_id(parent_name)');
+
+          // First check if latitude/longitude columns are available by making a test query
+          const { data: testData, error: testError } = await query
             .gt('start_time', new Date().toISOString())
             .order('start_time', { ascending: true })
-            .limit(15);
+            .limit(1);
 
-          if (playdatesError) throw playdatesError;
+          // If we have a "column does not exist" error for latitude, then we need to query without it
+          let playdatesData = [];
+          if (testError && testError.message.includes("column 'latitude' does not exist")) {
+            console.log("Latitude/longitude columns not available yet. Fetching without them.");
+            const { data, error: fetchError } = await supabase
+              .from('playdates')
+              .select('*, profiles:creator_id(parent_name)')
+              .gt('start_time', new Date().toISOString())
+              .order('start_time', { ascending: true })
+              .limit(15);
+            
+            if (fetchError) throw fetchError;
+            playdatesData = data || [];
+          } else {
+            // If the test query worked, then we can use latitude/longitude
+            const { data, error: fetchError } = await supabase
+              .from('playdates')
+              .select('*, profiles:creator_id(parent_name), latitude, longitude')
+              .gt('start_time', new Date().toISOString())
+              .order('start_time', { ascending: true })
+              .limit(15);
+            
+            if (fetchError) throw fetchError;
+            playdatesData = data || [];
+          }
 
           const formattedPlaydates = playdatesData.map(playdate => {
             try {
@@ -252,13 +280,23 @@ export const useDashboard = (userLocation?: LocationData) => {
           
           // Calculate nearby playdates if user location is available
           if (userLocation?.latitude && userLocation?.longitude) {
-            const nearby = getNearbyPlaydates(
-              userLocation.latitude,
-              userLocation.longitude,
-              formattedPlaydates,
-              10
+            // Only filter for nearby if the playdates have latitude and longitude
+            const playdatesWithLocation = formattedPlaydates.filter(
+              p => p.latitude !== undefined && p.longitude !== undefined
             );
-            setNearbyPlaydates(nearby);
+            
+            if (playdatesWithLocation.length > 0) {
+              const nearby = getNearbyPlaydates(
+                userLocation.latitude,
+                userLocation.longitude,
+                playdatesWithLocation,
+                10
+              );
+              setNearbyPlaydates(nearby);
+            } else {
+              console.log("No playdates with location data available");
+              setNearbyPlaydates([]);
+            }
           }
 
           // Fetch real upcoming events from database
