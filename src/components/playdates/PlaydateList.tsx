@@ -15,6 +15,7 @@ interface PlaydateListProps {
   emptyTitle: string;
   emptyMessage: string;
   showCreateButton?: boolean;
+  icon?: React.ReactNode;
 }
 
 const getPlaydateStatus = (playdate: Playdate): "confirmed" | "upcoming" | "past" | "cancelled" => {
@@ -42,7 +43,8 @@ const PlaydateList = ({
   error, 
   emptyTitle, 
   emptyMessage, 
-  showCreateButton = false 
+  showCreateButton = false,
+  icon
 }: PlaydateListProps) => {
   const navigate = useNavigate();
   
@@ -52,7 +54,7 @@ const PlaydateList = ({
     <section className="bg-white rounded-xl shadow-soft border border-muted p-6 hover:shadow-lg transition-all duration-300">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <CalendarDays className="h-5 w-5 text-primary" />
+          {icon || <CalendarDays className="h-5 w-5 text-primary" />}
           <h2 className="text-xl font-medium">{title}</h2>
         </div>
         <Button variant="outline" size="sm" className="hover:bg-secondary/10 hover:text-secondary transition-colors">
@@ -103,6 +105,7 @@ const PlaydateList = ({
                 host={playdate.host}
                 host_id={playdate.host_id}
                 status={getPlaydateStatus(playdate)}
+                distance={playdate.distance}
                 onClick={() => navigate(`/playdate/${playdate.id}`)}
               />
             );

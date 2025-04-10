@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Calendar, MapPin, Users, Clock } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, Navigation } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,6 +15,7 @@ interface PlaydateCardProps {
     status?: string;
     host?: string;
     host_id?: string;
+    distance?: number;
   };
 }
 
@@ -37,7 +38,8 @@ const PlaydateCard: React.FC<PlaydateCardProps> = ({ playdate }) => {
     families, 
     status = 'upcoming', 
     host = 'Unknown Host',
-    host_id
+    host_id,
+    distance
   } = playdate;
   const statusClass = statusColors[status as keyof typeof statusColors] || 'bg-muted text-muted-foreground';
 
@@ -52,6 +54,8 @@ const PlaydateCard: React.FC<PlaydateCardProps> = ({ playdate }) => {
     }
   };
 
+  const showDistance = distance !== undefined;
+
   return (
     <div 
       className="rounded-xl border border-muted bg-white p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
@@ -60,14 +64,23 @@ const PlaydateCard: React.FC<PlaydateCardProps> = ({ playdate }) => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1">
         <h3 className="text-lg font-semibold text-foreground">{title}</h3>
-        <span
-          className={cn(
-            'px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap mt-1 sm:mt-0',
-            statusClass
+        <div className="flex items-center gap-2">
+          {showDistance && (
+            <span className="px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap bg-blue-100 text-blue-800">
+              {distance < 1 
+                ? `${Math.round(distance * 1000)} m away` 
+                : `${distance.toFixed(1)} km away`}
+            </span>
           )}
-        >
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </span>
+          <span
+            className={cn(
+              'px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap mt-1 sm:mt-0',
+              statusClass
+            )}
+          >
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </span>
+        </div>
       </div>
 
       <p 
@@ -97,6 +110,17 @@ const PlaydateCard: React.FC<PlaydateCardProps> = ({ playdate }) => {
           <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
           <p className="line-clamp-1">{location}</p>
         </div>
+
+        {showDistance && (
+          <div className="flex items-center gap-2">
+            <Navigation className="w-4 h-4 text-primary flex-shrink-0" />
+            <p>
+              {distance < 1 
+                ? `${Math.round(distance * 1000)} meters from you` 
+                : `${distance.toFixed(1)} kilometers from you`}
+            </p>
+          </div>
+        )}
 
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-primary flex-shrink-0" />

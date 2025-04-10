@@ -1,7 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
+import { getNearbyPlaydates } from '@/utils/locationUtils';
 
 export interface Playdate {
   id: string;
@@ -16,15 +18,29 @@ export interface Playdate {
   attendees?: number;
   start_time?: string;
   end_time?: string;
+  latitude?: number;
+  longitude?: number;
+  distance?: number;
 }
 
-export const usePlaydates = () => {
+interface UsePlaydatesOptions {
+  userLocation?: {
+    latitude: number | null;
+    longitude: number | null;
+  };
+  maxDistance?: number;
+}
+
+export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
   const { user } = useAuth();
   const [allPlaydates, setAllPlaydates] = useState<Playdate[]>([]);
   const [myPlaydates, setMyPlaydates] = useState<Playdate[]>([]);
   const [pastPlaydates, setPastPlaydates] = useState<Playdate[]>([]);
+  const [nearbyPlaydates, setNearbyPlaydates] = useState<Playdate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(null);
+
+  const { userLocation, maxDistance = 10 } = options;
 
   useEffect(() => {
     const fetchPlaydates = async () => {
@@ -129,7 +145,9 @@ export const usePlaydates = () => {
             host: hostName,
             host_id: p.creator_id,
             start_time: p.start_time,
-            end_time: p.end_time
+            end_time: p.end_time,
+            latitude: p.latitude,
+            longitude: p.longitude
           };
         };
 
@@ -137,9 +155,21 @@ export const usePlaydates = () => {
         const formattedPast = pastPlaydatesData.map(p => formatPlaydate(p, 'past'));
         const formattedMyPlaydates = formattedUpcoming.filter(p => p.host_id === user.id);
 
+        // Find nearby playdates if user location is available
+        let formattedNearby: Playdate[] = [];
+        if (userLocation?.latitude && userLocation?.longitude) {
+          formattedNearby = getNearbyPlaydates(
+            userLocation.latitude,
+            userLocation.longitude,
+            formattedUpcoming,
+            maxDistance
+          );
+        }
+
         setAllPlaydates(formattedUpcoming);
         setMyPlaydates(formattedMyPlaydates);
         setPastPlaydates(formattedPast);
+        setNearbyPlaydates(formattedNearby);
       } catch (err) {
         console.error('Error fetching playdates:', err);
         setError(err);
@@ -149,7 +179,14 @@ export const usePlaydates = () => {
     };
 
     fetchPlaydates();
-  }, [user]);
+  }, [user, userLocation]);
 
-  return { allPlaydates, myPlaydates, pastPlaydates, loading, error };
+  return { 
+    allPlaydates, 
+    myPlaydates, 
+    pastPlaydates, 
+    nearbyPlaydates, 
+    loading, 
+    error 
+  };
 };

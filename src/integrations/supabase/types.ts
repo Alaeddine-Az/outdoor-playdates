@@ -428,7 +428,9 @@ export type Database = {
           description: string | null
           end_time: string
           id: string
+          latitude: number | null
           location: string
+          longitude: number | null
           max_participants: number | null
           start_time: string
           title: string
@@ -440,7 +442,9 @@ export type Database = {
           description?: string | null
           end_time: string
           id?: string
+          latitude?: number | null
           location: string
+          longitude?: number | null
           max_participants?: number | null
           start_time: string
           title: string
@@ -452,7 +456,9 @@ export type Database = {
           description?: string | null
           end_time?: string
           id?: string
+          latitude?: number | null
           location?: string
+          longitude?: number | null
           max_participants?: number | null
           start_time?: string
           title?: string

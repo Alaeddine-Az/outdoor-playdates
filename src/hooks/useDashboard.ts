@@ -4,6 +4,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { format, parseISO, compareAsc } from 'date-fns';
 import { DashboardEvent } from '@/types';
+import { getNearbyPlaydates } from '@/utils/locationUtils';
 
 interface PlaydateData {
   id: string;
@@ -15,7 +16,11 @@ interface PlaydateData {
   families: number;
   status: 'upcoming' | 'pending' | 'completed';
   host?: string;
+  host_id?: string;
   start_time?: string;
+  latitude?: number;
+  longitude?: number;
+  distance?: number;
 }
 
 interface ConnectionData {
@@ -26,12 +31,20 @@ interface ConnectionData {
   distance: string;
 }
 
-export const useDashboard = () => {
+interface LocationData {
+  latitude: number | null;
+  longitude: number | null;
+  loading?: boolean;
+  error?: string | null;
+}
+
+export const useDashboard = (userLocation?: LocationData) => {
   const { user } = useAuth();
   const { profile, children, loading: profileLoading, error: profileError } = useProfile();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [upcomingPlaydates, setUpcomingPlaydates] = useState<PlaydateData[]>([]);
+  const [nearbyPlaydates, setNearbyPlaydates] = useState<PlaydateData[]>([]);
   const [suggestedConnections, setSuggestedConnections] = useState<ConnectionData[]>([]);
   const [nearbyEvents, setNearbyEvents] = useState<DashboardEvent[]>([]);
 
@@ -153,10 +166,10 @@ export const useDashboard = () => {
           // Fetch playdates
           const { data: playdatesData, error: playdatesError } = await supabase
             .from('playdates')
-            .select('*, playdate_participants(*), profiles:creator_id(parent_name)')
+            .select('*, playdate_participants(*), profiles:creator_id(parent_name), latitude, longitude')
             .gt('start_time', new Date().toISOString())
             .order('start_time', { ascending: true })
-            .limit(10);
+            .limit(15);
 
           if (playdatesError) throw playdatesError;
 
@@ -204,7 +217,9 @@ export const useDashboard = () => {
                 status,
                 host: hostName,
                 host_id: playdate.creator_id,
-                start_time: playdate.start_time
+                start_time: playdate.start_time,
+                latitude: playdate.latitude,
+                longitude: playdate.longitude
               };
             } catch (err) {
               console.error("Error processing playdate:", err, playdate);
@@ -234,6 +249,17 @@ export const useDashboard = () => {
             .slice(0, 6);
 
           setUpcomingPlaydates(sortedPlaydates);
+          
+          // Calculate nearby playdates if user location is available
+          if (userLocation?.latitude && userLocation?.longitude) {
+            const nearby = getNearbyPlaydates(
+              userLocation.latitude,
+              userLocation.longitude,
+              formattedPlaydates,
+              10
+            );
+            setNearbyPlaydates(nearby);
+          }
 
           // Fetch real upcoming events from database
           const { data: eventsData, error: eventsError } = await supabase
@@ -320,7 +346,7 @@ export const useDashboard = () => {
     };
 
     fetchDashboardData();
-  }, [user, profile, profileLoading, profileError]);
+  }, [user, profile, profileLoading, profileError, userLocation]);
 
   return {
     loading: loading || profileLoading,
@@ -328,6 +354,7 @@ export const useDashboard = () => {
     profile,
     children,
     upcomingPlaydates,
+    nearbyPlaydates,
     suggestedConnections,
     nearbyEvents
   };

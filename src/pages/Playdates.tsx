@@ -1,18 +1,23 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Sparkles, PartyPopper, CalendarDays } from 'lucide-react';
+import { PlusCircle, Sparkles, PartyPopper, CalendarDays, Navigation } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { usePlaydates } from '@/hooks/usePlaydates';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 import PlaydateList from '@/components/playdates/PlaydateList';
 import PlaydateSidebar from '@/components/playdates/PlaydateSidebar';
+import { useUserLocation } from '@/hooks/useUserLocation';
 
 const Playdates = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { allPlaydates, myPlaydates, pastPlaydates, loading, error } = usePlaydates();
+  const userLocation = useUserLocation();
+  const { allPlaydates, myPlaydates, pastPlaydates, nearbyPlaydates, loading, error } = usePlaydates({
+    userLocation,
+    maxDistance: 10
+  });
   
   if (!user) {
     toast({
@@ -57,6 +62,19 @@ const Playdates = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 fade-up-stagger">
         {/* Main content area */}
         <div className="md:col-span-2 space-y-6">
+          {nearbyPlaydates && nearbyPlaydates.length > 0 && userLocation.latitude && userLocation.longitude && (
+            <PlaydateList
+              title="Playdates Near You"
+              playdates={nearbyPlaydates}
+              loading={loading}
+              error={error}
+              emptyTitle="No nearby playdates"
+              emptyMessage="There are no playdates near your current location."
+              showCreateButton={true}
+              icon={<Navigation className="h-5 w-5 text-blue-500" />}
+            />
+          )}
+          
           <PlaydateList
             title="Upcoming Playdates"
             playdates={allPlaydates}

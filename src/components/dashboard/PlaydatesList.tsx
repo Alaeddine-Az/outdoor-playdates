@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CalendarDays, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -15,7 +14,8 @@ interface Playdate {
   status?: string;
   host?: string;
   host_id?: string;
-  start_time?: string; // Added to help with sorting
+  start_time?: string;
+  distance?: number;
 }
 
 interface PlaydatesListProps {
@@ -24,7 +24,8 @@ interface PlaydatesListProps {
   showNewButton?: boolean;
   viewAllLink?: string;
   className?: string;
-  limit?: number; // Added limit prop
+  limit?: number;
+  icon?: React.ReactNode;
 }
 
 const PlaydatesList = ({
@@ -33,17 +34,19 @@ const PlaydatesList = ({
   showNewButton = false,
   viewAllLink,
   className = '',
-  limit = 6, // Default to 6 playdates
+  limit = 6,
+  icon = <CalendarDays className="text-orange-500 w-5 h-5" />
 }: PlaydatesListProps) => {
-  // Sort playdates by start_time if available, otherwise use the current order
   const sortedPlaydates = [...playdates].sort((a, b) => {
+    if (a.distance !== undefined && b.distance !== undefined) {
+      return a.distance - b.distance;
+    }
     if (a.start_time && b.start_time) {
       return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
     }
     return 0;
   });
 
-  // Limit the number of playdates to display
   const limitedPlaydates = sortedPlaydates.slice(0, limit);
 
   return (
@@ -56,7 +59,7 @@ const PlaydatesList = ({
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0 mb-4">
         <div className="flex items-center gap-3">
           <div className="bg-[#F9DA6F] p-2 rounded-xl">
-            <CalendarDays className="text-orange-500 w-5 h-5" />
+            {icon}
           </div>
           <h2 className="text-lg md:text-xl font-bold text-neutral-800">
             {title}

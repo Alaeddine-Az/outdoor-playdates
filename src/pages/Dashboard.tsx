@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -9,10 +8,12 @@ import SuggestedConnections from '@/components/dashboard/SuggestedConnections';
 import NearbyEvents from '@/components/dashboard/NearbyEvents';
 import { useDashboard } from '@/hooks/useDashboard';
 import { toast } from '@/components/ui/use-toast';
-import { Pencil } from 'lucide-react';
+import { Pencil, MapPin } from 'lucide-react';
+import { useUserLocation } from '@/hooks/useUserLocation';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const userLocation = useUserLocation();
   const {
     loading,
     profile,
@@ -20,8 +21,9 @@ const Dashboard = () => {
     upcomingPlaydates,
     suggestedConnections,
     nearbyEvents,
+    nearbyPlaydates,
     error
-  } = useDashboard();
+  } = useDashboard(userLocation);
 
   useEffect(() => {
     if (error) {
@@ -56,54 +58,54 @@ const Dashboard = () => {
     <div className="animate-fade-in px-4 py-6 max-w-6xl mx-auto">
       {/* Hero Section */}
       <section
-  className="relative bg-[#CEEBF0] rounded-3xl overflow-hidden mb-8 px-6 py-8"
-  style={{ height: '240px', fontFamily: '"Baloo 2", cursive' }}
->
-  {/* Sky Background */}
-  <div className="absolute inset-0 bg-[#CEEBF0]" />
+        className="relative bg-[#CEEBF0] rounded-3xl overflow-hidden mb-8 px-6 py-8"
+        style={{ height: '240px', fontFamily: '"Baloo 2", cursive' }}
+      >
+        {/* Sky Background */}
+        <div className="absolute inset-0 bg-[#CEEBF0]" />
 
-  {/* Sun Emoji */}
-  <div className="absolute top-6 right-6 text-4xl z-30">🌞</div>
+        {/* Sun Emoji */}
+        <div className="absolute top-6 right-6 text-4xl z-30">🌞</div>
 
-  {/* Cloud */}
-  <div className="absolute top-8 left-6 w-24 h-24 bg-white rounded-full opacity-90 z-20" />
+        {/* Cloud */}
+        <div className="absolute top-8 left-6 w-24 h-24 bg-white rounded-full opacity-90 z-20" />
 
-  {/* Parallax Hills */}
-<div className="absolute bottom-0 w-[110%] left-[-5%] h-[80px] bg-[#D4F7D3] rounded-t-[50%] z-0" />
-<div className="absolute bottom-0 w-[110%] left-[-5%] h-[70px] bg-[#A5E4A2] rounded-t-[50%] z-10 translate-y-[6px]" />
-<div className="absolute bottom-0 w-[110%] left-[-5%] h-[60px] bg-[#73C770] rounded-t-[50%] z-20 translate-y-[12px]" />
+        {/* Parallax Hills */}
+        <div className="absolute bottom-0 w-[110%] left-[-5%] h-[80px] bg-[#D4F7D3] rounded-t-[50%] z-0" />
+        <div className="absolute bottom-0 w-[110%] left-[-5%] h-[70px] bg-[#A5E4A2] rounded-t-[50%] z-10 translate-y-[6px]" />
+        <div className="absolute bottom-0 w-[110%] left-[-5%] h-[60px] bg-[#73C770] rounded-t-[50%] z-20 translate-y-[12px]" />
 
-  {/* Text */}
-  <div className="relative z-30 text-left mt-8">
-    <h1 className="text-3xl md:text-4xl font-extrabold text-black mb-2">
-      Welcome back, {profile?.parent_name?.split(' ')[0] || 'Test'}!
-    </h1>
-    <p className="text-md md:text-lg text-black">
-      Here&apos;s what&apos;s happening with your playdates and connections.
-    </p>
-  </div>
+        {/* Text */}
+        <div className="relative z-30 text-left mt-8">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-black mb-2">
+            Welcome back, {profile?.parent_name?.split(' ')[0] || 'Test'}!
+          </h1>
+          <p className="text-md md:text-lg text-black">
+            Here&apos;s what&apos;s happening with your playdates and connections.
+          </p>
+        </div>
 
-  {/* Edit Profile Button - Mobile */}
-  <div className="absolute bottom-4 right-4 md:hidden z-30">
-    <Button
-      size="icon"
-      className="bg-[#F9DA6F] text-black hover:brightness-110 w-12 h-12 rounded-full"
-      onClick={() => navigate('/parent-profile')}
-    >
-      <Pencil className="w-5 h-5" />
-    </Button>
-  </div>
+        {/* Edit Profile Button - Mobile */}
+        <div className="absolute bottom-4 right-4 md:hidden z-30">
+          <Button
+            size="icon"
+            className="bg-[#F9DA6F] text-black hover:brightness-110 w-12 h-12 rounded-full"
+            onClick={() => navigate('/parent-profile')}
+          >
+            <Pencil className="w-5 h-5" />
+          </Button>
+        </div>
 
-  {/* Edit Profile Button - Desktop */}
-  <div className="hidden md:block absolute bottom-6 left-6 z-30">
-    <Button
-      className="bg-[#F9DA6F] text-black font-semibold px-5 py-2 rounded-full hover:brightness-110"
-      onClick={() => navigate('/parent-profile')}
-    >
-      Edit Profile
-    </Button>
-  </div>
-</section>
+        {/* Edit Profile Button - Desktop */}
+        <div className="hidden md:block absolute bottom-6 left-6 z-30">
+          <Button
+            className="bg-[#F9DA6F] text-black font-semibold px-5 py-2 rounded-full hover:brightness-110"
+            onClick={() => navigate('/parent-profile')}
+          >
+            Edit Profile
+          </Button>
+        </div>
+      </section>
 
       {/* Main Content */}
       {loading ? (
@@ -115,6 +117,18 @@ const Dashboard = () => {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
+            {userLocation.latitude && userLocation.longitude && nearbyPlaydates && nearbyPlaydates.length > 0 && (
+              <PlaydatesList
+                title="Playdates Near You"
+                playdates={nearbyPlaydates}
+                showNewButton={true}
+                viewAllLink="/playdates"
+                limit={3}
+                className="bg-gradient-to-br from-[#FDF7E4] to-[#FAEBBD]"
+                icon={<MapPin className="text-orange-500 w-5 h-5" />}
+              />
+            )}
+            
             <PlaydatesList
               title="Upcoming Playdates"
               playdates={upcomingPlaydates}
