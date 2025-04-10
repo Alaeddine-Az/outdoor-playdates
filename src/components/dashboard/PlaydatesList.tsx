@@ -41,6 +41,8 @@ const PlaydatesList = ({
     if (a.distance !== undefined && b.distance !== undefined) {
       return a.distance - b.distance;
     }
+    if (a.distance !== undefined) return -1;
+    if (b.distance !== undefined) return 1;
     if (a.start_time && b.start_time) {
       return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
     }

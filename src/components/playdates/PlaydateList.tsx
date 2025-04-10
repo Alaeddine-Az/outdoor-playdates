@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -50,6 +49,22 @@ const PlaydateList = ({
   
   console.log(`Rendering ${title} with ${playdates.length} playdates:`, playdates);
   
+  // Sort playdates by distance if available, otherwise by start time
+  const sortedPlaydates = [...playdates].sort((a, b) => {
+    // If both playdates have distance, sort by distance
+    if (a.distance !== undefined && b.distance !== undefined) {
+      return a.distance - b.distance;
+    }
+    // If only one has distance, prioritize the one with distance
+    if (a.distance !== undefined) return -1;
+    if (b.distance !== undefined) return 1;
+    // Otherwise sort by start_time
+    if (a.start_time && b.start_time) {
+      return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
+    }
+    return 0;
+  });
+  
   return (
     <section className="bg-white rounded-xl shadow-soft border border-muted p-6 hover:shadow-lg transition-all duration-300">
       <div className="flex items-center justify-between mb-6">
@@ -76,7 +91,7 @@ const PlaydateList = ({
             {typeof error === 'object' ? 'An error occurred' : error}
           </p>
         </div>
-      ) : playdates.length === 0 ? (
+      ) : sortedPlaydates.length === 0 ? (
         <div className="p-8 text-center bg-muted/30 rounded-xl">
           <h3 className="text-lg font-medium mb-2">{emptyTitle}</h3>
           <p className="text-muted-foreground mb-4">
@@ -85,13 +100,13 @@ const PlaydateList = ({
           {showCreateButton && (
             <Button onClick={() => navigate('/create-playdate')} className="button-glow bg-primary hover:bg-primary/90 text-white bounce-hover">
               <PlusCircle className="h-4 w-4 mr-2" />
-              Create {playdates.length === 0 ? 'the first' : 'a new'} playdate
+              Create {sortedPlaydates.length === 0 ? 'the first' : 'a new'} playdate
             </Button>
           )}
         </div>
       ) : (
         <div className="space-y-4">
-          {playdates.map((playdate) => {
+          {sortedPlaydates.map((playdate) => {
             console.log(`Rendering playdate ${playdate.id} with host: ${playdate.host}, host_id: ${playdate.host_id}`);
             return (
               <PlaydateItem 
@@ -113,7 +128,7 @@ const PlaydateList = ({
         </div>
       )}
       
-      {playdates.length > 0 && (
+      {sortedPlaydates.length > 0 && (
         <div className="mt-6">
           <Button variant="ghost" className="text-muted-foreground w-full hover:text-primary hover:bg-primary/5 transition-colors">
             View All Playdates

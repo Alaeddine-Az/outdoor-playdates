@@ -5,7 +5,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { format, parseISO, compareAsc } from 'date-fns';
 import { DashboardEvent } from '@/types';
-import { getNearbyPlaydates } from '@/utils/locationUtils';
+import { getNearbyPlaydates, getDistanceInKm } from '@/utils/locationUtils';
 
 interface PlaydateData {
   id: string;
@@ -266,8 +266,26 @@ export const useDashboard = (userLocation?: LocationData) => {
             }
           });
 
+          // Add distance to all playdates when user location is available
+          let playdatesWithDistances = [...formattedPlaydates];
+          if (userLocation?.latitude && userLocation?.longitude) {
+            playdatesWithDistances = formattedPlaydates.map(playdate => {
+              if (playdate.latitude !== undefined && playdate.longitude !== undefined && 
+                  playdate.latitude !== null && playdate.longitude !== null) {
+                const distance = getDistanceInKm(
+                  userLocation.latitude,
+                  userLocation.longitude,
+                  playdate.latitude,
+                  playdate.longitude
+                );
+                return { ...playdate, distance };
+              }
+              return playdate;
+            });
+          }
+
           // Sort by start_time (closest first) and limit to 6
-          const sortedPlaydates = formattedPlaydates
+          const sortedPlaydates = playdatesWithDistances
             .sort((a, b) => {
               if (a.start_time && b.start_time) {
                 return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
@@ -280,19 +298,19 @@ export const useDashboard = (userLocation?: LocationData) => {
           
           // Calculate nearby playdates if user location is available
           if (userLocation?.latitude && userLocation?.longitude) {
-            // Only filter for nearby if the playdates have latitude and longitude
-            const playdatesWithLocation = formattedPlaydates.filter(
-              p => p.latitude !== undefined && p.longitude !== undefined
+            // Filter for playdates with location
+            const playdatesWithLocation = playdatesWithDistances.filter(
+              p => p.latitude !== undefined && p.longitude !== undefined && 
+                   p.latitude !== null && p.longitude !== null
             );
             
             if (playdatesWithLocation.length > 0) {
-              const nearby = getNearbyPlaydates(
-                userLocation.latitude,
-                userLocation.longitude,
-                playdatesWithLocation,
-                10
-              );
-              setNearbyPlaydates(nearby);
+              // Get all playdates within 10km and sort by distance
+              const playdatesWithinDistance = playdatesWithLocation.filter(p => 
+                p.distance !== undefined && p.distance <= 10
+              ).sort((a, b) => (a.distance || 999) - (b.distance || 999));
+              
+              setNearbyPlaydates(playdatesWithinDistance);
             } else {
               console.log("No playdates with location data available");
               setNearbyPlaydates([]);

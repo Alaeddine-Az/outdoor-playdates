@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
-import { getNearbyPlaydates } from '@/utils/locationUtils';
+import { getNearbyPlaydates, getDistanceInKm } from '@/utils/locationUtils';
 
 export interface Playdate {
   id: string;
@@ -170,31 +170,80 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
         const formattedPast = pastPlaydatesData.map(p => formatPlaydate(p, 'past'));
         const formattedMyPlaydates = formattedUpcoming.filter(p => p.host_id === user.id);
 
-        // Find nearby playdates if user location is available
-        let formattedNearby: Playdate[] = [];
+        // Calculate distance for all playdates if user location is available
+        let playdatesWithDistances = [...formattedUpcoming];
+        let pastPlaydatesWithDistances = [...formattedPast];
+        let myPlaydatesWithDistances = [...formattedMyPlaydates];
+        
         if (userLocation?.latitude && userLocation?.longitude && hasLocationColumns) {
-          // Filter playdate with valid coordinates
-          const playdatesWithCoords = formattedUpcoming.filter(
+          // Add distance to all upcoming playdates with valid coordinates
+          playdatesWithDistances = formattedUpcoming.map(playdate => {
+            if (playdate.latitude !== undefined && playdate.longitude !== undefined && 
+                playdate.latitude !== null && playdate.longitude !== null) {
+              const distance = getDistanceInKm(
+                userLocation.latitude,
+                userLocation.longitude,
+                playdate.latitude,
+                playdate.longitude
+              );
+              return { ...playdate, distance };
+            }
+            return playdate;
+          });
+          
+          // Add distance to all past playdates with valid coordinates
+          pastPlaydatesWithDistances = formattedPast.map(playdate => {
+            if (playdate.latitude !== undefined && playdate.longitude !== undefined && 
+                playdate.latitude !== null && playdate.longitude !== null) {
+              const distance = getDistanceInKm(
+                userLocation.latitude,
+                userLocation.longitude,
+                playdate.latitude,
+                playdate.longitude
+              );
+              return { ...playdate, distance };
+            }
+            return playdate;
+          });
+          
+          // Add distance to all my playdates with valid coordinates
+          myPlaydatesWithDistances = formattedMyPlaydates.map(playdate => {
+            if (playdate.latitude !== undefined && playdate.longitude !== undefined && 
+                playdate.latitude !== null && playdate.longitude !== null) {
+              const distance = getDistanceInKm(
+                userLocation.latitude,
+                userLocation.longitude,
+                playdate.latitude,
+                playdate.longitude
+              );
+              return { ...playdate, distance };
+            }
+            return playdate;
+          });
+          
+          // Find nearby playdates (within maxDistance)
+          const playdatesWithCoords = playdatesWithDistances.filter(
             p => p.latitude !== undefined && p.longitude !== undefined && 
             p.latitude !== null && p.longitude !== null
           );
           
           if (playdatesWithCoords.length > 0) {
-            formattedNearby = getNearbyPlaydates(
+            const nearby = getNearbyPlaydates(
               userLocation.latitude,
               userLocation.longitude,
               playdatesWithCoords,
               maxDistance
             );
+            setNearbyPlaydates(nearby);
           } else {
             console.log("No playdates found with valid coordinates");
+            setNearbyPlaydates([]);
           }
         }
 
-        setAllPlaydates(formattedUpcoming);
-        setMyPlaydates(formattedMyPlaydates);
-        setPastPlaydates(formattedPast);
-        setNearbyPlaydates(formattedNearby);
+        setAllPlaydates(playdatesWithDistances);
+        setMyPlaydates(myPlaydatesWithDistances);
+        setPastPlaydates(pastPlaydatesWithDistances);
       } catch (err) {
         console.error('Error fetching playdates:', err);
         setError(err);
