@@ -21,7 +21,7 @@ interface PlaydateData {
   start_time?: string;
   latitude?: number;
   longitude?: number;
-  distance?: number;
+  distance?: number;  // Added distance property to fix TypeScript errors
 }
 
 interface ConnectionData {
@@ -234,7 +234,8 @@ export const useDashboard = (userLocation?: LocationData) => {
 
               const hostName = playdate.profiles?.parent_name || 'Unknown Host';
 
-              return {
+              // Create a base playdate object without distance
+              const basePlaydate: PlaydateData = {
                 id: playdate.id,
                 title: playdate.title || 'Untitled Playdate',
                 date: dateStr,
@@ -247,8 +248,11 @@ export const useDashboard = (userLocation?: LocationData) => {
                 host_id: playdate.creator_id,
                 start_time: playdate.start_time,
                 latitude: playdate.latitude,
-                longitude: playdate.longitude
+                longitude: playdate.longitude,
+                distance: undefined // Initialize with undefined
               };
+
+              return basePlaydate;
             } catch (err) {
               console.error("Error processing playdate:", err, playdate);
               return {
@@ -261,7 +265,8 @@ export const useDashboard = (userLocation?: LocationData) => {
                 families: 1,
                 status: 'pending' as const,
                 host: playdate.profiles?.parent_name || 'Unknown Host',
-                host_id: playdate.creator_id
+                host_id: playdate.creator_id,
+                distance: undefined // Initialize with undefined
               };
             }
           });
@@ -280,7 +285,7 @@ export const useDashboard = (userLocation?: LocationData) => {
                 );
                 return { ...playdate, distance };
               }
-              return playdate;
+              return { ...playdate, distance: undefined };
             });
           }
 
