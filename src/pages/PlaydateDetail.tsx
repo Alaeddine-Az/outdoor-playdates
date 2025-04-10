@@ -44,6 +44,20 @@ const PlaydateDetail = () => {
   // Local participantDetails state
   const [localParticipantDetails, setLocalParticipantDetails] = useState(participantDetails);
 
+  // Get list of already participating child IDs for the current user
+  const [participatingChildIds, setParticipatingChildIds] = useState<string[]>([]);
+
+  // Determine which children are already participating
+  useEffect(() => {
+    const childIds: string[] = [];
+    Object.values(participantDetails).forEach(({ child }) => {
+      if (userChildren.some(userChild => userChild.id === child.id)) {
+        childIds.push(child.id);
+      }
+    });
+    setParticipatingChildIds(childIds);
+  }, [participantDetails, userChildren]);
+
   // Sync when the hook value changes
   useEffect(() => {
     setLocalParticipantDetails(participantDetails);
@@ -63,7 +77,7 @@ const PlaydateDetail = () => {
     setLocalParticipantDetails(prev => {
       const updated = { ...prev };
       for (const key in updated) {
-        if (updated[key].participantId === participantId) {
+        if (updated[key].participantId === participantId && updated[key].child.id === childIdToRemove) {
           delete updated[key];
           break;
         }
@@ -133,6 +147,7 @@ const PlaydateDetail = () => {
               onJoin={handleJoin}
               isCompleted={isCompleted}
               isCanceled={isCanceled}
+              alreadyJoined={participatingChildIds}
             />
           )}
 

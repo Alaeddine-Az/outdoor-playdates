@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Users, User, X } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChildProfile } from '@/types';
@@ -71,6 +71,7 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
             return (
               <div key={key} className="flex items-start space-x-3 p-3 border rounded-lg mb-3">
                 <Avatar className="h-10 w-10">
+                  <AvatarImage src={parent?.avatar_url} alt={child?.name} />
                   <AvatarFallback>{getInitials(child?.name)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
@@ -78,6 +79,11 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
                     <p className="font-medium">{child?.name}</p>
                   </div>
                   <p className="text-sm text-muted-foreground">{child?.age} years</p>
+                  {child?.interests && child.interests.length > 0 && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Interests: {child.interests.join(', ')}
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground mt-1">
                     <User className="inline h-3 w-3 mr-1" />
                     Parent:{' '}
@@ -86,7 +92,7 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
                         {parent.parent_name}
                       </Link>
                     ) : (
-                      '?'
+                      'Unknown'
                     )}
                   </p>
                 </div>

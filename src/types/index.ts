@@ -18,7 +18,7 @@ export interface ChildProfile {
   name: string;
   age: string;
   bio?: string;
-  interests?: string[]; // Add the missing interests field
+  interests?: string[];
   parent_id: string;
   created_at: string;
   updated_at: string;
@@ -69,8 +69,8 @@ export interface PlaydateParticipant {
   id: string;
   playdate_id: string;
   child_id: string; // Keep this for backward compatibility
-  child_ids?: string[]; // Optional array of child IDs
-  parent_id?: string; // Optional parent ID
+  child_ids: string[]; // Array of child IDs for multiple children
+  parent_id: string; // Parent ID is required for removing participants
   created_at: string;
   updated_at: string;
 }
@@ -84,7 +84,7 @@ export interface Playdate {
   end_time: string;
   creator_id: string;
   max_participants?: number;
-  status?: string; // Add status field to match the database
+  status?: string;
   created_at: string;
   updated_at: string;
 }
