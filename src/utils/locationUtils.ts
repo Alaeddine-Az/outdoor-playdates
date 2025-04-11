@@ -24,27 +24,19 @@ function deg2rad(deg: number): number {
 }
 
 /**
- * Get the user's current location with configurable options
- * @param options Optional geolocation options
+ * Get the user's current location
  * @returns Promise with coordinates or error
  */
-export function getUserLocation(options?: PositionOptions): Promise<GeolocationPosition> {
+export function getUserLocation(): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
       reject(new Error('Geolocation is not supported by your browser'));
     } else {
-      // Default options if none provided
-      const defaultOptions: PositionOptions = {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
         enableHighAccuracy: true,
-        timeout: 10000, // Increased timeout for better reliability
-        maximumAge: 30 * 60 * 1000 // 30 minutes cache maximum age
-      };
-      
-      navigator.geolocation.getCurrentPosition(
-        resolve, 
-        reject, 
-        options || defaultOptions
-      );
+        timeout: 5000,
+        maximumAge: 0
+      });
     }
   });
 }

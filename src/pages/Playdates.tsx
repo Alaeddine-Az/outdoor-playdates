@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Sparkles, PartyPopper, CalendarDays, Navigation } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { usePlaydates, Playdate } from '@/hooks/usePlaydates';
+import { usePlaydates } from '@/hooks/usePlaydates';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 import PlaydateList from '@/components/playdates/PlaydateList';
@@ -13,12 +13,9 @@ import { useUserLocation } from '@/hooks/useUserLocation';
 const Playdates = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const location = useUserLocation();
+  const userLocation = useUserLocation();
   const { allPlaydates, myPlaydates, pastPlaydates, nearbyPlaydates, loading, error } = usePlaydates({
-    userLocation: {
-      latitude: location.latitude,
-      longitude: location.longitude
-    },
+    userLocation,
     maxDistance: 10
   });
   
@@ -65,7 +62,7 @@ const Playdates = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 fade-up-stagger">
         {/* Main content area */}
         <div className="md:col-span-2 space-y-6">
-          {nearbyPlaydates && nearbyPlaydates.length > 0 && location.latitude && location.longitude && (
+          {nearbyPlaydates && nearbyPlaydates.length > 0 && userLocation.latitude && userLocation.longitude && (
             <PlaydateList
               title="Playdates Near You"
               playdates={nearbyPlaydates}

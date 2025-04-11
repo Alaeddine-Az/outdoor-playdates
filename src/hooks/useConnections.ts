@@ -25,14 +25,6 @@ export function useConnections() {
       setError(null);
       
       try {
-        // Check Supabase connection first
-        const { error: healthCheckError } = await supabase.from('connections').select('count').limit(1).single();
-        if (healthCheckError && healthCheckError.code !== 'PGRST116') {
-          // PGRST116 is "Results contain 0 rows" which is fine
-          console.error('Supabase connection check failed:', healthCheckError);
-          throw new Error('Database connection error. Please try again later.');
-        }
-
         // Fetch all connections related to the user using direct table query
         const { data, error: connectionsError } = await supabase
           .from('connections')
@@ -88,30 +80,10 @@ export function useConnections() {
         }
       } catch (e: any) {
         console.error('Error loading connections:', e);
-        let errorMessage = 'Failed to load connections. Please try again later.';
-        
-        if (e?.message) {
-          errorMessage = e.message;
-        } else if (e?.code) {
-          switch (e.code) {
-            case 'PGRST301':
-              errorMessage = 'Session expired. Please log in again.';
-              break;
-            case '20000':
-              errorMessage = 'No internet connection. Please check your network.';
-              break;
-            case '23505':
-              errorMessage = 'Connection already exists.';
-              break;
-            default:
-              errorMessage = `Error code: ${e.code}. Please try again later.`;
-          }
-        }
-        
-        setError(errorMessage);
+        setError(e.message);
         toast({
           title: 'Error loading connections',
-          description: errorMessage,
+          description: e.message,
           variant: 'destructive',
         });
       } finally {
@@ -119,23 +91,7 @@ export function useConnections() {
       }
     }
 
-    // Add retry logic for connection loading
-    let retryCount = 0;
-    const maxRetries = 2;
-    
-    const attemptLoad = async () => {
-      try {
-        await loadConnections();
-      } catch (e) {
-        if (retryCount < maxRetries) {
-          retryCount++;
-          console.log(`Retrying connection load attempt ${retryCount}...`);
-          setTimeout(attemptLoad, 1000 * retryCount); // Exponential backoff
-        }
-      }
-    };
-    
-    attemptLoad();
+    loadConnections();
   }, [user]);
 
   const sendConnectionRequest = async (recipientId: string) => {

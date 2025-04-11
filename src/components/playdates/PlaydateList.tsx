@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Filter, PlusCircle, CalendarDays } from 'lucide-react';
 import PlaydateItem from './PlaydateItem';
-import { Playdate } from '@/types/playdate';
+import { Playdate } from '@/hooks/usePlaydates';
 
 interface PlaydateListProps {
   title: string;

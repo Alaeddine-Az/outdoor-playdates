@@ -1,16 +1,10 @@
-
 import React, { useEffect, useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, MapPin, UserPlus, RefreshCw, AlertCircle } from 'lucide-react';
+import { Users, MapPin, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
-import { useConnections } from '@/hooks/useConnections';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { toast } from '@/components/ui/use-toast';
-import { fetchSuggestedConnections } from '@/services/connectionService';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface SuggestedConnectionProps {
   id: string;
@@ -22,10 +16,6 @@ interface SuggestedConnectionProps {
 
 const ConnectionCard = ({ id, name, childName, interests, city }: SuggestedConnectionProps) => {
   const navigate = useNavigate();
-  const { sendConnectionRequest, isConnected, hasPendingRequest } = useConnections();
-  const [isRequesting, setIsRequesting] = useState(false);
-  const [hasRequested, setHasRequested] = useState(hasPendingRequest(id));
-  const [isConnectedWithUser, setIsConnectedWithUser] = useState(isConnected(id));
 
   const getColor = (name: string) => {
     const colors = ['pink', 'blue', 'green', 'purple', 'teal'];
@@ -45,32 +35,6 @@ const ConnectionCard = ({ id, name, childName, interests, city }: SuggestedConne
     const color = getColor(name);
     return colorMap[color as keyof typeof colorMap];
   }, [name]);
-
-  const handleConnect = async () => {
-    if (isConnectedWithUser || hasRequested || isRequesting) return;
-    
-    setIsRequesting(true);
-    try {
-      const result = await sendConnectionRequest(id);
-      if (result.success) {
-        setHasRequested(true);
-        toast({
-          title: "Request sent",
-          description: `Connection request sent to ${name}`,
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: result.error || "Failed to send connection request",
-          variant: "destructive"
-        });
-      }
-    } catch (err) {
-      console.error("Error sending connection request:", err);
-    } finally {
-      setIsRequesting(false);
-    }
-  };
 
   return (
     <motion.div 
@@ -111,17 +75,8 @@ const ConnectionCard = ({ id, name, childName, interests, city }: SuggestedConne
         <Button 
           size="sm" 
           className="h-9 w-9 p-0 bg-play-beige hover:bg-play-orange/10 text-play-orange border border-play-orange/30 rounded-full shadow-sm"
-          onClick={handleConnect}
-          disabled={isConnectedWithUser || hasRequested || isRequesting}
-          title={isConnectedWithUser ? "Already connected" : hasRequested ? "Request sent" : "Send connection request"}
         >
-          {isRequesting ? (
-            <RefreshCw className="h-4 w-4 animate-spin" />
-          ) : hasRequested ? (
-            <CheckIcon className="h-4 w-4" />
-          ) : (
-            <UserPlus className="h-4 w-4" />
-          )}
+          <UserPlus className="h-4 w-4" />
         </Button>
       </div>
 
@@ -141,13 +96,6 @@ const ConnectionCard = ({ id, name, childName, interests, city }: SuggestedConne
   );
 };
 
-// CheckIcon component
-const CheckIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <polyline points="20 6 9 17 4 12"></polyline>
-  </svg>
-);
-
 interface SuggestedConnectionsProps {
   connections?: SuggestedConnectionProps[];
 }
@@ -155,9 +103,6 @@ interface SuggestedConnectionsProps {
 const SuggestedConnections = ({ connections: externalConnections }: SuggestedConnectionsProps) => {
   const [connections, setConnections] = useState<SuggestedConnectionProps[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [retrying, setRetrying] = useState(false);
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -167,31 +112,95 @@ const SuggestedConnections = ({ connections: externalConnections }: SuggestedCon
       return;
     }
 
-    fetchConnections();
-  }, [externalConnections, user?.id]);
+    const fetchConnections = async () => {
+      setLoading(true);
 
-  const fetchConnections = async () => {
-    if (!user?.id) return;
-    
-    setLoading(true);
-    setError(null);
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-    try {
-      const suggestions = await fetchSuggestedConnections(user.id);
+      if (userError || !user?.id) {
+        console.error('Error getting current user:', userError);
+        setLoading(false);
+        return;
+      }
+
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, parent_name, city')
+        .neq('id', user.id);
+
+      if (profilesError || !profiles) {
+        console.error('Error fetching profiles:', profilesError);
+        setLoading(false);
+        return;
+      }
+
+      const profileIds = profiles.map((p) => p.id);
+
+      const { data: children, error: childrenError } = await supabase
+        .from('children')
+        .select('id, name, age, parent_id')
+        .in('parent_id', profileIds);
+
+      if (childrenError || !children) {
+        console.error('Error fetching children:', childrenError);
+        setLoading(false);
+        return;
+      }
+
+      const childIds = children.map((c) => c.id);
+
+      const { data: childInterests, error: childInterestsError } = await supabase
+        .from('child_interests')
+        .select('child_id, interest_id')
+        .in('child_id', childIds);
+
+      if (childInterestsError || !childInterests) {
+        console.error('Error fetching child interests:', childInterestsError);
+        setLoading(false);
+        return;
+      }
+
+      const interestIds = [...new Set(childInterests.map((ci) => ci.interest_id))];
+      const { data: interests, error: interestsError } = await supabase
+        .from('interests')
+        .select('id, name')
+        .in('id', interestIds);
+
+      if (interestsError || !interests) {
+        console.error('Error fetching interests:', interestsError);
+        setLoading(false);
+        return;
+      }
+
+      const interestMap = Object.fromEntries(interests.map((i) => [i.id, i.name]));
+      const childInterestMap = childInterests.reduce((acc, ci) => {
+        if (!acc[ci.child_id]) acc[ci.child_id] = [];
+        acc[ci.child_id].push(interestMap[ci.interest_id]);
+        return acc;
+      }, {} as Record<string, string[]>);
+
+      const suggestions: SuggestedConnectionProps[] = children.map((child) => {
+        const parent = profiles.find((p) => p.id === child.parent_id);
+        return {
+          id: parent?.id ?? '',
+          name: parent?.parent_name ?? '',
+          city: parent?.city ?? '',
+          childName: `${child.name} (${child.age})`,
+          interests: childInterestMap[child.id] ?? [],
+        };
+      });
+
+      console.log('✅ Suggestions with interests:', suggestions);
+
       setConnections(suggestions);
-    } catch (err: any) {
-      console.error('Error fetching suggested connections:', err);
-      setError(err?.message || 'Failed to load suggested connections');
-    } finally {
       setLoading(false);
-    }
-  };
+    };
 
-  const handleRetry = async () => {
-    setRetrying(true);
-    await fetchConnections();
-    setRetrying(false);
-  };
+    fetchConnections();
+  }, [externalConnections]);
 
   const container = {
     hidden: { opacity: 0 },
@@ -221,32 +230,6 @@ const SuggestedConnections = ({ connections: externalConnections }: SuggestedCon
       <CardContent className="p-4 bg-white">
         {loading ? (
           <div className="text-sm text-muted-foreground">Loading suggestions...</div>
-        ) : error ? (
-          <div className="space-y-3">
-            <Alert variant="destructive" className="bg-red-50">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleRetry}
-              disabled={retrying}
-              className="w-full flex items-center justify-center"
-            >
-              {retrying ? (
-                <>
-                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                  Retrying...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Retry
-                </>
-              )}
-            </Button>
-          </div>
         ) : connections.length === 0 ? (
           <div className="text-sm text-muted-foreground">No suggested connections at the moment.</div>
         ) : (
