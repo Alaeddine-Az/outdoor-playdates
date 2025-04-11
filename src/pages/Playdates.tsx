@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Sparkles, PartyPopper, CalendarDays, Navigation } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { usePlaydates } from '@/hooks/usePlaydates';
+import { usePlaydates, Playdate } from '@/hooks/usePlaydates';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 import PlaydateList from '@/components/playdates/PlaydateList';
