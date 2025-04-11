@@ -1,9 +1,16 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Playdate, UsePlaydatesOptions, UsePlaydatesResult } from '@/types/playdate';
-import { fetchPlaydatesData, fetchCreatorProfiles, fetchPlaydateParticipants, formatPlaydate } from '@/services/playdatesService';
-import { addDistanceToPlaydates, findNearbyPlaydates } from '@/utils/playdateLocationUtils';
+import {
+  fetchPlaydatesData,
+  fetchCreatorProfiles,
+  fetchPlaydateParticipants,
+  formatPlaydate
+} from '@/services/playdatesService';
+import {
+  addDistanceToPlaydates,
+  findNearbyPlaydates
+} from '@/utils/playdateLocationUtils';
 
 export type { Playdate } from '@/types/playdate';
 
@@ -28,56 +35,50 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}): UsePlaydatesRes
       try {
         setLoading(true);
 
-        // Fetch all playdate data
         const { upcomingPlaydates, pastPlaydatesData, hasLocationColumns } = await fetchPlaydatesData(user.id);
-        
         const allPlaydatesData = [...upcomingPlaydates, ...pastPlaydatesData];
         const playdateIds = allPlaydatesData.map(p => p.id);
-        
-        // Fetch creator profiles
         const creatorIds = allPlaydatesData.map(p => p.creator_id).filter(Boolean);
         const creatorProfileMap = await fetchCreatorProfiles(creatorIds);
-        
-        // Fetch participant counts
         const participantCounts = await fetchPlaydateParticipants(playdateIds);
-        
-        // Format playdates
-        const formattedUpcoming = upcomingPlaydates.map(p => 
+
+        const formattedUpcoming = upcomingPlaydates.map(p =>
           formatPlaydate(p, 'upcoming', creatorProfileMap, participantCounts)
         );
-        
-        const formattedPast = pastPlaydatesData.map(p => 
+
+        const formattedPast = pastPlaydatesData.map(p =>
           formatPlaydate(p, 'past', creatorProfileMap, participantCounts)
         );
-        
+
         const formattedMyPlaydates = formattedUpcoming.filter(p => p.host_id === user.id);
-        
-        // Calculate distance for all playdates if user location is available
+
         let playdatesWithDistances = [...formattedUpcoming];
         let pastPlaydatesWithDistances = [...formattedPast];
         let myPlaydatesWithDistances = [...formattedMyPlaydates];
-        
-        if (userLocation?.latitude && userLocation?.longitude && hasLocationColumns) {
-          // Add distance to playdates
+
+        if (
+          userLocation?.latitude &&
+          userLocation?.longitude &&
+          hasLocationColumns
+        ) {
           playdatesWithDistances = addDistanceToPlaydates(
-            formattedUpcoming, 
-            userLocation.latitude, 
+            formattedUpcoming,
+            userLocation.latitude,
             userLocation.longitude
           );
-          
+
           pastPlaydatesWithDistances = addDistanceToPlaydates(
-            formattedPast, 
-            userLocation.latitude, 
+            formattedPast,
+            userLocation.latitude,
             userLocation.longitude
           );
-          
+
           myPlaydatesWithDistances = addDistanceToPlaydates(
-            formattedMyPlaydates, 
-            userLocation.latitude, 
+            formattedMyPlaydates,
+            userLocation.latitude,
             userLocation.longitude
           );
-          
-          // Find nearby playdates (within maxDistance)
+
           const nearby = findNearbyPlaydates(playdatesWithDistances, maxDistance);
           setNearbyPlaydates(nearby);
         } else {
@@ -96,14 +97,14 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}): UsePlaydatesRes
     };
 
     fetchPlaydates();
-  }, [user, userLocation, maxDistance]);
+  }, [user, userLocation?.latitude, userLocation?.longitude, maxDistance]);
 
-  return { 
-    allPlaydates, 
-    myPlaydates, 
-    pastPlaydates, 
-    nearbyPlaydates, 
-    loading, 
-    error 
+  return {
+    allPlaydates,
+    myPlaydates,
+    pastPlaydates,
+    nearbyPlaydates,
+    loading,
+    error
   };
 };
