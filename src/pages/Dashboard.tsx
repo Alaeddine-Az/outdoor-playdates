@@ -14,7 +14,7 @@ import { useUserLocation } from '@/hooks/useUserLocation';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const userLocation = useUserLocation();
+  const location = useUserLocation();
   const {
     loading,
     profile,
@@ -24,7 +24,7 @@ const Dashboard = () => {
     nearbyEvents,
     nearbyPlaydates,
     error
-  } = useDashboard(userLocation);
+  } = useDashboard(location);
 
   useEffect(() => {
     if (error) {
@@ -118,7 +118,7 @@ const Dashboard = () => {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            {userLocation.latitude && userLocation.longitude && nearbyPlaydates && nearbyPlaydates.length > 0 && (
+            {location.latitude && location.longitude && nearbyPlaydates && nearbyPlaydates.length > 0 && (
               <PlaydatesList
                 title="Playdates Near You"
                 playdates={nearbyPlaydates}

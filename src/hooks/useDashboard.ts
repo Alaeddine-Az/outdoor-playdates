@@ -2,13 +2,19 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
-import { PlaydateData, ConnectionData, LocationData, DashboardData } from '@/types/dashboard';
+import { PlaydateData, ConnectionData, DashboardData } from '@/types/dashboard';
 import { DashboardEvent } from '@/types';
 import { fetchPlaydates } from '@/services/playdateService';
 import { fetchSuggestedConnections } from '@/services/connectionService';
 import { fetchNearbyEvents } from '@/services/eventService';
 
-export const useDashboard = (userLocation?: LocationData) => {
+export const useDashboard = (location: {
+  latitude: number | null;
+  longitude: number | null;
+  loading?: boolean;
+  error?: string | null;
+  refreshLocation?: () => Promise<void>;
+}) => {
   const { user } = useAuth();
   const { profile, children, loading: profileLoading, error: profileError } = useProfile();
   const [loading, setLoading] = useState(true);
@@ -39,7 +45,7 @@ export const useDashboard = (userLocation?: LocationData) => {
         if (user) {
           // Run all data fetching in parallel
           const [playdatesResult, suggestedConnections, nearbyEvents] = await Promise.all([
-            fetchPlaydates(userLocation),
+            fetchPlaydates(location),
             fetchSuggestedConnections(user.id),
             fetchNearbyEvents()
           ]);
@@ -61,7 +67,7 @@ export const useDashboard = (userLocation?: LocationData) => {
     };
 
     fetchDashboardData();
-  }, [user, profile, profileLoading, profileError, userLocation]);
+  }, [user, profile, profileLoading, profileError, location]);
 
   return {
     loading: loading || profileLoading,

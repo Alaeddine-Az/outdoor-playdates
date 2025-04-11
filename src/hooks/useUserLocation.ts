@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
+
+import { useState, useEffect } from 'react';
 import { getUserLocation } from '@/utils/locationUtils';
 import { toast } from '@/components/ui/use-toast';
 
@@ -161,13 +162,8 @@ export function useUserLocation() {
     }
   };
 
-  const userLocation = useMemo(() => ({
-    latitude: location.latitude,
-    longitude: location.longitude,
-    loading: location.loading,
-    error: location.error,
+  return {
+    ...location,
     refreshLocation
-  }), [location.latitude, location.longitude, location.loading, location.error]);
-
-  return { userLocation };
+  };
 }

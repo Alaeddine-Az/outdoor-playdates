@@ -13,9 +13,12 @@ import { useUserLocation } from '@/hooks/useUserLocation';
 const Playdates = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const userLocation = useUserLocation();
+  const location = useUserLocation();
   const { allPlaydates, myPlaydates, pastPlaydates, nearbyPlaydates, loading, error } = usePlaydates({
-    userLocation,
+    userLocation: {
+      latitude: location.latitude,
+      longitude: location.longitude
+    },
     maxDistance: 10
   });
   
@@ -62,7 +65,7 @@ const Playdates = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 fade-up-stagger">
         {/* Main content area */}
         <div className="md:col-span-2 space-y-6">
-          {nearbyPlaydates && nearbyPlaydates.length > 0 && userLocation.latitude && userLocation.longitude && (
+          {nearbyPlaydates && nearbyPlaydates.length > 0 && location.latitude && location.longitude && (
             <PlaydateList
               title="Playdates Near You"
               playdates={nearbyPlaydates}

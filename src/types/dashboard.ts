@@ -24,6 +24,7 @@ export interface ConnectionData {
   childName: string;
   interests: string[];
   distance: string;
+  city?: string;
 }
 
 export interface LocationData {
@@ -31,6 +32,7 @@ export interface LocationData {
   longitude: number | null;
   loading?: boolean;
   error?: string | null;
+  refreshLocation?: () => Promise<void>;
 }
 
 export interface DashboardData {

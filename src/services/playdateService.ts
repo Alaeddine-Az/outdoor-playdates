@@ -1,14 +1,18 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { PlaydateData, LocationData } from '@/types/dashboard';
+import { PlaydateData } from '@/types/dashboard';
 import { formatPlaydate } from '@/utils/playdateFormatters';
 import { getDistanceInKm } from '@/utils/locationUtils';
-import { compareAsc } from 'date-fns';
 
 /**
  * Fetch playdates from Supabase and format them
  */
-export async function fetchPlaydates(userLocation?: LocationData): Promise<{
+export async function fetchPlaydates(location?: {
+  latitude: number | null;
+  longitude: number | null;
+  loading?: boolean;
+  error?: string | null;
+}): Promise<{
   upcomingPlaydates: PlaydateData[];
   nearbyPlaydates: PlaydateData[];
 }> {
@@ -51,13 +55,13 @@ export async function fetchPlaydates(userLocation?: LocationData): Promise<{
 
     // Add distance to all playdates when user location is available
     let playdatesWithDistances = [...formattedPlaydates];
-    if (userLocation?.latitude && userLocation?.longitude) {
+    if (location?.latitude && location?.longitude) {
       playdatesWithDistances = formattedPlaydates.map(playdate => {
         if (playdate.latitude !== undefined && playdate.longitude !== undefined && 
             playdate.latitude !== null && playdate.longitude !== null) {
           const distance = getDistanceInKm(
-            userLocation.latitude,
-            userLocation.longitude,
+            location.latitude,
+            location.longitude,
             playdate.latitude,
             playdate.longitude
           );
@@ -80,7 +84,7 @@ export async function fetchPlaydates(userLocation?: LocationData): Promise<{
     // Calculate nearby playdates if user location is available
     let nearbyPlaydates: PlaydateData[] = [];
     
-    if (userLocation?.latitude && userLocation?.longitude) {
+    if (location?.latitude && location?.longitude) {
       // Filter for playdates with location
       const playdatesWithLocation = playdatesWithDistances.filter(
         p => p.latitude !== undefined && p.longitude !== undefined && 
