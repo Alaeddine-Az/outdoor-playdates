@@ -90,6 +90,8 @@ export const assignAdminRole = async (email: string): Promise<{success: boolean,
     }
     
     // Insert the admin role
+    console.trace("🔥 INSERT to user_roles from authUtils.ts", { userId, role: 'admin' });
+
     const { error: insertError } = await supabase
       .from('user_roles')
       .insert({
