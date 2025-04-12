@@ -9,12 +9,12 @@ import SuggestedConnections from '@/components/dashboard/SuggestedConnections';
 import NearbyEvents from '@/components/dashboard/NearbyEvents';
 import { useDashboard } from '@/hooks/useDashboard';
 import { toast } from '@/components/ui/use-toast';
-import { Pencil, MapPin } from 'lucide-react';
+import { Pencil, MapPin, Navigation } from 'lucide-react';
 import { useUserLocation } from '@/hooks/useUserLocation';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const userLocation = useUserLocation();
+  const location = useUserLocation();
   const {
     loading,
     profile,
@@ -24,7 +24,7 @@ const Dashboard = () => {
     nearbyEvents,
     nearbyPlaydates,
     error
-  } = useDashboard(userLocation);
+  } = useDashboard(location);
 
   useEffect(() => {
     if (error) {
@@ -54,6 +54,8 @@ const Dashboard = () => {
   })) || [];
 
   const interests = profile?.interests || ['Arts & Crafts', 'Nature', 'STEM'];
+  const hasLocation = !location.loading && location.latitude !== null && location.longitude !== null;
+  const hasNearbyPlaydates = nearbyPlaydates && nearbyPlaydates.length > 0;
 
   return (
     <div className="animate-fade-in px-4 py-6 max-w-6xl mx-auto">
@@ -79,7 +81,7 @@ const Dashboard = () => {
         {/* Text */}
         <div className="relative z-30 text-left mt-8">
           <h1 className="text-3xl md:text-4xl font-extrabold text-black mb-2">
-            Welcome back, {profile?.parent_name?.split(' ')[0] || 'Test'}!
+            Welcome back, {profile?.parent_name?.split(' ')[0] || 'Friend'}!
           </h1>
           <p className="text-md md:text-lg text-black">
             Here&apos;s what&apos;s happening with your playdates and connections.
@@ -118,7 +120,7 @@ const Dashboard = () => {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            {userLocation.latitude && userLocation.longitude && nearbyPlaydates && nearbyPlaydates.length > 0 && (
+            {hasLocation && hasNearbyPlaydates && (
               <PlaydatesList
                 title="Playdates Near You"
                 playdates={nearbyPlaydates}
@@ -126,8 +128,24 @@ const Dashboard = () => {
                 viewAllLink="/playdates"
                 limit={3}
                 className="bg-gradient-to-br from-[#FDF7E4] to-[#FAEBBD]"
-                icon={<MapPin className="text-orange-500 w-5 h-5" />}
+                icon={<Navigation className="text-blue-500 w-5 h-5" />}
               />
+            )}
+            
+            {/* Show location error message if needed */}
+            {!hasLocation && !location.loading && (
+              <div className="bg-white rounded-xl shadow-soft border border-muted p-6 mb-6">
+                <h3 className="text-lg font-medium mb-2 flex items-center gap-2">
+                  <Navigation className="h-5 w-5 text-blue-500" />
+                  Enable Location Access
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  To see playdates near you, please enable location access. We use your location to show relevant playdates in your area.
+                </p>
+                <Button onClick={location.refreshLocation} className="bg-blue-500 hover:bg-blue-600 text-white">
+                  Enable Location
+                </Button>
+              </div>
             )}
             
             <PlaydatesList

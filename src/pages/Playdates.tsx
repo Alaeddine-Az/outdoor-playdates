@@ -13,9 +13,9 @@ import { useUserLocation } from '@/hooks/useUserLocation';
 const Playdates = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const userLocation = useUserLocation();
+  const location = useUserLocation();
   const { allPlaydates, myPlaydates, pastPlaydates, nearbyPlaydates, loading, error } = usePlaydates({
-    userLocation,
+    userLocation: location,
     maxDistance: 10
   });
   
@@ -28,6 +28,10 @@ const Playdates = () => {
     navigate('/auth');
     return null;
   }
+
+  const hasLocation = !location.loading && location.latitude !== null && location.longitude !== null;
+  const showLocationError = !location.loading && location.error;
+  const hasNearbyPlaydates = nearbyPlaydates && nearbyPlaydates.length > 0;
 
   return (
     <div className="animate-fade-in">
@@ -62,17 +66,47 @@ const Playdates = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 fade-up-stagger">
         {/* Main content area */}
         <div className="md:col-span-2 space-y-6">
-          {nearbyPlaydates && nearbyPlaydates.length > 0 && userLocation.latitude && userLocation.longitude && (
-            <PlaydateList
-              title="Playdates Near You"
-              playdates={nearbyPlaydates}
-              loading={loading}
-              error={error}
-              emptyTitle="No nearby playdates"
-              emptyMessage="There are no playdates near your current location."
-              showCreateButton={true}
-              icon={<Navigation className="h-5 w-5 text-blue-500" />}
-            />
+          {hasLocation && (
+            <>
+              {hasNearbyPlaydates ? (
+                <PlaydateList
+                  title="Playdates Near You"
+                  playdates={nearbyPlaydates}
+                  loading={loading}
+                  error={error}
+                  emptyTitle="No nearby playdates"
+                  emptyMessage="There are no playdates within 10km of your current location."
+                  showCreateButton={true}
+                  icon={<Navigation className="h-5 w-5 text-blue-500" />}
+                />
+              ) : (
+                <PlaydateList
+                  title="Playdates Near You"
+                  playdates={[]}
+                  loading={loading}
+                  error={error}
+                  emptyTitle="No playdates nearby"
+                  emptyMessage="There are no playdates within 10km of your location. Create one to get started!"
+                  showCreateButton={true}
+                  icon={<Navigation className="h-5 w-5 text-blue-500" />}
+                />
+              )}
+            </>
+          )}
+          
+          {showLocationError && (
+            <div className="bg-white rounded-xl shadow-soft border border-muted p-6 mb-6">
+              <h3 className="text-lg font-medium mb-2 flex items-center gap-2">
+                <Navigation className="h-5 w-5 text-blue-500" />
+                Location Access Required
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                Enable location access to see playdates near you. We use your location to show you relevant playdates in your area.
+              </p>
+              <Button onClick={location.refreshLocation} className="bg-blue-500 hover:bg-blue-600 text-white">
+                Enable Location Access
+              </Button>
+            </div>
           )}
           
           <PlaydateList

@@ -27,6 +27,9 @@ interface UsePlaydatesOptions {
   userLocation?: {
     latitude: number | null;
     longitude: number | null;
+    loading?: boolean;
+    error?: string | null;
+    refreshLocation?: () => Promise<void>;
   };
   maxDistance?: number;
 }
@@ -51,22 +54,19 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
 
       try {
         setLoading(true);
+        console.log('Fetching playdates with user location:', userLocation);
 
-        // First check if latitude/longitude columns are available
+        // Check if latitude/longitude columns are available
         const { data: testData, error: testError } = await supabase
           .from('playdates')
           .select('latitude, longitude')
           .limit(1);
 
         const hasLocationColumns = !(testError && testError.message.includes("column 'latitude' does not exist"));
+        console.log('Database has location columns:', hasLocationColumns);
 
         // Fetch upcoming playdates
         let upcomingPlaydatesQuery = supabase.from('playdates').select('*');
-        if (hasLocationColumns) {
-          console.log("Using playdates query with location columns");
-        } else {
-          console.log("Using playdates query without location columns");
-        }
 
         const { data: upcomingPlaydates, error: upcomingError } = await upcomingPlaydatesQuery
           .gt('start_time', new Date().toISOString())
@@ -147,8 +147,6 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
 
           const hostName = creatorProfile?.parent_name || 'Unknown Host';
 
-          console.log(`📌 Rendering playdate ${p.id} with host: ${hostName}, host_id: ${p.creator_id}`);
-
           return {
             id: p.id,
             title: p.title,
@@ -176,6 +174,8 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
         let myPlaydatesWithDistances = [...formattedMyPlaydates];
         
         if (userLocation?.latitude && userLocation?.longitude && hasLocationColumns) {
+          console.log('Adding distance to playdates using location:', userLocation);
+          
           // Add distance to all upcoming playdates with valid coordinates
           playdatesWithDistances = formattedUpcoming.map(playdate => {
             if (playdate.latitude !== undefined && playdate.longitude !== undefined && 
@@ -227,6 +227,8 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
             p.latitude !== null && p.longitude !== null
           );
           
+          console.log(`Found ${playdatesWithCoords.length} playdates with coordinates`);
+          
           if (playdatesWithCoords.length > 0) {
             const nearby = getNearbyPlaydates(
               userLocation.latitude,
@@ -234,11 +236,15 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
               playdatesWithCoords,
               maxDistance
             );
+            console.log(`Found ${nearby.length} nearby playdates`);
             setNearbyPlaydates(nearby);
           } else {
             console.log("No playdates found with valid coordinates");
             setNearbyPlaydates([]);
           }
+        } else {
+          console.log('User location not available or database missing location columns');
+          setNearbyPlaydates([]);
         }
 
         setAllPlaydates(playdatesWithDistances);
@@ -253,7 +259,7 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
     };
 
     fetchPlaydates();
-  }, [user, userLocation]);
+  }, [user, userLocation, maxDistance]);
 
   return { 
     allPlaydates, 
