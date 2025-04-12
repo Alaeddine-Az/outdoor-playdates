@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
@@ -39,6 +38,13 @@ export const ensureAdminUser = async () => {
     const adminRoleExists = existingRoles?.some(role => role.user_id === adminUserId);
     
     if (!adminRoleExists) {
+      // 🔥 Add trace before inserting role
+      console.trace("🔥 INSERT to user_roles from ensureAdminUser()", {
+        user_id: adminUserId,
+        role: 'admin',
+        context: 'Ensuring admin@admin.com has admin role'
+      });
+
       // Add admin role
       const { error: insertError } = await supabase
         .from('user_roles')
@@ -52,11 +58,11 @@ export const ensureAdminUser = async () => {
         return;
       }
       
-      console.log('Admin role assigned to admin@admin.com');
+      console.log('✅ Admin role assigned to admin@admin.com');
     } else {
-      console.log('admin@admin.com already has admin role');
+      console.log('ℹ️ admin@admin.com already has admin role');
     }
   } catch (error) {
-    console.error('Error initializing admin user:', error);
+    console.error('❌ Error initializing admin user:', error);
   }
 };
