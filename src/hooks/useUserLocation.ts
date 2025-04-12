@@ -42,6 +42,12 @@ export function useUserLocation() {
         lng: position.coords.longitude
       });
       
+      // Validate the received coordinates
+      if (position.coords.latitude === null || position.coords.longitude === null ||
+          isNaN(position.coords.latitude) || isNaN(position.coords.longitude)) {
+        throw new Error('Invalid location coordinates received from browser');
+      }
+      
       // Cache the location
       localStorage.setItem('user_lat', position.coords.latitude.toString());
       localStorage.setItem('user_lng', position.coords.longitude.toString());

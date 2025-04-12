@@ -8,18 +8,30 @@
  * @returns Distance in kilometers
  */
 export function getDistanceInKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  // Validate inputs
+  // Validate inputs - fail early with descriptive errors
   if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) {
     console.warn('Invalid coordinates provided to getDistanceInKm', { lat1, lon1, lat2, lon2 });
     return Infinity;
   }
   
+  // Convert all inputs to numbers to ensure correct calculations
+  const lat1Num = Number(lat1);
+  const lon1Num = Number(lon1);
+  const lat2Num = Number(lat2);
+  const lon2Num = Number(lon2);
+  
+  // Check if any conversion resulted in NaN
+  if (isNaN(lat1Num) || isNaN(lon1Num) || isNaN(lat2Num) || isNaN(lon2Num)) {
+    console.warn('Coordinates could not be converted to numbers', { lat1, lon1, lat2, lon2 });
+    return Infinity;
+  }
+  
   const R = 6371; // Radius of the earth in km
-  const dLat = deg2rad(lat2 - lat1);
-  const dLon = deg2rad(lon2 - lon1);
+  const dLat = deg2rad(lat2Num - lat1Num);
+  const dLon = deg2rad(lon2Num - lon1Num);
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    Math.cos(deg2rad(lat1Num)) * Math.cos(deg2rad(lat2Num)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c; // Distance in km
   return distance;
@@ -51,7 +63,7 @@ export function getUserLocation(): Promise<GeolocationPosition> {
         },
         {
           enableHighAccuracy: true,
-          timeout: 10000, // Increased timeout for better reliability
+          timeout: 15000, // Increased timeout for better reliability
           maximumAge: 5 * 60 * 1000 // Allow cached position up to 5 minutes
         }
       );
@@ -92,16 +104,29 @@ export function getNearbyPlaydates(
   let invalidCoordinates = 0;
 
   for (const playdate of playdates) {
-    // Skip playdates without coordinates, but log them
-    if (playdate.latitude == null || playdate.longitude == null) {
-      console.warn(`❌ Skipping playdate: ${playdate.title || 'Unnamed'} - missing coordinates`, playdate);
+    // Skip playdates without coordinates
+    if (playdate.latitude == null || playdate.longitude == null || 
+        playdate.latitude === undefined || playdate.longitude === undefined) {
+      console.warn(`❌ Skipping playdate: ${playdate.title || 'Unnamed'} - missing coordinates`, 
+        { id: playdate.id, lat: playdate.latitude, lng: playdate.longitude });
       invalidCoordinates++;
       continue;
     }
     
     validCoordinates++;
     try {
-      const distance = getDistanceInKm(userLat, userLon, playdate.latitude, playdate.longitude);
+      // Force conversion to number for latitude and longitude
+      const latitude = Number(playdate.latitude);
+      const longitude = Number(playdate.longitude);
+      
+      if (isNaN(latitude) || isNaN(longitude)) {
+        console.warn(`❌ Invalid coordinates for playdate: ${playdate.title || 'Unnamed'}`, 
+          { id: playdate.id, lat: playdate.latitude, lng: playdate.longitude });
+        invalidCoordinates++;
+        continue;
+      }
+      
+      const distance = getDistanceInKm(userLat, userLon, latitude, longitude);
       
       // Only add playdates within the specified distance
       if (distance <= maxDistance) {
@@ -112,6 +137,7 @@ export function getNearbyPlaydates(
       }
     } catch (error) {
       console.error(`Error calculating distance for playdate: ${playdate.title || 'Unnamed'}`, error);
+      invalidCoordinates++;
     }
   }
 

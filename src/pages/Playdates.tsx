@@ -32,15 +32,21 @@ const Playdates = () => {
   
   useEffect(() => {
     console.log("Playdates data loaded:", {
-      all: allPlaydates.length,
-      my: myPlaydates.length,
-      past: pastPlaydates.length,
+      all: allPlaydates?.length || 0,
+      my: myPlaydates?.length || 0,
+      past: pastPlaydates?.length || 0,
       nearby: nearbyPlaydates?.length || 0,
-      hasError: !!error
+      hasError: !!error,
+      errorDetails: error || 'None'
     });
     
     if (error) {
       console.error("Error loading playdates:", error);
+      toast({
+        title: "Error Loading Playdates",
+        description: "There was a problem loading the playdates. Please try again later.",
+        variant: "destructive"
+      });
     }
   }, [allPlaydates, myPlaydates, pastPlaydates, nearbyPlaydates, error]);
   
@@ -136,7 +142,7 @@ const Playdates = () => {
           
           <PlaydateList
             title="Upcoming Playdates"
-            playdates={allPlaydates}
+            playdates={allPlaydates || []}
             loading={loading}
             error={error}
             emptyTitle="No upcoming playdates"
@@ -146,7 +152,7 @@ const Playdates = () => {
           
           <PlaydateList
             title="My Scheduled Playdates"
-            playdates={myPlaydates}
+            playdates={myPlaydates || []}
             loading={loading}
             error={error}
             emptyTitle="No scheduled playdates"
@@ -156,7 +162,7 @@ const Playdates = () => {
           
           <PlaydateList
             title="Past Playdates"
-            playdates={pastPlaydates}
+            playdates={pastPlaydates || []}
             loading={loading}
             error={error}
             emptyTitle="No past playdates"

@@ -47,19 +47,20 @@ const PlaydateList = ({
 }: PlaydateListProps) => {
   const navigate = useNavigate();
   
-  console.log(`Rendering ${title} with ${playdates.length} playdates:`, playdates);
+  console.log(`Rendering ${title} with ${playdates?.length || 0} playdates:`, 
+    { title, count: playdates?.length || 0, hasDistanceValues: playdates?.some(p => p.distance !== undefined) });
   
   // Sort playdates by distance if available, otherwise by start time
-  const sortedPlaydates = [...playdates].sort((a, b) => {
+  const sortedPlaydates = [...(playdates || [])].sort((a, b) => {
     // If both playdates have distance, sort by distance
-    if (a.distance !== undefined && b.distance !== undefined) {
+    if (a?.distance !== undefined && b?.distance !== undefined) {
       return a.distance - b.distance;
     }
     // If only one has distance, prioritize the one with distance
-    if (a.distance !== undefined) return -1;
-    if (b.distance !== undefined) return 1;
+    if (a?.distance !== undefined) return -1;
+    if (b?.distance !== undefined) return 1;
     // Otherwise sort by start_time
-    if (a.start_time && b.start_time) {
+    if (a?.start_time && b?.start_time) {
       return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
     }
     return 0;
@@ -107,7 +108,17 @@ const PlaydateList = ({
       ) : (
         <div className="space-y-4">
           {sortedPlaydates.map((playdate) => {
-            console.log(`Rendering playdate ${playdate.id} with host: ${playdate.host}, host_id: ${playdate.host_id}`);
+            if (!playdate || !playdate.id) {
+              console.warn('Invalid playdate found in list:', playdate);
+              return null;
+            }
+            
+            console.log(`Rendering playdate ${playdate.id}`, {
+              host: playdate.host, 
+              host_id: playdate.host_id,
+              distance: playdate.distance
+            });
+            
             return (
               <PlaydateItem 
                 key={playdate.id}
