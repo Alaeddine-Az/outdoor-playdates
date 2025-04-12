@@ -12,6 +12,10 @@ interface Playdate {
   location: string;
   families: number;
   status?: string;
+  host?: string;
+  host_id?: string;
+  start_time?: string;
+  distance?: number;
 }
 
 interface PlaydatesListProps {
@@ -20,6 +24,8 @@ interface PlaydatesListProps {
   showNewButton?: boolean;
   viewAllLink?: string;
   className?: string;
+  limit?: number;
+  icon?: React.ReactNode;
 }
 
 const PlaydatesList = ({
@@ -28,7 +34,23 @@ const PlaydatesList = ({
   showNewButton = false,
   viewAllLink,
   className = '',
+  limit = 6,
+  icon = <CalendarDays className="text-orange-500 w-5 h-5" />
 }: PlaydatesListProps) => {
+  const sortedPlaydates = [...playdates].sort((a, b) => {
+    if (a.distance !== undefined && b.distance !== undefined) {
+      return a.distance - b.distance;
+    }
+    if (a.distance !== undefined) return -1;
+    if (b.distance !== undefined) return 1;
+    if (a.start_time && b.start_time) {
+      return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
+    }
+    return 0;
+  });
+
+  const limitedPlaydates = sortedPlaydates.slice(0, limit);
+
   return (
     <div
       className={cn(
@@ -39,7 +61,7 @@ const PlaydatesList = ({
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0 mb-4">
         <div className="flex items-center gap-3">
           <div className="bg-[#F9DA6F] p-2 rounded-xl">
-            <CalendarDays className="text-orange-500 w-5 h-5" />
+            {icon}
           </div>
           <h2 className="text-lg md:text-xl font-bold text-neutral-800">
             {title}
@@ -56,8 +78,8 @@ const PlaydatesList = ({
       </div>
 
       <div className="space-y-4">
-        {playdates.length > 0 ? (
-          playdates.map((playdate) => (
+        {limitedPlaydates.length > 0 ? (
+          limitedPlaydates.map((playdate) => (
             <PlaydateCard key={playdate.id} playdate={playdate} />
           ))
         ) : (
@@ -67,7 +89,7 @@ const PlaydatesList = ({
         )}
       </div>
 
-      {viewAllLink && playdates.length > 0 && (
+      {viewAllLink && playdates.length > limit && (
         <div className="text-right mt-4">
           <Link
             to={viewAllLink}

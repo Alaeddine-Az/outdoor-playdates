@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { toast } from '@/components/ui/use-toast';
 
 interface PlaydateJoinProps {
   userChildren: any[];
@@ -10,6 +11,7 @@ interface PlaydateJoinProps {
   onJoin: (selectedChildIds: string[]) => Promise<void>;
   isCompleted?: boolean;
   isCanceled?: boolean;
+  alreadyJoined?: string[]; // IDs of children already joined
 }
 
 export const PlaydateJoin: React.FC<PlaydateJoinProps> = ({ 
@@ -17,7 +19,8 @@ export const PlaydateJoin: React.FC<PlaydateJoinProps> = ({
   isJoining, 
   onJoin, 
   isCompleted = false,
-  isCanceled = false 
+  isCanceled = false,
+  alreadyJoined = []
 }) => {
   const [selectedChildIds, setSelectedChildIds] = useState<string[]>([]);
 
@@ -30,6 +33,15 @@ export const PlaydateJoin: React.FC<PlaydateJoinProps> = ({
   };
 
   const handleJoin = async () => {
+    if (selectedChildIds.length === 0) {
+      toast({
+        title: 'Selection required',
+        description: 'Please select at least one child to join the playdate',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
     await onJoin(selectedChildIds);
     // Clear selection after joining
     setSelectedChildIds([]);
@@ -48,16 +60,19 @@ export const PlaydateJoin: React.FC<PlaydateJoinProps> = ({
     helperText = 'This playdate has been canceled.';
   }
 
+  // Filter out children that are already participating
+  const availableChildren = userChildren.filter(child => !alreadyJoined.includes(child.id));
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Join this Playdate</CardTitle>
       </CardHeader>
       <CardContent>
-        {userChildren.length > 0 ? (
+        {availableChildren.length > 0 ? (
           <>
             <div className="mb-4 space-y-2">
-              {userChildren.map(child => (
+              {availableChildren.map(child => (
                 <div key={child.id} className="flex items-center space-x-2">
                   <Checkbox
                     disabled={isCompleted || isCanceled}
@@ -79,6 +94,8 @@ export const PlaydateJoin: React.FC<PlaydateJoinProps> = ({
               {buttonText}
             </Button>
           </>
+        ) : userChildren.length > 0 && alreadyJoined.length === userChildren.length ? (
+          <p className="text-sm text-muted-foreground">All your children are already participating in this playdate.</p>
         ) : (
           <p className="text-sm text-muted-foreground">You need to add children first.</p>
         )}

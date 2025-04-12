@@ -1,3 +1,4 @@
+
 import { Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -13,7 +14,7 @@ export interface AppLayoutProps {
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {
-  const { signOut, isAdmin } = useAuth(); // ← Added isAdmin
+  const { signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -21,6 +22,16 @@ export default function AppLayout({ children }: AppLayoutProps) {
       await signOut();
     } catch (err) {
       console.error('Sidebar sign out failed:', err);
+    }
+  };
+
+  const handleGoBack = () => {
+    // Check if there's history to go back to
+    if (window.history.length > 2) {
+      navigate(-1); // Go back in history
+    } else {
+      // Fallback to dashboard if no history
+      navigate('/dashboard');
     }
   };
 

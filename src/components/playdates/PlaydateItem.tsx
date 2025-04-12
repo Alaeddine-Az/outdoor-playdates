@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, MapPin, Users, User } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, User, Navigation } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface PlaydateItemProps {
@@ -15,6 +15,7 @@ interface PlaydateItemProps {
   id: string;
   host?: string;
   host_id?: string;
+  distance?: number;
 }
 
 const statusColors = {
@@ -34,7 +35,8 @@ const PlaydateItem = ({
   status = 'upcoming',
   onClick,
   host,
-  host_id
+  host_id,
+  distance
 }: PlaydateItemProps) => {
   const navigate = useNavigate();
   
@@ -53,6 +55,8 @@ const PlaydateItem = ({
     }
   };
   
+  const showDistance = distance !== undefined;
+  
   return (
     <div
       className="bg-white rounded-lg border border-muted p-4 hover:shadow-md transition-all cursor-pointer"
@@ -60,9 +64,18 @@ const PlaydateItem = ({
     >
       <div className="flex justify-between items-start mb-2">
         <h3 className="font-medium">{title}</h3>
-        <Badge className={statusColors[status] || 'bg-gray-100 text-gray-800'}>
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </Badge>
+        <div className="flex flex-col sm:flex-row gap-2">
+          {showDistance && (
+            <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">
+              {distance < 1 
+                ? `${Math.round(distance * 1000)}m away` 
+                : `${distance.toFixed(1)}km away`}
+            </Badge>
+          )}
+          <Badge className={statusColors[status] || 'bg-gray-100 text-gray-800'}>
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </Badge>
+        </div>
       </div>
       
       {host && host_id && (
@@ -90,6 +103,17 @@ const PlaydateItem = ({
           <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
           <span className="truncate">{location}</span>
         </div>
+        
+        {showDistance && (
+          <div className="flex items-center gap-2">
+            <Navigation className="h-4 w-4 text-primary flex-shrink-0" />
+            <span>
+              {distance < 1 
+                ? `${Math.round(distance * 1000)} meters from you` 
+                : `${distance.toFixed(1)} kilometers from you`}
+            </span>
+          </div>
+        )}
         
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-primary flex-shrink-0" />

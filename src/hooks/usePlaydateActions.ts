@@ -4,11 +4,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
-export const usePlaydateActions = (playdateId: string | undefined, refreshData: () => Promise<void>) => {
+export const usePlaydateActions = (
+  playdateId: string | undefined,
+  refreshData: () => Promise<void>
+) => {
   const { user } = useAuth();
   const [isJoining, setIsJoining] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isRemoving, setIsRemoving] = useState<string[]>([]);
 
   const handleJoinPlaydate = async (selectedChildIds: string[]) => {
     if (!user || selectedChildIds.length === 0 || !playdateId) {
@@ -22,23 +26,48 @@ export const usePlaydateActions = (playdateId: string | undefined, refreshData: 
 
     setIsJoining(true);
     try {
-      const primaryChildId = selectedChildIds[0];
+      // Check if the parent already has any children in this playdate
+      const { data: existingParticipation, error: checkError } = await supabase
+        .from('playdate_participants')
+        .select('id, child_ids')
+        .eq('playdate_id', playdateId)
+        .eq('parent_id', user.id)
+        .maybeSingle();
 
-      const { error } = await supabase.from('playdate_participants').insert({
-        playdate_id: playdateId,
-        child_id: primaryChildId,
-        child_ids: selectedChildIds,
-        parent_id: user.id,
-        status: 'pending'
-      });
-      
-      if (error) throw error;
+      if (checkError && checkError.code !== 'PGRST116') throw checkError;
+
+      if (existingParticipation) {
+        // Update existing participation with additional children
+        const updatedChildIds = [
+          ...new Set([
+            ...(existingParticipation.child_ids || []),
+            ...selectedChildIds
+          ])
+        ];
+
+        const { error: updateError } = await supabase
+          .from('playdate_participants')
+          .update({
+            child_ids: updatedChildIds,
+            child_id: selectedChildIds[0] // Keep this for backward compatibility
+          })
+          .eq('id', existingParticipation.id);
+
+        if (updateError) throw updateError;
+      } else {
+        // Create new participation
+        const { error } = await supabase.from('playdate_participants').insert({
+          playdate_id: playdateId,
+          child_id: selectedChildIds[0], // Primary child for backward compatibility
+          child_ids: selectedChildIds,
+          parent_id: user.id
+        });
+
+        if (error) throw error;
+      }
 
       toast({ title: 'Success', description: 'You have joined the playdate!' });
-      
-      // Immediately refresh the data to show the updated participants
       await refreshData();
-
     } catch (err: any) {
       console.error('Error joining playdate:', err);
       toast({
@@ -90,9 +119,8 @@ export const usePlaydateActions = (playdateId: string | undefined, refreshData: 
 
       if (error) throw error;
 
-      // Immediately refresh the data to show the updated playdate
       await refreshData();
-      
+
       toast({
         title: 'Success',
         description: 'Playdate updated successfully!',
@@ -109,18 +137,103 @@ export const usePlaydateActions = (playdateId: string | undefined, refreshData: 
     }
   };
 
+  const handleRemoveParticipant = async (participantId: string, childIdToRemove: string) => {
+    if (!user || !participantId || !childIdToRemove) return;
+
+    console.log("🔍 Trying to remove child from participant row:", { participantId, childIdToRemove });
+    setIsRemoving(prev => [...prev, participantId]);
+
+    try {
+      // Fetch the current participant row
+      const { data: row, error: fetchError } = await supabase
+        .from('playdate_participants')
+        .select('child_ids, parent_id, playdate_id')
+        .eq('id', participantId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Get the playdate to check if user is creator
+      const { data: playdateData, error: playdateError } = await supabase
+        .from('playdates')
+        .select('creator_id')
+        .eq('id', row.playdate_id)
+        .single();
+      
+      if (playdateError) throw playdateError;
+      
+      const isCreator = user.id === playdateData.creator_id;
+
+      // Security check - only allow parents to remove their own children or creators to remove any child
+      if (row.parent_id !== user.id && !isCreator) {
+        throw new Error("You can only remove your own children from the playdate.");
+      }
+
+      const currentChildIds = row.child_ids || [];
+
+      if (!currentChildIds.includes(childIdToRemove)) {
+        throw new Error("Child not found in this playdate.");
+      }
+
+      const updatedChildIds = currentChildIds.filter(id => id !== childIdToRemove);
+
+      if (updatedChildIds.length === 0) {
+        // No more children left – delete the whole row
+        const { error: deleteError } = await supabase
+          .from('playdate_participants')
+          .delete()
+          .eq('id', participantId);
+
+        if (deleteError) throw deleteError;
+
+        console.log("✅ Deleted participant row because no more children remained.");
+      } else {
+        // Update the row with remaining children
+        const { error: updateError } = await supabase
+          .from('playdate_participants')
+          .update({ 
+            child_ids: updatedChildIds,
+            child_id: updatedChildIds[0] // Update primary child ID to the first remaining child
+          })
+          .eq('id', participantId);
+
+        if (updateError) throw updateError;
+
+        console.log("✅ Updated participant row with fewer children:", updatedChildIds);
+      }
+
+      await refreshData();
+
+      toast({
+        title: 'Success',
+        description: 'Child removed from playdate successfully!',
+      });
+
+    } catch (err: any) {
+      console.error('❌ Error removing child from playdate:', err);
+      toast({
+        title: 'Failed',
+        description: err.message || 'Could not remove child from playdate.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsRemoving(prev => prev.filter(id => id !== participantId));
+    }
+  };
+
   const handlePlaydateCanceled = async () => {
-    // Immediately refresh the data to show the canceled status
     await refreshData();
   };
 
   return {
     isJoining,
-    isUpdating, 
+    isUpdating,
     isProcessing,
+    isRemoving,
     setIsProcessing,
     handleJoinPlaydate,
     handleUpdatePlaydate,
-    handlePlaydateCanceled
+    handlePlaydateCanceled,
+    handleRemoveParticipant
   };
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -7,33 +7,38 @@ import { Button } from '@/components/ui/button';
 import { Edit, User } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
-import { useState, useEffect } from 'react';
 import { ChildProfile, ParentProfile } from '@/types';
 
 const ChildProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+
   const [loading, setLoading] = useState(true);
   const [child, setChild] = useState<ChildProfile | null>(null);
   const [parent, setParent] = useState<ParentProfile | null>(null);
+  const [interests, setInterests] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadChildProfile() {
       if (!id) return;
+      const cleanChildId = id.trim();
 
       try {
         setLoading(true);
 
+        // Step 1: Load child
         const { data: childData, error: childError } = await supabase
           .from('children')
           .select('*')
-          .eq('id', id)
+          .eq('id', cleanChildId)
           .single();
 
         if (childError) throw childError;
         setChild(childData);
+        console.log('✅ Child loaded:', childData);
 
+        // Step 2: Load parent
         const { data: parentData, error: parentError } = await supabase
           .from('profiles')
           .select('*')
@@ -42,8 +47,40 @@ const ChildProfilePage = () => {
 
         if (parentError) throw parentError;
         setParent(parentData);
+        console.log('✅ Parent loaded:', parentData);
+
+        // Step 3: Get child's interest IDs
+        const { data: childInterests, error: childInterestsError } = await supabase
+          .from('child_interests')
+          .select('interest_id')
+          .eq('child_id', cleanChildId);
+
+        if (childInterestsError) throw childInterestsError;
+        const interestIds = childInterests.map(ci => ci.interest_id);
+        console.log('🎯 interestIds:', interestIds);
+
+        // Step 4: Fetch interest names
+        if (interestIds.length > 0) {
+          const { data: interestNames, error: interestNamesError } = await supabase
+            .from('interests')
+            .select('name')
+            .in('id', interestIds);
+
+          if (interestNamesError) {
+            console.error('❌ Error fetching interests:', interestNamesError);
+            setInterests([]);
+          } else {
+            const names = interestNames.map(i => i.name);
+            console.log('✅ Final interests:', names);
+            setInterests(names);
+          }
+        } else {
+          console.warn('⚠️ No interests found for this child.');
+          setInterests([]);
+        }
+
       } catch (e: any) {
-        console.error('Error loading child profile:', e);
+        console.error('❌ Error loading child profile:', e);
         setError(e.message);
       } finally {
         setLoading(false);
@@ -103,6 +140,27 @@ const ChildProfilePage = () => {
               <p className="text-muted-foreground mb-4">{child.bio}</p>
             )}
 
+            {/* ✅ Interests */}
+            <div className="mb-4">
+              <div className="text-sm font-medium mb-2">Interests:</div>
+              {interests.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {interests.map((interest, index) => (
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="bg-green-100 text-green-800 rounded-full px-3 py-1 text-sm"
+                    >
+                      {interest}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-muted-foreground text-sm italic">No interests found.</div>
+              )}
+            </div>
+
+            {/* ✅ Parent Info */}
             <div className="mb-4">
               <div className="text-sm font-medium mb-2">Parent:</div>
               <Link
@@ -114,6 +172,7 @@ const ChildProfilePage = () => {
               </Link>
             </div>
 
+            {/* ✅ Edit Button */}
             {isParent && (
               <Button asChild variant="outline">
                 <Link to={`/edit-child/${child.id}`}>

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PlaydateParticipants } from '@/components/playdates/detail/PlaydateParticipants';
 import { PlaydateJoin } from '@/components/playdates/detail/PlaydateJoin';
@@ -12,9 +12,9 @@ import { usePlaydateActions } from '@/hooks/usePlaydateActions';
 const PlaydateDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  
+
   const {
     playdate,
     creator,
@@ -33,19 +33,57 @@ const PlaydateDetail = () => {
     isJoining,
     isUpdating,
     isProcessing,
+    isRemoving,
     setIsProcessing,
     handleJoinPlaydate,
     handleUpdatePlaydate,
-    handlePlaydateCanceled
+    handlePlaydateCanceled,
+    handleRemoveParticipant
   } = usePlaydateActions(id, loadPlaydateData);
+
+  // Local participantDetails state
+  const [localParticipantDetails, setLocalParticipantDetails] = useState(participantDetails);
+
+  // Get list of already participating child IDs for the current user
+  const [participatingChildIds, setParticipatingChildIds] = useState<string[]>([]);
+
+  // Determine which children are already participating
+  useEffect(() => {
+    const childIds: string[] = [];
+    Object.values(participantDetails).forEach(({ child }) => {
+      if (userChildren.some(userChild => userChild.id === child.id)) {
+        childIds.push(child.id);
+      }
+    });
+    setParticipatingChildIds(childIds);
+  }, [participantDetails, userChildren]);
+
+  // Sync when the hook value changes
+  useEffect(() => {
+    setLocalParticipantDetails(participantDetails);
+  }, [participantDetails]);
 
   const handleUpdatePlaydateSubmit = (values: any) => {
     handleUpdatePlaydate(values, playdate);
     setIsEditDialogOpen(false);
   };
 
-  const handleParticipantRemoved = async () => {
-    await loadPlaydateData();
+  // Handle removing a participant
+  const handleParticipantRemoved = async (participantId: string, childIdToRemove: string) => {
+    // Call the hook function to remove from database
+    await handleRemoveParticipant(participantId, childIdToRemove);
+    
+    // Update local state immediately for a responsive UI
+    setLocalParticipantDetails(prev => {
+      const updated = { ...prev };
+      for (const key in updated) {
+        if (updated[key].participantId === participantId && updated[key].child.id === childIdToRemove) {
+          delete updated[key];
+          break;
+        }
+      }
+      return updated;
+    });
   };
 
   const handleJoin = async (selectedChildIds: string[]) => {
@@ -92,11 +130,12 @@ const PlaydateDetail = () => {
       <div className="grid md:grid-cols-3 gap-6 mt-6">
         <div className="md:col-span-2 space-y-6">
           <PlaydateParticipants 
-            participantDetails={participantDetails} 
+            participantDetails={localParticipantDetails} 
             playdateId={id || ''}
             isCompleted={isCompleted}
             isCanceled={isCanceled}
             onParticipantRemoved={handleParticipantRemoved}
+            isRemoving={isRemoving}
           />
         </div>
 
@@ -108,6 +147,7 @@ const PlaydateDetail = () => {
               onJoin={handleJoin}
               isCompleted={isCompleted}
               isCanceled={isCanceled}
+              alreadyJoined={participatingChildIds}
             />
           )}
 

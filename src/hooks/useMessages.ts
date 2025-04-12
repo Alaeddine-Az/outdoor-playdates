@@ -18,6 +18,8 @@ export function useMessages(otherId?: string) {
       return;
     }
 
+    let channel: any;
+
     async function loadMessages() {
       setLoading(true);
       setError(null);
@@ -75,7 +77,7 @@ export function useMessages(otherId?: string) {
         }
 
         // Set up real-time subscription for new messages
-        const channel = supabase
+        channel = supabase
           .channel('messages_channel')
           .on('postgres_changes', {
             event: 'INSERT',
@@ -96,9 +98,7 @@ export function useMessages(otherId?: string) {
           })
           .subscribe();
 
-        return () => {
-          supabase.removeChannel(channel);
-        };
+        setLoading(false);
       } catch (e: any) {
         console.error('Error loading messages:', e);
         setError(e.message);
@@ -107,12 +107,20 @@ export function useMessages(otherId?: string) {
           description: e.message,
           variant: 'destructive',
         });
-      } finally {
         setLoading(false);
       }
     }
 
+    // Call loadMessages without trying to get a return value
     loadMessages();
+    
+    // Clean up function for useEffect
+    return () => {
+      // Only unsubscribe if the channel exists
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, [user, otherId]);
 
   const sendMessage = async (content: string) => {
@@ -130,10 +138,6 @@ export function useMessages(otherId?: string) {
         .select();
 
       if (error) throw error;
-
-      if (data) {
-        setMessages(prev => [...prev, data[0] as Message]);
-      }
       
       return { success: true };
     } catch (e: any) {

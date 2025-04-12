@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ChildProfile } from '@/types';
 import { Link } from 'react-router-dom';
@@ -37,6 +36,20 @@ export default function ChildrenList({ children, parentId, isCurrentUser }: Chil
                   {child.name}
                 </Link>
                 <p className="text-sm text-muted-foreground">{child.age} years old</p>
+
+                {/* Show interests if available */}
+                {child.interests && child.interests.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {child.interests.slice(0, 2).map((interest) => (
+                      <Badge
+                        key={interest}
+                        className="text-xs bg-green-100 text-green-700 rounded-full px-2 py-0.5"
+                      >
+                        {interest}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             
