@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export const initializeAdminRole = async () => {
@@ -30,6 +29,13 @@ export const initializeAdminRole = async () => {
       return { success: true, message: 'Admin role already assigned' };
     }
     
+    // 🔥 Trace log before inserting into user_roles
+    console.trace('🔥 INSERT to user_roles from initializeAdminRole()', {
+      user_id: adminUserId,
+      role: 'admin',
+      context: 'Ensuring admin@admin.com has admin role'
+    });
+
     // Insert admin role if it doesn't exist
     const { data: insertData, error: insertError } = await supabase
       .from('user_roles')
