@@ -7,12 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon, Clock, MapPin, Users } from "lucide-react";
+import { CalendarIcon, Clock, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { LocationInput } from '@/components/LocationInput';
 import {
   Form,
   FormControl,
@@ -43,6 +44,8 @@ const PlaydateCreationForm = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isMobile = useIsMobile();
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -78,17 +81,28 @@ const PlaydateCreationForm = () => {
       const [endHour, endMinute] = values.endTime.split(':').map(Number);
       endDateTime.setHours(endHour, endMinute);
       
+      // Prepare data for insertion, including coordinates if available
+      const playdateData = {
+        title: values.title,
+        description: values.description,
+        location: values.location,
+        start_time: startDateTime.toISOString(),
+        end_time: endDateTime.toISOString(),
+        max_participants: values.maxParticipants,
+        creator_id: user.id,
+      };
+      
+      // Add coordinates if available
+      if (latitude !== null && longitude !== null) {
+        Object.assign(playdateData, {
+          latitude,
+          longitude
+        });
+      }
+      
       const { data, error } = await supabase
         .from('playdates')
-        .insert({
-          title: values.title,
-          description: values.description,
-          location: values.location,
-          start_time: startDateTime.toISOString(),
-          end_time: endDateTime.toISOString(),
-          max_participants: values.maxParticipants,
-          creator_id: user.id,
-        })
+        .insert(playdateData)
         .select();
       
       if (error) throw error;
@@ -112,6 +126,11 @@ const PlaydateCreationForm = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+  
+  const handleLocationCoordinatesChange = (lat: number, lng: number) => {
+    setLatitude(lat);
+    setLongitude(lng);
   };
   
   return (
@@ -166,15 +185,16 @@ const PlaydateCreationForm = () => {
                 <FormItem>
                   <FormLabel>Location</FormLabel>
                   <FormControl>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                      <Input 
-                        placeholder="e.g. Nose Hill Park" 
-                        className="pl-10"
-                        {...field} 
-                      />
-                    </div>
+                    <LocationInput 
+                      value={field.value}
+                      onChange={field.onChange}
+                      onCoordinatesChange={handleLocationCoordinatesChange}
+                      placeholder="Search for a place..."
+                    />
                   </FormControl>
+                  <FormDescription className="text-xs sm:text-sm">
+                    Enter a location or use your current position.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

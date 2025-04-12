@@ -14,20 +14,20 @@ export function useUserLocation() {
     return cachedLng ? parseFloat(cachedLng) : null;
   });
   
-  const [loading, setLoading] = useState<boolean>(!latitude || !longitude);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Use refs to prevent unnecessary re-fetches and re-renders
-  const fetchAttempted = useRef(false);
-  const isMounted = useRef(true);
+  // Use refs to prevent unnecessary re-fetches
+  const fetchAttemptedRef = useRef(false);
+  const isMountedRef = useRef(true);
 
   const fetchLocation = useCallback(async () => {
-    if (fetchAttempted.current || !isMounted.current) return;
+    if (fetchAttemptedRef.current || !isMountedRef.current) return;
     
     try {
       setLoading(true);
       setError(null);
-      fetchAttempted.current = true;
+      fetchAttemptedRef.current = true;
       
       // Check for cached location
       const cachedLat = localStorage.getItem('user_lat');
@@ -39,7 +39,6 @@ export function useUserLocation() {
       if (cachedLat && cachedLng && cacheTime) {
         const cacheAge = Date.now() - parseInt(cacheTime, 10);
         if (cacheAge < cacheValidForMs) {
-          console.log('Using cached location data');
           setLatitude(parseFloat(cachedLat));
           setLongitude(parseFloat(cachedLng));
           setLoading(false);
@@ -51,7 +50,7 @@ export function useUserLocation() {
       const position = await getUserLocation();
       
       // Only update state if the component is still mounted
-      if (!isMounted.current) return;
+      if (!isMountedRef.current) return;
       
       // Validate the received coordinates
       if (position.coords.latitude === null || position.coords.longitude === null ||
@@ -66,9 +65,8 @@ export function useUserLocation() {
       
       setLatitude(position.coords.latitude);
       setLongitude(position.coords.longitude);
-      setLoading(false);
     } catch (error) {
-      if (!isMounted.current) return;
+      if (!isMountedRef.current) return;
       
       console.error('Error getting location:', error);
       const errorMessage = error instanceof Error 
@@ -76,19 +74,22 @@ export function useUserLocation() {
         : 'Failed to get location';
       
       setError(errorMessage);
-      setLoading(false);
       
       toast({
         title: 'Location Access Error',
-        description: 'We couldn\'t access your location. Nearby playdate suggestions will not be available.',
+        description: 'We couldn\'t access your location. Some location features may not be available.',
         variant: 'destructive'
       });
+    } finally {
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   }, []);
 
   const refreshLocation = useCallback(async () => {
     // Reset fetch attempt flag to allow refetching
-    fetchAttempted.current = false;
+    fetchAttemptedRef.current = false;
     
     // Clear cache
     localStorage.removeItem('user_lat');
@@ -98,28 +99,25 @@ export function useUserLocation() {
     // Fetch fresh location
     await fetchLocation();
     
-    if (isMounted.current) {
+    if (isMountedRef.current && !error) {
       toast({
-        title: 'Location Refreshed',
-        description: error 
-          ? 'We couldn\'t refresh your location. Please check your location settings.' 
-          : 'Your location has been successfully updated.',
-        variant: error ? 'destructive' : 'default'
+        title: 'Location Updated',
+        description: 'Your location has been successfully refreshed.',
       });
     }
   }, [error, fetchLocation]);
 
   useEffect(() => {
-    isMounted.current = true;
+    isMountedRef.current = true;
     
-    // Only fetch if we haven't already attempted and don't have cached data
-    if (!fetchAttempted.current && (!latitude || !longitude)) {
+    // Only fetch if we don't have cached data
+    if (!latitude || !longitude) {
       fetchLocation();
     }
     
     // Cleanup function
     return () => {
-      isMounted.current = false;
+      isMountedRef.current = false;
     };
   }, [fetchLocation, latitude, longitude]);
 
