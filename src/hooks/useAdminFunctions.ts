@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -69,33 +68,20 @@ export function useAdminFunctions() {
     }
   };
 
-const grantAdminRole = async (userId: string) => {
-  setLoading(true);
-  try {
-    console.trace("🔥 INSERT to user_roles from useAdminFunctions.ts → grantAdminRole()", {
-      userId,
-      role: 'admin',
-    });
-
-    const { error } = await supabase
-      .from('user_roles')
-      .insert({
-        user_id: userId,
+  const grantAdminRole = async (userId: string) => {
+    setLoading(true);
+    try {
+      console.trace("🔥 INSERT to user_roles from useAdminFunctions.ts → grantAdminRole()", {
+        userId,
         role: 'admin',
       });
 
-    if (error) {
-      console.error('❌ Failed to grant admin role:', error);
-    } else {
-      console.log('✅ Admin role granted successfully to user:', userId);
-    }
-
-  } catch (err) {
-    console.error('❌ Exception in grantAdminRole:', err);
-  } finally {
-    setLoading(false);
-  }
-};
+      const { error } = await supabase
+        .from('user_roles')
+        .insert({
+          user_id: userId,
+          role: 'admin',
+        });
 
       if (error) throw error;
 
@@ -104,6 +90,7 @@ const grantAdminRole = async (userId: string) => {
         description: 'User now has admin privileges',
       });
 
+      console.log('✅ Admin role granted successfully to user:', userId);
       return { success: true };
     } catch (error: any) {
       console.error('Error granting admin role:', error);
