@@ -69,15 +69,33 @@ export function useAdminFunctions() {
     }
   };
 
-  const grantAdminRole = async (userId: string) => {
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: userId,
-          role: 'admin'
-        });
+const grantAdminRole = async (userId: string) => {
+  setLoading(true);
+  try {
+    console.trace("🔥 INSERT to user_roles from useAdminFunctions.ts → grantAdminRole()", {
+      userId,
+      role: 'admin',
+    });
+
+    const { error } = await supabase
+      .from('user_roles')
+      .insert({
+        user_id: userId,
+        role: 'admin',
+      });
+
+    if (error) {
+      console.error('❌ Failed to grant admin role:', error);
+    } else {
+      console.log('✅ Admin role granted successfully to user:', userId);
+    }
+
+  } catch (err) {
+    console.error('❌ Exception in grantAdminRole:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
       if (error) throw error;
 
