@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -63,6 +64,11 @@ const PlaydateList = ({
     });
   }, [playdates]);
   
+  // Memoize the filtered playdates array
+  const filteredPlaydates = useMemo(() => {
+    return sortedPlaydates.filter(playdate => playdate && playdate.id);
+  }, [sortedPlaydates]);
+  
   return (
     <section className="bg-white rounded-xl shadow-soft border border-muted p-6 hover:shadow-lg transition-all duration-300">
       <div className="flex items-center justify-between mb-6">
@@ -89,7 +95,7 @@ const PlaydateList = ({
             {typeof error === 'object' ? 'An error occurred' : error}
           </p>
         </div>
-      ) : sortedPlaydates.length === 0 ? (
+      ) : filteredPlaydates.length === 0 ? (
         <div className="p-8 text-center bg-muted/30 rounded-xl">
           <h3 className="text-lg font-medium mb-2">{emptyTitle}</h3>
           <p className="text-muted-foreground mb-4">
@@ -98,38 +104,32 @@ const PlaydateList = ({
           {showCreateButton && (
             <Button onClick={() => navigate('/create-playdate')} className="button-glow bg-primary hover:bg-primary/90 text-white bounce-hover">
               <PlusCircle className="h-4 w-4 mr-2" />
-              Create {sortedPlaydates.length === 0 ? 'the first' : 'a new'} playdate
+              Create {filteredPlaydates.length === 0 ? 'the first' : 'a new'} playdate
             </Button>
           )}
         </div>
       ) : (
         <div className="space-y-4">
-          {sortedPlaydates.map((playdate) => {
-            if (!playdate || !playdate.id) {
-              return null;
-            }
-            
-            return (
-              <PlaydateItem 
-                key={playdate.id}
-                id={playdate.id}
-                title={playdate.title}
-                date={playdate.date}
-                time={playdate.time}
-                location={playdate.location}
-                attendees={playdate.families}
-                host={playdate.host}
-                host_id={playdate.host_id}
-                status={getPlaydateStatus(playdate)}
-                distance={playdate.distance}
-                onClick={() => navigate(`/playdate/${playdate.id}`)}
-              />
-            );
-          })}
+          {filteredPlaydates.map((playdate) => (
+            <PlaydateItem 
+              key={playdate.id}
+              id={playdate.id}
+              title={playdate.title}
+              date={playdate.date}
+              time={playdate.time}
+              location={playdate.location}
+              attendees={playdate.families}
+              host={playdate.host}
+              host_id={playdate.host_id}
+              status={getPlaydateStatus(playdate)}
+              distance={playdate.distance}
+              onClick={() => navigate(`/playdate/${playdate.id}`)}
+            />
+          ))}
         </div>
       )}
       
-      {sortedPlaydates.length > 0 && (
+      {filteredPlaydates.length > 0 && (
         <div className="mt-6">
           <Button variant="ghost" className="text-muted-foreground w-full hover:text-primary hover:bg-primary/5 transition-colors">
             View All Playdates

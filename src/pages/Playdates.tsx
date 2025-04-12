@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+
+import React, { useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Sparkles, PartyPopper, CalendarDays, Navigation } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -16,18 +17,26 @@ const Playdates = () => {
   
   // Only log when location data changes
   useEffect(() => {
-    if (!location.loading) {
+    if (!location.loading && location.latitude !== null && location.longitude !== null) {
       console.log("Location data in Playdates component:", {
         latitude: location.latitude,
         longitude: location.longitude,
-        loading: location.loading,
         error: location.error
       });
     }
-  }, [location.latitude, location.longitude, location.loading, location.error]);
+  }, [location.latitude, location.longitude, location.error]);
+  
+  // Memoize the location object to prevent unnecessary re-renders
+  const memoizedLocation = useMemo(() => ({
+    latitude: location.latitude,
+    longitude: location.longitude,
+    loading: location.loading,
+    error: location.error,
+    refreshLocation: location.refreshLocation
+  }), [location.latitude, location.longitude, location.loading, location.error, location.refreshLocation]);
   
   const { allPlaydates, myPlaydates, pastPlaydates, nearbyPlaydates, loading, error } = usePlaydates({
-    userLocation: location,
+    userLocation: memoizedLocation,
     maxDistance: 10
   });
   
@@ -38,9 +47,7 @@ const Playdates = () => {
         all: allPlaydates?.length || 0,
         my: myPlaydates?.length || 0,
         past: pastPlaydates?.length || 0,
-        nearby: nearbyPlaydates?.length || 0,
-        hasError: !!error,
-        errorDetails: error || 'None'
+        nearby: nearbyPlaydates?.length || 0
       });
     }
   }, [
@@ -48,8 +55,7 @@ const Playdates = () => {
     allPlaydates?.length,
     myPlaydates?.length,
     pastPlaydates?.length,
-    nearbyPlaydates?.length,
-    error
+    nearbyPlaydates?.length
   ]);
   
   if (!user) {

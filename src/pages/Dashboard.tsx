@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+
+import React, { useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,9 +16,18 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useUserLocation();
   
-  // Only log location data once when it changes to reduce console spam
+  // Memoize the location object to prevent unnecessary re-renders
+  const memoizedLocation = useMemo(() => ({
+    latitude: location.latitude,
+    longitude: location.longitude,
+    loading: location.loading,
+    error: location.error,
+    refreshLocation: location.refreshLocation
+  }), [location.latitude, location.longitude, location.loading, location.error, location.refreshLocation]);
+  
+  // Only log once when location data changes to reduce console spam
   useEffect(() => {
-    if (!location.loading) {
+    if (!location.loading && (location.latitude !== null || location.longitude !== null)) {
       console.log("Location data in Dashboard component:", {
         latitude: location.latitude,
         longitude: location.longitude,
@@ -25,7 +35,7 @@ const Dashboard = () => {
         error: location.error
       });
     }
-  }, [location.latitude, location.longitude, location.loading, location.error]);
+  }, [location.latitude, location.longitude, location.error]);
   
   const {
     loading,
@@ -36,7 +46,7 @@ const Dashboard = () => {
     nearbyEvents,
     nearbyPlaydates,
     error
-  } = useDashboard(location);
+  } = useDashboard(memoizedLocation);
   
   // Only log on actual data changes, not every render
   useEffect(() => {

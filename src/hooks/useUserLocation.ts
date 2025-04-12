@@ -4,9 +4,17 @@ import { getUserLocation } from '@/utils/locationUtils';
 import { toast } from '@/components/ui/use-toast';
 
 export function useUserLocation() {
-  const [latitude, setLatitude] = useState<number | null>(null);
-  const [longitude, setLongitude] = useState<number | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [latitude, setLatitude] = useState<number | null>(() => {
+    const cachedLat = localStorage.getItem('user_lat');
+    return cachedLat ? parseFloat(cachedLat) : null;
+  });
+  
+  const [longitude, setLongitude] = useState<number | null>(() => {
+    const cachedLng = localStorage.getItem('user_lng');
+    return cachedLng ? parseFloat(cachedLng) : null;
+  });
+  
+  const [loading, setLoading] = useState<boolean>(!latitude || !longitude);
   const [error, setError] = useState<string | null>(null);
   
   // Use refs to prevent unnecessary re-fetches and re-renders
@@ -104,8 +112,8 @@ export function useUserLocation() {
   useEffect(() => {
     isMounted.current = true;
     
-    // Only fetch if we haven't already attempted
-    if (!fetchAttempted.current) {
+    // Only fetch if we haven't already attempted and don't have cached data
+    if (!fetchAttempted.current && (!latitude || !longitude)) {
       fetchLocation();
     }
     
@@ -113,7 +121,7 @@ export function useUserLocation() {
     return () => {
       isMounted.current = false;
     };
-  }, [fetchLocation]);
+  }, [fetchLocation, latitude, longitude]);
 
   return {
     latitude,
