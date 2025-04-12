@@ -16,7 +16,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useUserLocation();
   
-  // Debug location data
+  // Debug location data once, not in a dependency that causes re-renders
   useEffect(() => {
     console.log("Location data in Dashboard component:", {
       latitude: location.latitude,
@@ -24,7 +24,7 @@ const Dashboard = () => {
       loading: location.loading,
       error: location.error
     });
-  }, [location]);
+  }, [location.latitude, location.longitude, location.loading, location.error]);
   
   const {
     loading,
@@ -37,19 +37,22 @@ const Dashboard = () => {
     error
   } = useDashboard(location);
   
+  // Only log on actual data changes, not every render
   useEffect(() => {
-    console.log("Dashboard data loaded:", {
-      profileLoaded: !!profile,
-      childrenCount: children?.length || 0,
-      upcomingCount: upcomingPlaydates?.length || 0,
-      nearbyCount: nearbyPlaydates?.length || 0,
-      hasError: !!error
-    });
+    if (!loading) {
+      console.log("Dashboard data loaded:", {
+        profileLoaded: !!profile,
+        childrenCount: children?.length || 0,
+        upcomingCount: upcomingPlaydates?.length || 0,
+        nearbyCount: nearbyPlaydates?.length || 0,
+        hasError: !!error
+      });
+    }
     
     if (error) {
       console.error("Error loading dashboard data:", error);
     }
-  }, [profile, children, upcomingPlaydates, nearbyPlaydates, error]);
+  }, [loading, profile, children, upcomingPlaydates, nearbyPlaydates, error]);
 
   useEffect(() => {
     if (error) {

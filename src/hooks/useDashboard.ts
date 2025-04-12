@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,7 +21,7 @@ interface PlaydateData {
   start_time?: string;
   latitude?: number;
   longitude?: number;
-  distance?: number;  // Added distance property to fix TypeScript errors
+  distance?: number;
 }
 
 interface ConnectionData {
@@ -47,6 +48,9 @@ export const useDashboard = (userLocation?: LocationData) => {
   const [nearbyPlaydates, setNearbyPlaydates] = useState<PlaydateData[]>([]);
   const [suggestedConnections, setSuggestedConnections] = useState<ConnectionData[]>([]);
   const [nearbyEvents, setNearbyEvents] = useState<DashboardEvent[]>([]);
+  
+  // Use a ref to prevent infinite fetching
+  const fetchInProgress = useRef(false);
 
   useEffect(() => {
     if (profileError) {
@@ -60,8 +64,12 @@ export const useDashboard = (userLocation?: LocationData) => {
       return;
     }
 
+    // Skip fetch if it's already in progress
+    if (fetchInProgress.current) return;
+
     const fetchDashboardData = async () => {
       try {
+        fetchInProgress.current = true;
         setLoading(true);
 
         if (user) {
@@ -405,10 +413,18 @@ export const useDashboard = (userLocation?: LocationData) => {
         console.error("Error loading dashboard data:", err);
         setError("Failed to load dashboard data");
         setLoading(false);
+      } finally {
+        // Always reset the fetch flag when done
+        fetchInProgress.current = false;
       }
     };
 
     fetchDashboardData();
+    
+    // Clean up function to ensure we don't have dangling requests
+    return () => {
+      fetchInProgress.current = false;
+    };
   }, [user, profile, profileLoading, profileError, userLocation]);
 
   return {

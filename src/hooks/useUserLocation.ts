@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getUserLocation } from '@/utils/locationUtils';
 import { toast } from '@/components/ui/use-toast';
 
@@ -8,11 +8,17 @@ export function useUserLocation() {
   const [longitude, setLongitude] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Use a ref to prevent unnecessary re-fetches
+  const fetchAttempted = useRef(false);
 
   const fetchLocation = useCallback(async () => {
+    if (fetchAttempted.current) return;
+    
     try {
       setLoading(true);
       setError(null);
+      fetchAttempted.current = true;
       
       // Check for cached location
       const cachedLat = localStorage.getItem('user_lat');
@@ -84,6 +90,9 @@ export function useUserLocation() {
   }, []);
 
   const refreshLocation = useCallback(async () => {
+    // Reset fetch attempt flag to allow refetching
+    fetchAttempted.current = false;
+    
     // Clear cache
     localStorage.removeItem('user_lat');
     localStorage.removeItem('user_lng');
@@ -103,7 +112,10 @@ export function useUserLocation() {
 
   useEffect(() => {
     fetchLocation();
-  }, [fetchLocation]);
+    // We intentionally don't include fetchLocation in the dependency array
+    // to prevent an infinite loop, since it's wrapped in useCallback
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     latitude,

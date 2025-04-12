@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Sparkles, PartyPopper, CalendarDays, Navigation } from 'lucide-react';
@@ -15,7 +14,7 @@ const Playdates = () => {
   const { user } = useAuth();
   const location = useUserLocation();
   
-  // Debug location data
+  // Debug location data only when it changes, not on every render
   useEffect(() => {
     console.log("Location data in Playdates component:", {
       latitude: location.latitude,
@@ -23,22 +22,25 @@ const Playdates = () => {
       loading: location.loading,
       error: location.error
     });
-  }, [location]);
+  }, [location.latitude, location.longitude, location.loading, location.error]);
   
   const { allPlaydates, myPlaydates, pastPlaydates, nearbyPlaydates, loading, error } = usePlaydates({
     userLocation: location,
     maxDistance: 10
   });
   
+  // Only log when playdate data actually changes
   useEffect(() => {
-    console.log("Playdates data loaded:", {
-      all: allPlaydates?.length || 0,
-      my: myPlaydates?.length || 0,
-      past: pastPlaydates?.length || 0,
-      nearby: nearbyPlaydates?.length || 0,
-      hasError: !!error,
-      errorDetails: error || 'None'
-    });
+    if (!loading) {
+      console.log("Playdates data loaded:", {
+        all: allPlaydates?.length || 0,
+        my: myPlaydates?.length || 0,
+        past: pastPlaydates?.length || 0,
+        nearby: nearbyPlaydates?.length || 0,
+        hasError: !!error,
+        errorDetails: error || 'None'
+      });
+    }
     
     if (error) {
       console.error("Error loading playdates:", error);
@@ -48,7 +50,7 @@ const Playdates = () => {
         variant: "destructive"
       });
     }
-  }, [allPlaydates, myPlaydates, pastPlaydates, nearbyPlaydates, error]);
+  }, [allPlaydates, myPlaydates, pastPlaydates, nearbyPlaydates, error, loading]);
   
   if (!user) {
     toast({
