@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,7 +25,6 @@ export const usePlaydateActions = (
 
     setIsJoining(true);
     try {
-      // Check if the parent already has any children in this playdate
       const { data: existingParticipation, error: checkError } = await supabase
         .from('playdate_participants')
         .select('id, child_ids')
@@ -37,7 +35,6 @@ export const usePlaydateActions = (
       if (checkError && checkError.code !== 'PGRST116') throw checkError;
 
       if (existingParticipation) {
-        // Update existing participation with additional children
         const updatedChildIds = [
           ...new Set([
             ...(existingParticipation.child_ids || []),
@@ -49,16 +46,15 @@ export const usePlaydateActions = (
           .from('playdate_participants')
           .update({
             child_ids: updatedChildIds,
-            child_id: selectedChildIds[0] // Keep this for backward compatibility
+            child_id: selectedChildIds[0]
           })
           .eq('id', existingParticipation.id);
 
         if (updateError) throw updateError;
       } else {
-        // Create new participation
         const { error } = await supabase.from('playdate_participants').insert({
           playdate_id: playdateId,
-          child_id: selectedChildIds[0], // Primary child for backward compatibility
+          child_id: selectedChildIds[0],
           child_ids: selectedChildIds,
           parent_id: user.id
         });
@@ -144,7 +140,6 @@ export const usePlaydateActions = (
     setIsRemoving(prev => [...prev, participantId]);
 
     try {
-      // Fetch the current participant row
       const { data: row, error: fetchError } = await supabase
         .from('playdate_participants')
         .select('child_ids, parent_id, playdate_id')
@@ -153,7 +148,6 @@ export const usePlaydateActions = (
 
       if (fetchError) throw fetchError;
 
-      // Get the playdate to check if user is creator
       const { data: playdateData, error: playdateError } = await supabase
         .from('playdates')
         .select('creator_id')
@@ -164,7 +158,6 @@ export const usePlaydateActions = (
       
       const isCreator = user.id === playdateData.creator_id;
 
-      // Security check - only allow parents to remove their own children or creators to remove any child
       if (row.parent_id !== user.id && !isCreator) {
         throw new Error("You can only remove your own children from the playdate.");
       }
@@ -178,7 +171,6 @@ export const usePlaydateActions = (
       const updatedChildIds = currentChildIds.filter(id => id !== childIdToRemove);
 
       if (updatedChildIds.length === 0) {
-        // No more children left – delete the whole row
         const { error: deleteError } = await supabase
           .from('playdate_participants')
           .delete()
@@ -188,12 +180,11 @@ export const usePlaydateActions = (
 
         console.log("✅ Deleted participant row because no more children remained.");
       } else {
-        // Update the row with remaining children
         const { error: updateError } = await supabase
           .from('playdate_participants')
           .update({ 
             child_ids: updatedChildIds,
-            child_id: updatedChildIds[0] // Update primary child ID to the first remaining child
+            child_id: updatedChildIds[0]
           })
           .eq('id', participantId);
 
@@ -222,7 +213,34 @@ export const usePlaydateActions = (
   };
 
   const handlePlaydateCanceled = async () => {
-    await refreshData();
+    if (!user || !playdateId) return;
+
+    setIsProcessing(true);
+    try {
+      const { error } = await supabase
+        .from('playdates')
+        .update({ status: 'cancelled' }) // ✅ Must match DB constraint
+        .eq('id', playdateId)
+        .eq('creator_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Cancelled',
+        description: 'Playdate was successfully cancelled.',
+      });
+
+      await refreshData();
+    } catch (err: any) {
+      console.error('Error cancelling playdate:', err);
+      toast({
+        title: 'Failed',
+        description: err.message || 'Could not cancel playdate.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return {
