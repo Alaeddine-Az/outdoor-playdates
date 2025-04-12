@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -16,14 +15,16 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useUserLocation();
   
-  // Debug location data once, not in a dependency that causes re-renders
+  // Only log location data once when it changes to reduce console spam
   useEffect(() => {
-    console.log("Location data in Dashboard component:", {
-      latitude: location.latitude,
-      longitude: location.longitude,
-      loading: location.loading,
-      error: location.error
-    });
+    if (!location.loading) {
+      console.log("Location data in Dashboard component:", {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        loading: location.loading,
+        error: location.error
+      });
+    }
   }, [location.latitude, location.longitude, location.loading, location.error]);
   
   const {
@@ -48,11 +49,7 @@ const Dashboard = () => {
         hasError: !!error
       });
     }
-    
-    if (error) {
-      console.error("Error loading dashboard data:", error);
-    }
-  }, [loading, profile, children, upcomingPlaydates, nearbyPlaydates, error]);
+  }, [loading, profile, children?.length, upcomingPlaydates?.length, nearbyPlaydates?.length, error]);
 
   useEffect(() => {
     if (error) {

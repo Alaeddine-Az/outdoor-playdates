@@ -14,14 +14,16 @@ const Playdates = () => {
   const { user } = useAuth();
   const location = useUserLocation();
   
-  // Debug location data only when it changes, not on every render
+  // Only log when location data changes
   useEffect(() => {
-    console.log("Location data in Playdates component:", {
-      latitude: location.latitude,
-      longitude: location.longitude,
-      loading: location.loading,
-      error: location.error
-    });
+    if (!location.loading) {
+      console.log("Location data in Playdates component:", {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        loading: location.loading,
+        error: location.error
+      });
+    }
   }, [location.latitude, location.longitude, location.loading, location.error]);
   
   const { allPlaydates, myPlaydates, pastPlaydates, nearbyPlaydates, loading, error } = usePlaydates({
@@ -41,16 +43,14 @@ const Playdates = () => {
         errorDetails: error || 'None'
       });
     }
-    
-    if (error) {
-      console.error("Error loading playdates:", error);
-      toast({
-        title: "Error Loading Playdates",
-        description: "There was a problem loading the playdates. Please try again later.",
-        variant: "destructive"
-      });
-    }
-  }, [allPlaydates, myPlaydates, pastPlaydates, nearbyPlaydates, error, loading]);
+  }, [
+    loading,
+    allPlaydates?.length,
+    myPlaydates?.length,
+    pastPlaydates?.length,
+    nearbyPlaydates?.length,
+    error
+  ]);
   
   if (!user) {
     toast({
@@ -97,7 +97,6 @@ const Playdates = () => {
       </header>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 fade-up-stagger">
-        {/* Main content area */}
         <div className="md:col-span-2 space-y-6">
           {hasLocation && (
             <>
@@ -173,7 +172,6 @@ const Playdates = () => {
           />
         </div>
         
-        {/* Sidebar content */}
         <PlaydateSidebar />
       </div>
     </div>

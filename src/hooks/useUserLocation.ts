@@ -9,11 +9,12 @@ export function useUserLocation() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Use a ref to prevent unnecessary re-fetches
+  // Use refs to prevent unnecessary re-fetches and re-renders
   const fetchAttempted = useRef(false);
+  const isMounted = useRef(true);
 
   const fetchLocation = useCallback(async () => {
-    if (fetchAttempted.current) return;
+    if (fetchAttempted.current || !isMounted.current) return;
     
     try {
       setLoading(true);
@@ -30,23 +31,19 @@ export function useUserLocation() {
       if (cachedLat && cachedLng && cacheTime) {
         const cacheAge = Date.now() - parseInt(cacheTime, 10);
         if (cacheAge < cacheValidForMs) {
-          console.log('Using cached location data:', { cachedLat, cachedLng });
+          console.log('Using cached location data');
           setLatitude(parseFloat(cachedLat));
           setLongitude(parseFloat(cachedLng));
           setLoading(false);
           return;
-        } else {
-          console.log('Cached location expired, fetching fresh data');
         }
       }
       
       // Get fresh location
-      console.log('Requesting fresh location from browser');
       const position = await getUserLocation();
-      console.log('Received location from browser:', {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      });
+      
+      // Only update state if the component is still mounted
+      if (!isMounted.current) return;
       
       // Validate the received coordinates
       if (position.coords.latitude === null || position.coords.longitude === null ||
@@ -63,6 +60,8 @@ export function useUserLocation() {
       setLongitude(position.coords.longitude);
       setLoading(false);
     } catch (error) {
+      if (!isMounted.current) return;
+      
       console.error('Error getting location:', error);
       const errorMessage = error instanceof Error 
         ? error.message 
@@ -76,16 +75,6 @@ export function useUserLocation() {
         description: 'We couldn\'t access your location. Nearby playdate suggestions will not be available.',
         variant: 'destructive'
       });
-      
-      // Attempt to get approximate location from IP if available
-      try {
-        if (navigator.geolocation === undefined) {
-          // Only try IP geolocation if browser geolocation is not available
-          console.log("Browser geolocation not available, would try IP geolocation in production");
-        }
-      } catch (ipError) {
-        console.error('Fallback IP geolocation also failed:', ipError);
-      }
     }
   }, []);
 
@@ -101,21 +90,30 @@ export function useUserLocation() {
     // Fetch fresh location
     await fetchLocation();
     
-    toast({
-      title: 'Location Refreshed',
-      description: error 
-        ? 'We couldn\'t refresh your location. Please check your location settings.' 
-        : 'Your location has been successfully updated.',
-      variant: error ? 'destructive' : 'default'
-    });
+    if (isMounted.current) {
+      toast({
+        title: 'Location Refreshed',
+        description: error 
+          ? 'We couldn\'t refresh your location. Please check your location settings.' 
+          : 'Your location has been successfully updated.',
+        variant: error ? 'destructive' : 'default'
+      });
+    }
   }, [error, fetchLocation]);
 
   useEffect(() => {
-    fetchLocation();
-    // We intentionally don't include fetchLocation in the dependency array
-    // to prevent an infinite loop, since it's wrapped in useCallback
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    isMounted.current = true;
+    
+    // Only fetch if we haven't already attempted
+    if (!fetchAttempted.current) {
+      fetchLocation();
+    }
+    
+    // Cleanup function
+    return () => {
+      isMounted.current = false;
+    };
+  }, [fetchLocation]);
 
   return {
     latitude,
