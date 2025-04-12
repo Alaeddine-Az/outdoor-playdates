@@ -15,6 +15,17 @@ import { useUserLocation } from '@/hooks/useUserLocation';
 const Dashboard = () => {
   const navigate = useNavigate();
   const location = useUserLocation();
+  
+  // Debug location data
+  useEffect(() => {
+    console.log("Location data in Dashboard component:", {
+      latitude: location.latitude,
+      longitude: location.longitude,
+      loading: location.loading,
+      error: location.error
+    });
+  }, [location]);
+  
   const {
     loading,
     profile,
@@ -25,6 +36,20 @@ const Dashboard = () => {
     nearbyPlaydates,
     error
   } = useDashboard(location);
+  
+  useEffect(() => {
+    console.log("Dashboard data loaded:", {
+      profileLoaded: !!profile,
+      childrenCount: children?.length || 0,
+      upcomingCount: upcomingPlaydates?.length || 0,
+      nearbyCount: nearbyPlaydates?.length || 0,
+      hasError: !!error
+    });
+    
+    if (error) {
+      console.error("Error loading dashboard data:", error);
+    }
+  }, [profile, children, upcomingPlaydates, nearbyPlaydates, error]);
 
   useEffect(() => {
     if (error) {

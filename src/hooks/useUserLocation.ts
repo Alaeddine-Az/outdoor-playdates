@@ -24,16 +24,23 @@ export function useUserLocation() {
       if (cachedLat && cachedLng && cacheTime) {
         const cacheAge = Date.now() - parseInt(cacheTime, 10);
         if (cacheAge < cacheValidForMs) {
-          console.log('Using cached location data');
+          console.log('Using cached location data:', { cachedLat, cachedLng });
           setLatitude(parseFloat(cachedLat));
           setLongitude(parseFloat(cachedLng));
           setLoading(false);
           return;
+        } else {
+          console.log('Cached location expired, fetching fresh data');
         }
       }
       
       // Get fresh location
+      console.log('Requesting fresh location from browser');
       const position = await getUserLocation();
+      console.log('Received location from browser:', {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      });
       
       // Cache the location
       localStorage.setItem('user_lat', position.coords.latitude.toString());

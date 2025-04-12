@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Sparkles, PartyPopper, CalendarDays, Navigation } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -14,10 +14,35 @@ const Playdates = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const location = useUserLocation();
+  
+  // Debug location data
+  useEffect(() => {
+    console.log("Location data in Playdates component:", {
+      latitude: location.latitude,
+      longitude: location.longitude,
+      loading: location.loading,
+      error: location.error
+    });
+  }, [location]);
+  
   const { allPlaydates, myPlaydates, pastPlaydates, nearbyPlaydates, loading, error } = usePlaydates({
     userLocation: location,
     maxDistance: 10
   });
+  
+  useEffect(() => {
+    console.log("Playdates data loaded:", {
+      all: allPlaydates.length,
+      my: myPlaydates.length,
+      past: pastPlaydates.length,
+      nearby: nearbyPlaydates?.length || 0,
+      hasError: !!error
+    });
+    
+    if (error) {
+      console.error("Error loading playdates:", error);
+    }
+  }, [allPlaydates, myPlaydates, pastPlaydates, nearbyPlaydates, error]);
   
   if (!user) {
     toast({

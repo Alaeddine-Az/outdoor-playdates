@@ -10,7 +10,7 @@
 export function getDistanceInKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   // Validate inputs
   if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) {
-    console.warn('Invalid coordinates provided to getDistanceInKm');
+    console.warn('Invalid coordinates provided to getDistanceInKm', { lat1, lon1, lat2, lon2 });
     return Infinity;
   }
   
@@ -34,15 +34,27 @@ function deg2rad(deg: number): number {
  * @returns Promise with coordinates or error
  */
 export function getUserLocation(): Promise<GeolocationPosition> {
+  console.log('Getting user location with browser geolocation API');
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
       reject(new Error('Geolocation is not supported by your browser'));
     } else {
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: true,
-        timeout: 10000, // Increased timeout for better reliability
-        maximumAge: 5 * 60 * 1000 // Allow cached position up to 5 minutes
-      });
+      console.log('Calling getCurrentPosition...');
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log('Successfully got position:', position.coords);
+          resolve(position);
+        }, 
+        (error) => {
+          console.error('Geolocation error:', error.code, error.message);
+          reject(error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000, // Increased timeout for better reliability
+          maximumAge: 5 * 60 * 1000 // Allow cached position up to 5 minutes
+        }
+      );
     }
   });
 }
@@ -61,20 +73,33 @@ export function getNearbyPlaydates(
   playdates: any[], 
   maxDistance: number = 10
 ): any[] {
-  if (!userLat || !userLon || !playdates?.length) {
-    console.warn('Missing required parameters for getNearbyPlaydates');
+  console.log(`Finding playdates near [${userLat}, ${userLon}] within ${maxDistance}km`, { 
+    totalPlaydates: playdates?.length 
+  });
+  
+  if (!userLat || !userLon) {
+    console.warn('Missing user coordinates for getNearbyPlaydates');
+    return [];
+  }
+  
+  if (!playdates?.length) {
+    console.warn('No playdates provided to getNearbyPlaydates');
     return [];
   }
 
   const results = [];
+  let validCoordinates = 0;
+  let invalidCoordinates = 0;
 
   for (const playdate of playdates) {
     // Skip playdates without coordinates, but log them
     if (playdate.latitude == null || playdate.longitude == null) {
-      console.warn(`❌ Skipping playdate: ${playdate.title || 'Unnamed'} - missing coordinates`);
+      console.warn(`❌ Skipping playdate: ${playdate.title || 'Unnamed'} - missing coordinates`, playdate);
+      invalidCoordinates++;
       continue;
     }
-
+    
+    validCoordinates++;
     try {
       const distance = getDistanceInKm(userLat, userLon, playdate.latitude, playdate.longitude);
       
@@ -90,8 +115,9 @@ export function getNearbyPlaydates(
     }
   }
 
+  console.log(`Found ${results.length} playdates within ${maxDistance}km. Valid coords: ${validCoordinates}, Invalid: ${invalidCoordinates}`);
+  
   // Sort by distance (closest first)
   results.sort((a, b) => a.distance - b.distance);
-  console.log(`Found ${results.length} playdates within ${maxDistance}km.`);
   return results;
 }
