@@ -9,7 +9,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, Clock, Users } from "lucide-react";
-import { LocationInput } from '@/components/LocationInput';
+import { LocationInput } from '@/components/location/LocationInput';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
