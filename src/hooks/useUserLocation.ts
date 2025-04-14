@@ -1,98 +1,125 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { getUserLocation } from '@/utils/locationUtils';
 import { toast } from '@/components/ui/use-toast';
-import { useLocationCache } from './location/useLocationCache';
-import { useBrowserGeolocation } from './location/useBrowserGeolocation';
 
 export function useUserLocation() {
-  const [latitude, setLatitude] = useState<number | null>(null);
-  const [longitude, setLongitude] = useState<number | null>(null);
+  const [latitude, setLatitude] = useState<number | null>(() => {
+    const cachedLat = localStorage.getItem('user_lat');
+    return cachedLat ? parseFloat(cachedLat) : null;
+  });
   
-  const { 
-    cachedLatitude, 
-    cachedLongitude, 
-    isCacheValid, 
-    updateCache, 
-    clearCache 
-  } = useLocationCache();
+  const [longitude, setLongitude] = useState<number | null>(() => {
+    const cachedLng = localStorage.getItem('user_lng');
+    return cachedLng ? parseFloat(cachedLng) : null;
+  });
   
-  const { 
-    loading, 
-    error, 
-    fetchLocation 
-  } = useBrowserGeolocation();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Use refs to prevent unnecessary re-fetches
   const fetchAttemptedRef = useRef(false);
   const isMountedRef = useRef(true);
 
-  // Initialize from cache
-  useEffect(() => {
-    if (cachedLatitude && cachedLongitude && isCacheValid) {
-      setLatitude(cachedLatitude);
-      setLongitude(cachedLongitude);
-    }
-  }, [cachedLatitude, cachedLongitude, isCacheValid]);
-
-  const fetchLocationAndUpdateCache = useCallback(async () => {
+  const fetchLocation = useCallback(async () => {
     if (fetchAttemptedRef.current || !isMountedRef.current) return;
     
-    fetchAttemptedRef.current = true;
-    
-    // Use cached location if it's valid
-    if (isCacheValid && cachedLatitude && cachedLongitude) {
-      setLatitude(cachedLatitude);
-      setLongitude(cachedLongitude);
-      return;
+    try {
+      setLoading(true);
+      setError(null);
+      fetchAttemptedRef.current = true;
+      
+      // Check for cached location
+      const cachedLat = localStorage.getItem('user_lat');
+      const cachedLng = localStorage.getItem('user_lng');
+      const cacheTime = localStorage.getItem('location_cache_time');
+      
+      // Use cached location if it's less than 30 minutes old
+      const cacheValidForMs = 30 * 60 * 1000; // 30 minutes
+      if (cachedLat && cachedLng && cacheTime) {
+        const cacheAge = Date.now() - parseInt(cacheTime, 10);
+        if (cacheAge < cacheValidForMs) {
+          setLatitude(parseFloat(cachedLat));
+          setLongitude(parseFloat(cachedLng));
+          setLoading(false);
+          return;
+        }
+      }
+      
+      // Get fresh location
+      const position = await getUserLocation();
+      
+      // Only update state if the component is still mounted
+      if (!isMountedRef.current) return;
+      
+      // Validate the received coordinates
+      if (position.coords.latitude === null || position.coords.longitude === null ||
+          isNaN(position.coords.latitude) || isNaN(position.coords.longitude)) {
+        throw new Error('Invalid location coordinates received from browser');
+      }
+      
+      // Cache the location
+      localStorage.setItem('user_lat', position.coords.latitude.toString());
+      localStorage.setItem('user_lng', position.coords.longitude.toString());
+      localStorage.setItem('location_cache_time', Date.now().toString());
+      
+      setLatitude(position.coords.latitude);
+      setLongitude(position.coords.longitude);
+    } catch (error) {
+      if (!isMountedRef.current) return;
+      
+      console.error('Error getting location:', error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Failed to get location';
+      
+      setError(errorMessage);
+      
+      toast({
+        title: 'Location Access Error',
+        description: 'We couldn\'t access your location. Some location features may not be available.',
+        variant: 'destructive'
+      });
+    } finally {
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
-    
-    // Otherwise get fresh location
-    const result = await fetchLocation();
-    
-    // Only update state if the component is still mounted
-    if (!isMountedRef.current) return;
-    
-    if (result) {
-      updateCache(result.latitude, result.longitude);
-      setLatitude(result.latitude);
-      setLongitude(result.longitude);
-    }
-  }, [fetchLocation, isCacheValid, cachedLatitude, cachedLongitude, updateCache]);
+  }, []);
 
   const refreshLocation = useCallback(async () => {
     // Reset fetch attempt flag to allow refetching
     fetchAttemptedRef.current = false;
     
     // Clear cache
-    clearCache();
+    localStorage.removeItem('user_lat');
+    localStorage.removeItem('user_lng');
+    localStorage.removeItem('location_cache_time');
     
     // Fetch fresh location
-    const result = await fetchLocation();
+    await fetchLocation();
     
-    if (isMountedRef.current && result) {
-      updateCache(result.latitude, result.longitude);
-      setLatitude(result.latitude);
-      setLongitude(result.longitude);
-      
+    if (isMountedRef.current && !error) {
       toast({
         title: 'Location Updated',
         description: 'Your location has been successfully refreshed.',
       });
     }
-  }, [fetchLocation, clearCache, updateCache]);
+  }, [error, fetchLocation]);
 
   useEffect(() => {
     isMountedRef.current = true;
     
     // Only fetch if we don't have cached data
     if (!latitude || !longitude) {
-      fetchLocationAndUpdateCache();
+      fetchLocation();
     }
     
     // Cleanup function
     return () => {
       isMountedRef.current = false;
     };
-  }, [fetchLocationAndUpdateCache, latitude, longitude]);
+  }, [fetchLocation, latitude, longitude]);
 
   return {
     latitude,
