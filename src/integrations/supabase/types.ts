@@ -433,7 +433,6 @@ export type Database = {
           longitude: number | null
           max_participants: number | null
           start_time: string
-          status: string | null
           title: string
           updated_at: string
         }
@@ -448,7 +447,6 @@ export type Database = {
           longitude?: number | null
           max_participants?: number | null
           start_time: string
-          status?: string | null
           title: string
           updated_at?: string
         }
@@ -463,7 +461,6 @@ export type Database = {
           longitude?: number | null
           max_participants?: number | null
           start_time?: string
-          status?: string | null
           title?: string
           updated_at?: string
         }
