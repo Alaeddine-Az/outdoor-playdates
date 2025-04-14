@@ -439,3 +439,22 @@ input, select, textarea, button {
 html {
   scroll-behavior: smooth;
 }
+
+/* Mobile location search styles */
+.location-suggestion-item {
+  @apply transition-colors duration-150 ease-in-out;
+}
+
+.location-suggestion-item:active {
+  @apply bg-gray-700;
+}
+
+/* Dark theme for mobile location search */
+.mobile-dark-theme {
+  @apply bg-black text-white border-gray-700;
+}
+
+/* Improve scrolling on mobile */
+.scroll-smooth {
+  -webkit-overflow-scrolling: touch;
+}
