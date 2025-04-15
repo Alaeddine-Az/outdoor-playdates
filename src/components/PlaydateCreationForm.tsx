@@ -14,9 +14,10 @@ const PlaydateCreationForm = () => {
   const isMobile = useIsMobile();
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
-  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
   
-  console.log('PlaydateCreationForm - API Key available:', !!googleMapsApiKey);
+  // Ensure API key is correctly retrieved from environment variables
+  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+  console.log('PlaydateCreationForm - Google Maps API Key:', googleMapsApiKey ? 'Available' : 'Not available');
   
   const form = useForm<PlaydateFormValues>({
     resolver: zodResolver(playdateFormSchema),
@@ -53,7 +54,8 @@ const PlaydateCreationForm = () => {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
           <PlaydateFormFields 
             form={form} 
-            onLocationCoordinatesChange={handleLocationCoordinatesChange} 
+            onLocationCoordinatesChange={handleLocationCoordinatesChange}
+            googleMapsApiKey={googleMapsApiKey} // Pass API key explicitly
           />
           
           <PlaydateFormActions isSubmitting={isSubmitting} />
