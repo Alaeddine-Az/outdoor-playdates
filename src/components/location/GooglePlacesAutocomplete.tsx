@@ -20,6 +20,8 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
   apiKey
 }) => {
   const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+  const [isScriptLoading, setIsScriptLoading] = useState(true);
+  const [scriptError, setScriptError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Autocomplete options focused on Canada
@@ -30,7 +32,15 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
   };
 
   const onLoad = (autocompleteInstance: google.maps.places.Autocomplete) => {
+    console.log('Google Places Autocomplete loaded successfully');
     setAutocomplete(autocompleteInstance);
+    setIsScriptLoading(false);
+  };
+
+  const onError = (error: Error) => {
+    console.error('Error loading Google Places:', error);
+    setScriptError('Failed to load location search. Please try again.');
+    setIsScriptLoading(false);
   };
 
   const onPlaceChanged = () => {
@@ -43,29 +53,64 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
     }
   };
 
+  if (!apiKey) {
+    return (
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="pl-10"
+        placeholder="API key is missing"
+        disabled
+      />
+    );
+  }
+
   return (
     <LoadScript
       googleMapsApiKey={apiKey}
       libraries={['places']}
+      onLoad={() => console.log('Google Maps script loaded')}
+      onError={onError}
     >
       <div className="relative w-full">
         <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
           <MapPin className="h-4 w-4" />
         </div>
-        <Autocomplete
-          onLoad={onLoad}
-          onPlaceChanged={onPlaceChanged}
-          options={autocompleteOptions}
-        >
+        
+        {isScriptLoading ? (
+          <div className="relative">
+            <Input
+              value={value}
+              className="pl-10"
+              placeholder="Loading location search..."
+              disabled
+            />
+            <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin" />
+          </div>
+        ) : scriptError ? (
           <Input
-            ref={inputRef}
             value={value}
-            onChange={(e) => onChange(e.target.value)}
             className="pl-10"
-            placeholder={placeholder}
+            placeholder={scriptError}
+            disabled
           />
-        </Autocomplete>
+        ) : (
+          <Autocomplete
+            onLoad={onLoad}
+            onPlaceChanged={onPlaceChanged}
+            options={autocompleteOptions}
+          >
+            <Input
+              ref={inputRef}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              className="pl-10"
+              placeholder={placeholder}
+            />
+          </Autocomplete>
+        )}
       </div>
     </LoadScript>
   );
 };
+

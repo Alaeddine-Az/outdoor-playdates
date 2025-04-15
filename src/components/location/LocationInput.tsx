@@ -16,7 +16,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   onChange, 
   onCoordinatesChange, 
   placeholder = "Enter a location...",
-  apiKey = process.env.VITE_GOOGLE_MAPS_API_KEY // Use environment variable
+  apiKey = process.env.VITE_GOOGLE_MAPS_API_KEY
 }) => {
   const handlePlaceSelected = (place: google.maps.places.PlaceResult) => {
     if (place.geometry?.location) {
@@ -41,3 +41,4 @@ export const LocationInput: React.FC<LocationInputProps> = ({
     />
   );
 };
+
