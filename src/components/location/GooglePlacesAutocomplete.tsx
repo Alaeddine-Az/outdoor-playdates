@@ -1,11 +1,8 @@
-
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Loader2, MapPin } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { LoadScript, Autocomplete, Libraries } from '@react-google-maps/api';
 
-// Define libraries as a static constant outside of the component
-// This prevents the warning about reloading the script unnecessarily
 const libraries: Libraries = ['places'];
 
 interface GooglePlacesAutocompleteProps {
@@ -23,48 +20,33 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
   placeholder = "Enter a location...",
   apiKey
 }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
   const [isScriptLoading, setIsScriptLoading] = useState(true);
   const [scriptError, setScriptError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Check if API key is available
-  useEffect(() => {
-    const keyStatus = apiKey && apiKey.trim() !== '' ? 'available' : 'missing';
-    console.log(`GooglePlacesAutocomplete - API key ${keyStatus} (length: ${apiKey?.length || 0})`);
-    
-    if (!apiKey || apiKey.trim() === '') {
-      console.error('Google Maps API key is missing or empty');
-      setScriptError('Google Maps API key is missing');
-      setIsScriptLoading(false);
-    } else {
-      console.log('Google Maps API key is available and will be used');
-      setScriptError(null);
-    }
-  }, [apiKey]);
-
-  // Autocomplete options focused on Canada
   const autocompleteOptions: google.maps.places.AutocompleteOptions = {
     componentRestrictions: { country: 'ca' },
     fields: ['name', 'formatted_address', 'place_id', 'geometry'],
     types: ['establishment', 'geocode']
   };
 
-  const onLoad = (autocompleteInstance: google.maps.places.Autocomplete) => {
-    console.log('Google Places Autocomplete loaded successfully');
-    setAutocomplete(autocompleteInstance);
+  const handleLoad = (instance: google.maps.places.Autocomplete) => {
+    console.log('✅ Google Places Autocomplete loaded');
+    setAutocomplete(instance);
     setIsScriptLoading(false);
   };
 
-  const onError = (error: Error) => {
-    console.error('Error loading Google Places:', error);
+  const handleError = (error: Error) => {
+    console.error('❌ Error loading Google Places:', error);
     setScriptError('Failed to load location search. Please try again.');
     setIsScriptLoading(false);
   };
 
-  const onPlaceChanged = () => {
+  const handlePlaceChanged = () => {
     if (autocomplete) {
       const place = autocomplete.getPlace();
+      console.log('📍 Place selected:', place);
       if (place.formatted_address) {
         onChange(place.formatted_address);
         onPlaceSelected(place);
@@ -82,7 +64,7 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="pl-10"
-          placeholder="Google Maps API key is required"
+          placeholder="Google Maps API key is missing"
           disabled
         />
       </div>
@@ -93,14 +75,14 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
     <LoadScript
       googleMapsApiKey={apiKey}
       libraries={libraries}
-      onLoad={() => console.log('Google Maps script loaded')}
-      onError={onError}
+      onLoad={() => console.log('📦 Google Maps script loaded')}
+      onError={handleError}
     >
       <div className="relative w-full">
         <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
           <MapPin className="h-4 w-4" />
         </div>
-        
+
         {isScriptLoading ? (
           <div className="relative">
             <Input
@@ -120,8 +102,8 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
           />
         ) : (
           <Autocomplete
-            onLoad={onLoad}
-            onPlaceChanged={onPlaceChanged}
+            onLoad={handleLoad}
+            onPlaceChanged={handlePlaceChanged}
             options={autocompleteOptions}
           >
             <Input
