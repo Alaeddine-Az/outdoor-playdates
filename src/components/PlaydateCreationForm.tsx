@@ -14,6 +14,9 @@ const PlaydateCreationForm = () => {
   const isMobile = useIsMobile();
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
+  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+  
+  console.log('PlaydateCreationForm - API Key available:', !!googleMapsApiKey);
   
   const form = useForm<PlaydateFormValues>({
     resolver: zodResolver(playdateFormSchema),

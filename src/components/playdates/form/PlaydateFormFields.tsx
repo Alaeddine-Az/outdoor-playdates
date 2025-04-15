@@ -37,7 +37,9 @@ export const PlaydateFormFields: React.FC<PlaydateFormFieldsProps> = ({
   onLocationCoordinatesChange 
 }) => {
   const isMobile = useIsMobile();
-  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+  
+  console.log('Using Google Maps API Key:', googleMapsApiKey ? 'Available' : 'Not available');
   
   return (
     <>

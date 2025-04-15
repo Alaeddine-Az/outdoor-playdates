@@ -26,11 +26,12 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
 
   // Check if API key is available
   useEffect(() => {
-    if (!apiKey) {
-      console.error('Google Maps API key is missing');
+    if (!apiKey || apiKey.trim() === '') {
+      console.error('Google Maps API key is missing or empty');
       setScriptError('Google Maps API key is missing');
       setIsScriptLoading(false);
     } else {
+      console.log('Google Maps API key is available and will be used');
       setScriptError(null);
     }
   }, [apiKey]);
@@ -64,7 +65,7 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
     }
   };
 
-  if (!apiKey) {
+  if (!apiKey || apiKey.trim() === '') {
     return (
       <div className="relative w-full">
         <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
