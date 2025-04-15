@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
@@ -15,9 +15,16 @@ const PlaydateCreationForm = () => {
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   
-  // Ensure API key is correctly retrieved from environment variables
+  // Get API key from environment variable
   const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-  console.log('PlaydateCreationForm - Google Maps API Key:', googleMapsApiKey ? 'Available' : 'Not available');
+  
+  // Log for debugging
+  useEffect(() => {
+    console.log('PlaydateCreationForm - Google Maps API Key:', googleMapsApiKey ? 'Available' : 'Not available');
+    if (googleMapsApiKey) {
+      console.log('API Key length:', googleMapsApiKey.length);
+    }
+  }, [googleMapsApiKey]);
   
   const form = useForm<PlaydateFormValues>({
     resolver: zodResolver(playdateFormSchema),

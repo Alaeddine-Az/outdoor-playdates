@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GooglePlacesAutocomplete } from './GooglePlacesAutocomplete';
 import { toast } from '@/components/ui/use-toast';
 import { Input } from "@/components/ui/input";
@@ -18,9 +18,13 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   onChange, 
   onCoordinatesChange, 
   placeholder = "Enter a location...",
-  apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+  apiKey = ''
 }) => {
   const [manualMode, setManualMode] = useState<boolean>(false);
+  
+  useEffect(() => {
+    console.log('LocationInput - API Key available:', apiKey ? 'yes' : 'no', 'length:', apiKey?.length || 0);
+  }, [apiKey]);
   
   const handlePlaceSelected = (place: google.maps.places.PlaceResult) => {
     if (place.geometry?.location) {
@@ -42,11 +46,11 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   React.useEffect(() => {
     if (!hasApiKey) {
       setManualMode(true);
+    } else {
+      // If we have an API key, default to Google Places search
+      setManualMode(false);
     }
   }, [hasApiKey]);
-  
-  // Log for debugging
-  console.log('Google Maps API Key available:', hasApiKey ? 'yes' : 'no');
   
   // Handle manual mode toggle
   const toggleManualMode = () => {
@@ -96,7 +100,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
         onChange={onChange}
         onPlaceSelected={handlePlaceSelected}
         placeholder={placeholder}
-        apiKey={apiKey || ''}
+        apiKey={apiKey}
       />
       <button 
         type="button"

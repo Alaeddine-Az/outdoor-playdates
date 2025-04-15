@@ -26,6 +26,9 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
 
   // Check if API key is available
   useEffect(() => {
+    const keyStatus = apiKey && apiKey.trim() !== '' ? 'available' : 'missing';
+    console.log(`GooglePlacesAutocomplete - API key ${keyStatus} (length: ${apiKey?.length || 0})`);
+    
     if (!apiKey || apiKey.trim() === '') {
       console.error('Google Maps API key is missing or empty');
       setScriptError('Google Maps API key is missing');
