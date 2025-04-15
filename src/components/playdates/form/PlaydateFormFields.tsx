@@ -93,12 +93,14 @@ export const PlaydateFormFields: React.FC<PlaydateFormFieldsProps> = ({
                   value={field.value}
                   onChange={field.onChange}
                   onCoordinatesChange={onLocationCoordinatesChange}
-                  placeholder="Search for a place..."
+                  placeholder="Enter a location..."
                   apiKey={googleMapsApiKey}
                 />
               </FormControl>
               <FormDescription className="text-xs sm:text-sm">
-                Enter a location or use your current position.
+                {googleMapsApiKey 
+                  ? "Enter a location or use your current position." 
+                  : "Enter the location (API key not available for automatic search)."}
               </FormDescription>
               <FormMessage />
             </FormItem>

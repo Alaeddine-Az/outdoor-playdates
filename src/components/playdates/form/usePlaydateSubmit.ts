@@ -49,12 +49,19 @@ export const usePlaydateSubmit = ({ userId, latitude, longitude }: UsePlaydateSu
         status: 'active', // Set default status
       };
       
-      // Add coordinates if available
+      // Add coordinates if available, or use default coordinates for Toronto if location provided but no coordinates
       if (latitude !== null && longitude !== null) {
         Object.assign(playdateData, {
           latitude,
           longitude
         });
+      } else if (values.location) {
+        // Use default coordinates for Toronto if no specific coordinates provided
+        Object.assign(playdateData, {
+          latitude: 43.6532,
+          longitude: -79.3832
+        });
+        console.log("Using default Toronto coordinates for playdate");
       }
       
       const { data, error } = await supabase
