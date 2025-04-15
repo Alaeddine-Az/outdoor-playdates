@@ -2,7 +2,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Loader2, MapPin } from 'lucide-react';
 import { Input } from "@/components/ui/input";
-import { LoadScript, Autocomplete } from '@react-google-maps/api';
+import { LoadScript, Autocomplete, Libraries } from '@react-google-maps/api';
+
+// Define libraries as a static constant outside of the component
+// This prevents the warning about reloading the script unnecessarily
+const libraries: Libraries = ['places'];
 
 interface GooglePlacesAutocompleteProps {
   value: string;
@@ -88,7 +92,7 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
   return (
     <LoadScript
       googleMapsApiKey={apiKey}
-      libraries={['places']}
+      libraries={libraries}
       onLoad={() => console.log('Google Maps script loaded')}
       onError={onError}
     >
