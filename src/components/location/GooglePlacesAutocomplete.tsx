@@ -2,11 +2,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Loader2, MapPin } from 'lucide-react';
 import { Input } from "@/components/ui/input";
-import { LoadScript, Autocomplete } from '@react-google-maps/api';
+import { LoadScript, Autocomplete, Libraries } from '@react-google-maps/api';
 
 // Define libraries as a static constant outside of the component
 // This prevents the warning about reloading the script unnecessarily
-const libraries: ("places" | "drawing" | "geometry" | "localContext" | "visualization")[] = ['places'];
+const libraries: Libraries = ['places'];
 
 interface GooglePlacesAutocompleteProps {
   value: string;
