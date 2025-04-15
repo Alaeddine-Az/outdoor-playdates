@@ -40,7 +40,13 @@ export const PlaydateFormFields: React.FC<PlaydateFormFieldsProps> = ({
 }) => {
   const isMobile = useIsMobile();
   
-  console.log('Using Google Maps API Key:', googleMapsApiKey ? 'Available' : 'Not available');
+  React.useEffect(() => {
+    console.log('PlaydateFormFields - Using Google Maps API Key:', googleMapsApiKey ? 'Available' : 'Not available');
+    if (googleMapsApiKey) {
+      console.log('API Key length in PlaydateFormFields:', googleMapsApiKey.length);
+      console.log('API Key starts with:', googleMapsApiKey.substring(0, 5) + '...');
+    }
+  }, [googleMapsApiKey]);
   
   return (
     <>
@@ -100,7 +106,7 @@ export const PlaydateFormFields: React.FC<PlaydateFormFieldsProps> = ({
               </FormControl>
               <FormDescription className="text-xs sm:text-sm">
                 {googleMapsApiKey 
-                  ? "Enter a location or use your current position." 
+                  ? "Enter a location or use the Google Places autocomplete." 
                   : "Enter the location (API key not available for automatic search)."}
               </FormDescription>
               <FormMessage />

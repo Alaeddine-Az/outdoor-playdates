@@ -15,7 +15,7 @@ const PlaydateCreationForm = () => {
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   
-  // Get API key from environment variable
+  // Get API key from environment variable with correct name
   const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
   
   // Log for debugging
@@ -23,6 +23,7 @@ const PlaydateCreationForm = () => {
     console.log('PlaydateCreationForm - Google Maps API Key:', googleMapsApiKey ? 'Available' : 'Not available');
     if (googleMapsApiKey) {
       console.log('API Key length:', googleMapsApiKey.length);
+      console.log('API Key starts with:', googleMapsApiKey.substring(0, 5) + '...');
     }
   }, [googleMapsApiKey]);
   
@@ -62,7 +63,7 @@ const PlaydateCreationForm = () => {
           <PlaydateFormFields 
             form={form} 
             onLocationCoordinatesChange={handleLocationCoordinatesChange}
-            googleMapsApiKey={googleMapsApiKey} // Pass API key explicitly
+            googleMapsApiKey={googleMapsApiKey}
           />
           
           <PlaydateFormActions isSubmitting={isSubmitting} />

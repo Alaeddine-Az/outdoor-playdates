@@ -22,8 +22,12 @@ export const LocationInput: React.FC<LocationInputProps> = ({
 }) => {
   const [manualMode, setManualMode] = useState<boolean>(false);
   
+  // Improved logging for debugging
   useEffect(() => {
     console.log('LocationInput - API Key available:', apiKey ? 'yes' : 'no', 'length:', apiKey?.length || 0);
+    if (apiKey) {
+      console.log('API Key in LocationInput starts with:', apiKey.substring(0, 5) + '...');
+    }
   }, [apiKey]);
   
   const handlePlaceSelected = (place: google.maps.places.PlaceResult) => {
@@ -45,9 +49,11 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   // Enable manual mode if there's no API key
   React.useEffect(() => {
     if (!hasApiKey) {
+      console.log('No API key available, switching to manual mode');
       setManualMode(true);
     } else {
       // If we have an API key, default to Google Places search
+      console.log('API key available, using Google Places search by default');
       setManualMode(false);
     }
   }, [hasApiKey]);
