@@ -31,13 +31,18 @@ export const LocationInput: React.FC<LocationInputProps> = ({
     }
   };
 
+  // Ensure we have a valid API key
+  const googleMapsApiKey = apiKey || import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+  
+  console.log('Google Maps API Key available:', !!googleMapsApiKey);
+
   return (
     <GooglePlacesAutocomplete
       value={value}
       onChange={onChange}
       onPlaceSelected={handlePlaceSelected}
       placeholder={placeholder}
-      apiKey={apiKey || ''}
+      apiKey={googleMapsApiKey}
     />
   );
 };

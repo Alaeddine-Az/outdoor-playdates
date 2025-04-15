@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -14,7 +13,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
 
-// Export the form schema so it can be reused
 export const playdateFormSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
@@ -39,6 +37,7 @@ export const PlaydateFormFields: React.FC<PlaydateFormFieldsProps> = ({
   onLocationCoordinatesChange 
 }) => {
   const isMobile = useIsMobile();
+  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   
   return (
     <>
@@ -93,6 +92,7 @@ export const PlaydateFormFields: React.FC<PlaydateFormFieldsProps> = ({
                   onChange={field.onChange}
                   onCoordinatesChange={onLocationCoordinatesChange}
                   placeholder="Search for a place..."
+                  apiKey={googleMapsApiKey}
                 />
               </FormControl>
               <FormDescription className="text-xs sm:text-sm">

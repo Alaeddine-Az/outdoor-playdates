@@ -24,6 +24,17 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
   const [scriptError, setScriptError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Check if API key is available
+  useEffect(() => {
+    if (!apiKey) {
+      console.error('Google Maps API key is missing');
+      setScriptError('Google Maps API key is missing');
+      setIsScriptLoading(false);
+    } else {
+      setScriptError(null);
+    }
+  }, [apiKey]);
+
   // Autocomplete options focused on Canada
   const autocompleteOptions: google.maps.places.AutocompleteOptions = {
     componentRestrictions: { country: 'ca' },
@@ -55,13 +66,18 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
 
   if (!apiKey) {
     return (
-      <Input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="pl-10"
-        placeholder="API key is missing"
-        disabled
-      />
+      <div className="relative w-full">
+        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+          <MapPin className="h-4 w-4" />
+        </div>
+        <Input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="pl-10"
+          placeholder="Google Maps API key is required"
+          disabled
+        />
+      </div>
     );
   }
 
@@ -113,4 +129,3 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
     </LoadScript>
   );
 };
-
