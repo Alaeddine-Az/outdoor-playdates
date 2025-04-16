@@ -46,7 +46,7 @@ export const usePlaydateSubmit = ({ userId, latitude, longitude }: UsePlaydateSu
         end_time: endDateTime.toISOString(),
         max_participants: values.maxParticipants,
         creator_id: userId,
-        status: 'active', // Set default status
+        status: 'upcoming', // Using 'upcoming' which is an allowed value in the constraint
       };
       
       // Add coordinates if available, or use default coordinates for Toronto if location provided but no coordinates
