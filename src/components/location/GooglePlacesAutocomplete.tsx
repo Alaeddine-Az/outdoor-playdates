@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Loader2, MapPin } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Autocomplete } from '@react-google-maps/api';
@@ -10,6 +10,11 @@ interface GooglePlacesAutocompleteProps {
   onPlaceSelected: (place: google.maps.places.PlaceResult) => void;
   placeholder?: string;
   apiKey: string;
+  userLocation?: {
+    latitude: number | null;
+    longitude: number | null;
+  };
+  searchRadius?: number;
 }
 
 export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> = ({
@@ -17,15 +22,34 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
   onChange,
   onPlaceSelected,
   placeholder = "Enter a location...",
-  apiKey
+  apiKey,
+  userLocation,
+  searchRadius = 10000, // Default 10km radius
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
 
-  const autocompleteOptions: google.maps.places.AutocompleteOptions = {
-    componentRestrictions: { country: 'ca' },
-    fields: ['name', 'formatted_address', 'place_id', 'geometry'],
-    types: ['establishment', 'geocode']
+  // Define autocomplete options with regional biasing
+  const getAutocompleteOptions = (): google.maps.places.AutocompleteOptions => {
+    const options: google.maps.places.AutocompleteOptions = {
+      componentRestrictions: { country: 'ca' },
+      fields: ['name', 'formatted_address', 'place_id', 'geometry'],
+      types: ['establishment', 'geocode']
+    };
+
+    // Apply location bias if user location is available
+    if (userLocation?.latitude && userLocation?.longitude) {
+      console.log('Applying location bias:', userLocation.latitude, userLocation.longitude);
+      options.locationBias = {
+        location: new google.maps.LatLng(
+          userLocation.latitude,
+          userLocation.longitude
+        ),
+        radius: searchRadius
+      };
+    }
+
+    return options;
   };
 
   const handleLoad = (instance: google.maps.places.Autocomplete) => {
@@ -43,6 +67,23 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
       }
     }
   };
+
+  // Update autocomplete options when user location changes
+  useEffect(() => {
+    if (autocomplete && userLocation?.latitude && userLocation?.longitude) {
+      const bounds = new google.maps.LatLngBounds(
+        new google.maps.LatLng(
+          userLocation.latitude - 0.1, 
+          userLocation.longitude - 0.1
+        ),
+        new google.maps.LatLng(
+          userLocation.latitude + 0.1, 
+          userLocation.longitude + 0.1
+        )
+      );
+      autocomplete.setBounds(bounds);
+    }
+  }, [autocomplete, userLocation]);
 
   if (!apiKey || apiKey.trim() === '') {
     return (
@@ -69,7 +110,7 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
       <Autocomplete
         onLoad={handleLoad}
         onPlaceChanged={handlePlaceChanged}
-        options={autocompleteOptions}
+        options={getAutocompleteOptions()}
       >
         <Input
           ref={inputRef}

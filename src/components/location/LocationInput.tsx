@@ -4,6 +4,7 @@ import { GooglePlacesAutocomplete } from './GooglePlacesAutocomplete';
 import { toast } from '@/components/ui/use-toast';
 import { Input } from "@/components/ui/input";
 import { MapPin } from 'lucide-react';
+import { useUserLocation } from '@/hooks/useUserLocation';
 
 interface LocationInputProps {
   value: string;
@@ -21,6 +22,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   apiKey = ''
 }) => {
   const [manualMode, setManualMode] = useState<boolean>(false);
+  const { latitude, longitude } = useUserLocation();
   
   // Improved logging for debugging
   useEffect(() => {
@@ -28,7 +30,11 @@ export const LocationInput: React.FC<LocationInputProps> = ({
     if (apiKey) {
       console.log('API Key in LocationInput starts with:', apiKey.substring(0, 5) + '...');
     }
-  }, [apiKey]);
+    
+    if (latitude && longitude) {
+      console.log('User location available for biasing:', { latitude, longitude });
+    }
+  }, [apiKey, latitude, longitude]);
   
   const handlePlaceSelected = (place: google.maps.places.PlaceResult) => {
     if (place.geometry?.location) {
@@ -107,6 +113,8 @@ export const LocationInput: React.FC<LocationInputProps> = ({
         onPlaceSelected={handlePlaceSelected}
         placeholder={placeholder}
         apiKey={apiKey}
+        userLocation={latitude && longitude ? { latitude, longitude } : undefined}
+        searchRadius={10000} // 10km radius
       />
       <button 
         type="button"
