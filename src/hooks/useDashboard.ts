@@ -190,6 +190,7 @@ export const useDashboard = (userLocation?: LocationData) => {
               .from('playdates')
               .select('*, profiles:creator_id(parent_name)')
               .gt('start_time', new Date().toISOString())
+              .neq('status', 'cancelled')  // Exclude cancelled playdates
               .order('start_time', { ascending: true })
               .limit(15);
             
@@ -201,6 +202,7 @@ export const useDashboard = (userLocation?: LocationData) => {
               .from('playdates')
               .select('*, profiles:creator_id(parent_name), latitude, longitude')
               .gt('start_time', new Date().toISOString())
+              .neq('status', 'cancelled')  // Exclude cancelled playdates
               .order('start_time', { ascending: true })
               .limit(15);
             

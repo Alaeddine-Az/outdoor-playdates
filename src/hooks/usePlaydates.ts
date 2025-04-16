@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -65,20 +64,22 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
         const hasLocationColumns = !(testError && testError.message.includes("column 'latitude' does not exist"));
         console.log('Database has location columns:', hasLocationColumns);
 
-        // Fetch upcoming playdates
+        // Fetch upcoming playdates - exclude cancelled playdates
         let upcomingPlaydatesQuery = supabase.from('playdates').select('*');
 
         const { data: upcomingPlaydates, error: upcomingError } = await upcomingPlaydatesQuery
           .gt('start_time', new Date().toISOString())
+          .neq('status', 'cancelled')  // Exclude cancelled playdates
           .order('start_time', { ascending: true });
 
         if (upcomingError) throw upcomingError;
 
-        // Fetch past playdates
+        // Fetch past playdates - exclude cancelled playdates
         const { data: pastPlaydatesData, error: pastError } = await supabase
           .from('playdates')
           .select('*')
           .lt('end_time', new Date().toISOString())
+          .neq('status', 'cancelled')  // Exclude cancelled playdates
           .order('start_time', { ascending: false })
           .limit(10);
 
@@ -154,7 +155,7 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
             time: `${format(new Date(p.start_time), 'h:mm a')} - ${format(new Date(p.end_time), 'h:mm a')}`,
             location: p.location,
             families: participantCounts[p.id] || 0,
-            status,
+            status: p.status || status,  // Use the database status if available
             host: hostName,
             host_id: p.creator_id,
             start_time: p.start_time,
@@ -166,9 +167,10 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
 
         const formattedUpcoming = upcomingPlaydates.map(p => formatPlaydate(p, 'upcoming'));
         const formattedPast = pastPlaydatesData.map(p => formatPlaydate(p, 'past'));
+        
+        // Filter out my playdates that are cancelled
         const formattedMyPlaydates = formattedUpcoming.filter(p => p.host_id === user.id);
 
-        // Calculate distance for all playdates if user location is available
         let playdatesWithDistances = [...formattedUpcoming];
         let pastPlaydatesWithDistances = [...formattedPast];
         let myPlaydatesWithDistances = [...formattedMyPlaydates];

@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,6 +18,10 @@ interface PlaydateListProps {
 }
 
 const getPlaydateStatus = (playdate: Playdate): "confirmed" | "upcoming" | "past" | "cancelled" => {
+  if (playdate.status === 'cancelled') {
+    return 'cancelled';
+  }
+  
   if (!playdate.start_time || !playdate.end_time) {
     return playdate.status as "confirmed" | "upcoming" | "past" | "cancelled" || "upcoming";
   }
@@ -51,7 +54,9 @@ const PlaydateList = ({
   const sortedPlaydates = useMemo(() => {
     if (!playdates || playdates.length === 0) return [];
     
-    return [...playdates].sort((a, b) => {
+    const filteredPlaydates = playdates.filter(p => p.status !== 'cancelled');
+    
+    return [...filteredPlaydates].sort((a, b) => {
       if (a?.distance !== undefined && b?.distance !== undefined) {
         return a.distance - b.distance;
       }
@@ -64,7 +69,6 @@ const PlaydateList = ({
     });
   }, [playdates]);
   
-  // Memoize the filtered playdates array
   const filteredPlaydates = useMemo(() => {
     return sortedPlaydates.filter(playdate => playdate && playdate.id);
   }, [sortedPlaydates]);
