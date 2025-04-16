@@ -37,18 +37,7 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
       types: ['establishment', 'geocode']
     };
 
-    // Apply location bias if user location is available
-    if (userLocation?.latitude && userLocation?.longitude) {
-      console.log('Applying location bias:', userLocation.latitude, userLocation.longitude);
-      options.locationBias = {
-        location: new google.maps.LatLng(
-          userLocation.latitude,
-          userLocation.longitude
-        ),
-        radius: searchRadius
-      };
-    }
-
+    // We'll set bounds in the useEffect instead of using locationBias
     return options;
   };
 
@@ -71,6 +60,10 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
   // Update autocomplete options when user location changes
   useEffect(() => {
     if (autocomplete && userLocation?.latitude && userLocation?.longitude) {
+      console.log('Setting location bounds for autocomplete:', userLocation);
+      
+      // Create a bias bound around the user's location
+      // This creates a bounding box approximately 20km in each direction (0.1 degrees ~= 11km)
       const bounds = new google.maps.LatLngBounds(
         new google.maps.LatLng(
           userLocation.latitude - 0.1, 
@@ -81,7 +74,19 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
           userLocation.longitude + 0.1
         )
       );
+      
+      // Apply the bounds to the autocomplete instance
       autocomplete.setBounds(bounds);
+      
+      // Optionally set the search bias (if available in the Google Maps API version)
+      if (google.maps.places.RankBy && 'DISTANCE' in google.maps.places.RankBy) {
+        try {
+          // @ts-ignore - This is valid but might not be in the type definitions
+          autocomplete.setOptions({ rankBy: google.maps.places.RankBy.DISTANCE });
+        } catch (e) {
+          console.warn('Unable to set rankBy option:', e);
+        }
+      }
     }
   }, [autocomplete, userLocation]);
 
