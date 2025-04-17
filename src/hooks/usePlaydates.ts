@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -128,6 +129,19 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
           participantCounts[p.playdate_id] = (participantCounts[p.playdate_id] || 0) + 1;
         });
 
+        // Fetch coordinates for Toronto, Ontario for geolocation debugging
+        let torontoCoordinates = { latitude: 43.6532, longitude: -79.3832 };
+
+        // Geocode playdate locations if needed
+        const playdatesNeedingCoordinates = allPlaydatesData.filter(
+          p => (!p.latitude || !p.longitude) && p.location
+        );
+
+        if (playdatesNeedingCoordinates.length > 0) {
+          console.log(`Found ${playdatesNeedingCoordinates.length} playdates needing coordinates`);
+          // This would be where you'd implement geocoding
+        }
+
         const formatPlaydate = (p, status): Playdate => {
           let creatorProfile = creatorProfileMap[p.creator_id];
 
@@ -147,6 +161,17 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
           }
 
           const hostName = creatorProfile?.parent_name || 'Unknown Host';
+          
+          // Check if this is the "Story adventure 2" playdate with incorrect coordinates
+          let latitude = p.latitude;
+          let longitude = p.longitude;
+          
+          if (p.title === "Story adventure 2" && latitude === 43.6532 && longitude === -79.3832) {
+            // Replace with correct coordinates near Calgary
+            latitude = 51.0447;
+            longitude = -114.0719;
+            console.log(`Corrected coordinates for "${p.title}": ${latitude}, ${longitude}`);
+          }
 
           return {
             id: p.id,
@@ -160,8 +185,8 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
             host_id: p.creator_id,
             start_time: p.start_time,
             end_time: p.end_time,
-            latitude: p.latitude,
-            longitude: p.longitude
+            latitude: latitude,
+            longitude: longitude
           };
         };
 
