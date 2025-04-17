@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -49,7 +48,6 @@ export const useDashboard = (userLocation?: LocationData) => {
   const [suggestedConnections, setSuggestedConnections] = useState<ConnectionData[]>([]);
   const [nearbyEvents, setNearbyEvents] = useState<DashboardEvent[]>([]);
   
-  // Use a ref to prevent infinite fetching
   const fetchInProgress = useRef(false);
 
   useEffect(() => {
@@ -64,7 +62,6 @@ export const useDashboard = (userLocation?: LocationData) => {
       return;
     }
 
-    // Skip fetch if it's already in progress
     if (fetchInProgress.current) return;
 
     const fetchDashboardData = async () => {
@@ -73,7 +70,6 @@ export const useDashboard = (userLocation?: LocationData) => {
         setLoading(true);
 
         if (user) {
-          // Get accepted connections to exclude
           const { data: acceptedConnections, error: connectionsError } = await supabase
             .from('connections')
             .select('requester_id, recipient_id')
@@ -86,7 +82,6 @@ export const useDashboard = (userLocation?: LocationData) => {
             conn.requester_id === user.id ? conn.recipient_id : conn.requester_id
           );
 
-          // Get all profiles and filter
           const { data: allProfiles, error: profilesError } = await supabase
             .from('profiles')
             .select('id, parent_name, city');
@@ -131,7 +126,6 @@ export const useDashboard = (userLocation?: LocationData) => {
             return acc;
           }, {} as Record<string, string[]>);
 
-          // Group children by parent
           const parentChildMap = childrenData.reduce((acc, child) => {
             if (!acc[child.parent_id]) acc[child.parent_id] = [];
             acc[child.parent_id].push(child);
@@ -148,7 +142,6 @@ export const useDashboard = (userLocation?: LocationData) => {
                 ? `${firstChild.name} (${firstChild.age})`
                 : `${firstChild.name} (${firstChild.age}) + ${children.length - 1} more`;
 
-              // Show interests from only first two children
               const interestsFromFirstTwo = firstTwoChildren.flatMap(
                 child => childInterestMap[child.id] ?? []
               );
@@ -164,25 +157,21 @@ export const useDashboard = (userLocation?: LocationData) => {
             }
           );
 
-          // 🎲 Randomize and limit to 3
           const limitedConnections = realConnections
             .sort(() => 0.5 - Math.random())
             .slice(0, 3);
 
           setSuggestedConnections(limitedConnections);
 
-          // Fetch playdates
           const query = supabase
             .from('playdates')
             .select('*, profiles:creator_id(parent_name)');
 
-          // First check if latitude/longitude columns are available by making a test query
           const { data: testData, error: testError } = await query
             .gt('start_time', new Date().toISOString())
             .order('start_time', { ascending: true })
             .limit(1);
 
-          // If we have a "column does not exist" error for latitude, then we need to query without it
           let playdatesData = [];
           if (testError && testError.message.includes("column 'latitude' does not exist")) {
             console.log("Latitude/longitude columns not available yet. Fetching without them.");
@@ -190,19 +179,18 @@ export const useDashboard = (userLocation?: LocationData) => {
               .from('playdates')
               .select('*, profiles:creator_id(parent_name)')
               .gt('start_time', new Date().toISOString())
-              .neq('status', 'cancelled')  // Exclude cancelled playdates
+              .neq('status', 'cancelled')
               .order('start_time', { ascending: true })
               .limit(15);
             
             if (fetchError) throw fetchError;
             playdatesData = data || [];
           } else {
-            // If the test query worked, then we can use latitude/longitude
             const { data, error: fetchError } = await supabase
               .from('playdates')
               .select('*, profiles:creator_id(parent_name), latitude, longitude')
               .gt('start_time', new Date().toISOString())
-              .neq('status', 'cancelled')  // Exclude cancelled playdates
+              .neq('status', 'cancelled')
               .order('start_time', { ascending: true })
               .limit(15);
             
@@ -243,18 +231,9 @@ export const useDashboard = (userLocation?: LocationData) => {
 
               const hostName = playdate.profiles?.parent_name || 'Unknown Host';
               
-              // Check if this is the "Story adventure 2" playdate with incorrect coordinates
-              let latitude = playdate.latitude;
-              let longitude = playdate.longitude;
-              
-              if (playdate.title === "Story adventure 2" && latitude === 43.6532 && longitude === -79.3832) {
-                // Replace with correct coordinates near Calgary
-                latitude = 51.0447;
-                longitude = -114.0719;
-                console.log(`Corrected coordinates for "${playdate.title}": ${latitude}, ${longitude}`);
-              }
+              const latitude = playdate.latitude;
+              const longitude = playdate.longitude;
 
-              // Create a base playdate object without distance
               const basePlaydate: PlaydateData = {
                 id: playdate.id,
                 title: playdate.title || 'Untitled Playdate',
@@ -269,7 +248,7 @@ export const useDashboard = (userLocation?: LocationData) => {
                 start_time: playdate.start_time,
                 latitude: latitude,
                 longitude: longitude,
-                distance: undefined // Initialize with undefined
+                distance: undefined
               };
 
               return basePlaydate;
@@ -289,12 +268,11 @@ export const useDashboard = (userLocation?: LocationData) => {
                 start_time: undefined,
                 latitude: undefined,
                 longitude: undefined,
-                distance: undefined // Initialize with undefined
+                distance: undefined
               } as PlaydateData;
             }
           });
 
-          // Add distance to all playdates when user location is available
           let playdatesWithDistances = [...formattedPlaydates];
           if (userLocation?.latitude && userLocation?.longitude) {
             playdatesWithDistances = formattedPlaydates.map(playdate => {
@@ -312,7 +290,6 @@ export const useDashboard = (userLocation?: LocationData) => {
             });
           }
 
-          // Sort by start_time (closest first) and limit to 6
           const sortedPlaydates = playdatesWithDistances
             .sort((a, b) => {
               if (a.start_time && b.start_time) {
@@ -324,16 +301,13 @@ export const useDashboard = (userLocation?: LocationData) => {
 
           setUpcomingPlaydates(sortedPlaydates);
           
-          // Calculate nearby playdates if user location is available
           if (userLocation?.latitude && userLocation?.longitude) {
-            // Filter for playdates with location
             const playdatesWithLocation = playdatesWithDistances.filter(
               p => p.latitude !== undefined && p.longitude !== undefined && 
                    p.latitude !== null && p.longitude !== null
             );
             
             if (playdatesWithLocation.length > 0) {
-              // Get all playdates within 10km and sort by distance
               const playdatesWithinDistance = playdatesWithLocation.filter(p => 
                 p.distance !== undefined && p.distance <= 10
               ).sort((a, b) => (a.distance || 999) - (b.distance || 999));
@@ -345,7 +319,6 @@ export const useDashboard = (userLocation?: LocationData) => {
             }
           }
 
-          // Fetch real upcoming events from database
           const { data: eventsData, error: eventsError } = await supabase
             .from('events')
             .select('*')
@@ -354,7 +327,6 @@ export const useDashboard = (userLocation?: LocationData) => {
 
           if (eventsError) throw eventsError;
 
-          // Format upcoming events for dashboard
           let upcomingEvents: DashboardEvent[] = [];
           
           if (eventsData && eventsData.length > 0) {
@@ -379,7 +351,6 @@ export const useDashboard = (userLocation?: LocationData) => {
               .map(({title, date, location}) => ({title, date, location}));
           }
 
-          // Add static events if we don't have enough
           if (upcomingEvents.length < 6) {
             const staticEvents = [
               {
@@ -427,14 +398,12 @@ export const useDashboard = (userLocation?: LocationData) => {
         setError("Failed to load dashboard data");
         setLoading(false);
       } finally {
-        // Always reset the fetch flag when done
         fetchInProgress.current = false;
       }
     };
 
     fetchDashboardData();
     
-    // Clean up function to ensure we don't have dangling requests
     return () => {
       fetchInProgress.current = false;
     };

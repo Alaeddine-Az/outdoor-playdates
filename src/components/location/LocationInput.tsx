@@ -35,8 +35,11 @@ export const LocationInput: React.FC<LocationInputProps> = ({
     if (place.geometry?.location) {
       const lat = place.geometry.location.lat();
       const lng = place.geometry.location.lng();
-      onCoordinatesChange(lat, lng);
+      
       console.log('Selected place coordinates:', { lat, lng });
+      
+      // Always call onCoordinatesChange with the selected coordinates
+      onCoordinatesChange(lat, lng);
       
       // Use formatted address if available
       const formattedAddress = place.formatted_address || value;
@@ -45,6 +48,13 @@ export const LocationInput: React.FC<LocationInputProps> = ({
       toast({
         title: "Location selected",
         description: "The location has been successfully set.",
+      });
+    } else {
+      console.warn('Place selected without valid geometry', place);
+      toast({
+        title: "Location error",
+        description: "Could not get coordinates for this location. Please try another location.",
+        variant: "destructive"
       });
     }
   };
