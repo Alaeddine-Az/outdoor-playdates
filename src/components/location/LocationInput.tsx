@@ -4,6 +4,7 @@ import { GooglePlacesAutocomplete } from './GooglePlacesAutocomplete';
 import { toast } from '@/components/ui/use-toast';
 import { Input } from "@/components/ui/input";
 import { MapPin } from 'lucide-react';
+import { useUserLocation } from '@/hooks/useUserLocation';
 
 interface LocationInputProps {
   value: string;
@@ -21,8 +22,8 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   apiKey = ''
 }) => {
   const [manualMode, setManualMode] = useState<boolean>(false);
+  const { latitude, longitude } = useUserLocation();
   
-  // Improved logging for debugging
   useEffect(() => {
     console.log('LocationInput - API Key available:', apiKey ? 'yes' : 'no', 'length:', apiKey?.length || 0);
     if (apiKey) {
@@ -35,6 +36,11 @@ export const LocationInput: React.FC<LocationInputProps> = ({
       const lat = place.geometry.location.lat();
       const lng = place.geometry.location.lng();
       onCoordinatesChange(lat, lng);
+      console.log('Selected place coordinates:', { lat, lng });
+      
+      // Use formatted address if available
+      const formattedAddress = place.formatted_address || value;
+      onChange(formattedAddress);
       
       toast({
         title: "Location selected",
@@ -61,10 +67,6 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   // Handle manual mode toggle
   const toggleManualMode = () => {
     setManualMode(!manualMode);
-    if (!manualMode) {
-      // If switching to manual mode, set default coordinates for Toronto
-      onCoordinatesChange(43.6532, -79.3832); // Toronto coordinates
-    }
   };
 
   if (manualMode || !hasApiKey) {
@@ -107,6 +109,8 @@ export const LocationInput: React.FC<LocationInputProps> = ({
         onPlaceSelected={handlePlaceSelected}
         placeholder={placeholder}
         apiKey={apiKey}
+        userLocation={latitude && longitude ? { latitude, longitude } : undefined}
+        searchRadius={10000} // 10km radius
       />
       <button 
         type="button"

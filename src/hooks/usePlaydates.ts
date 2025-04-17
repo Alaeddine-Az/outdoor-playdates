@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -56,29 +55,22 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
         setLoading(true);
         console.log('Fetching playdates with user location:', userLocation);
 
-        // Check if latitude/longitude columns are available
-        const { data: testData, error: testError } = await supabase
-          .from('playdates')
-          .select('latitude, longitude')
-          .limit(1);
-
-        const hasLocationColumns = !(testError && testError.message.includes("column 'latitude' does not exist"));
-        console.log('Database has location columns:', hasLocationColumns);
-
-        // Fetch upcoming playdates
+        // Fetch upcoming playdates - exclude cancelled playdates
         let upcomingPlaydatesQuery = supabase.from('playdates').select('*');
 
         const { data: upcomingPlaydates, error: upcomingError } = await upcomingPlaydatesQuery
           .gt('start_time', new Date().toISOString())
+          .neq('status', 'cancelled')
           .order('start_time', { ascending: true });
 
         if (upcomingError) throw upcomingError;
 
-        // Fetch past playdates
+        // Fetch past playdates - exclude cancelled playdates
         const { data: pastPlaydatesData, error: pastError } = await supabase
           .from('playdates')
           .select('*')
           .lt('end_time', new Date().toISOString())
+          .neq('status', 'cancelled')  // Exclude cancelled playdates
           .order('start_time', { ascending: false })
           .limit(10);
 
@@ -127,6 +119,19 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
           participantCounts[p.playdate_id] = (participantCounts[p.playdate_id] || 0) + 1;
         });
 
+        // Fetch coordinates for Toronto, Ontario for geolocation debugging
+        let torontoCoordinates = { latitude: 43.6532, longitude: -79.3832 };
+
+        // Geocode playdate locations if needed
+        const playdatesNeedingCoordinates = allPlaydatesData.filter(
+          p => (!p.latitude || !p.longitude) && p.location
+        );
+
+        if (playdatesNeedingCoordinates.length > 0) {
+          console.log(`Found ${playdatesNeedingCoordinates.length} playdates needing coordinates`);
+          // This would be where you'd implement geocoding
+        }
+
         const formatPlaydate = (p, status): Playdate => {
           let creatorProfile = creatorProfileMap[p.creator_id];
 
@@ -154,7 +159,7 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
             time: `${format(new Date(p.start_time), 'h:mm a')} - ${format(new Date(p.end_time), 'h:mm a')}`,
             location: p.location,
             families: participantCounts[p.id] || 0,
-            status,
+            status: p.status || status,
             host: hostName,
             host_id: p.creator_id,
             start_time: p.start_time,
@@ -166,14 +171,15 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
 
         const formattedUpcoming = upcomingPlaydates.map(p => formatPlaydate(p, 'upcoming'));
         const formattedPast = pastPlaydatesData.map(p => formatPlaydate(p, 'past'));
+        
+        // Filter out my playdates that are cancelled
         const formattedMyPlaydates = formattedUpcoming.filter(p => p.host_id === user.id);
 
-        // Calculate distance for all playdates if user location is available
         let playdatesWithDistances = [...formattedUpcoming];
         let pastPlaydatesWithDistances = [...formattedPast];
         let myPlaydatesWithDistances = [...formattedMyPlaydates];
         
-        if (userLocation?.latitude && userLocation?.longitude && hasLocationColumns) {
+        if (userLocation?.latitude && userLocation?.longitude) {
           console.log('Adding distance to playdates using location:', userLocation);
           
           // Add distance to all upcoming playdates with valid coordinates

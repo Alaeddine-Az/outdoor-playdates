@@ -36,12 +36,11 @@ export const PlaydateCancel: React.FC<PlaydateCancelProps> = ({
     
     setIsProcessing(true);
     try {
-      // Update the playdate status to 'canceled'
-      // Here we use an explicit cast to any to bypass the TypeScript error
-      // until the database schema and types are properly aligned
+      // Update the playdate status to 'cancelled' (with British spelling)
+      // This is one of the allowed values in the playdates_status_check constraint
       const { error: playdateError } = await supabase
         .from('playdates')
-        .update({ status: 'canceled' } as any)
+        .update({ status: 'cancelled' })
         .eq('id', playdateId);
       
       if (playdateError) throw playdateError;

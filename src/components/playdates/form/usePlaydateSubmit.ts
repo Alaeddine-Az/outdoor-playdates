@@ -25,6 +25,15 @@ export const usePlaydateSubmit = ({ userId, latitude, longitude }: UsePlaydateSu
       return;
     }
     
+    if (!latitude || !longitude) {
+      toast({
+        title: "Location required",
+        description: "Please select a location using the Google Places search.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
@@ -37,7 +46,7 @@ export const usePlaydateSubmit = ({ userId, latitude, longitude }: UsePlaydateSu
       const [endHour, endMinute] = values.endTime.split(':').map(Number);
       endDateTime.setHours(endHour, endMinute);
       
-      // Prepare data for insertion, including coordinates if available
+      // Always include the coordinates from Google Places
       const playdateData = {
         title: values.title,
         description: values.description,
@@ -46,23 +55,10 @@ export const usePlaydateSubmit = ({ userId, latitude, longitude }: UsePlaydateSu
         end_time: endDateTime.toISOString(),
         max_participants: values.maxParticipants,
         creator_id: userId,
-        status: 'active', // Set default status
+        status: 'upcoming',
+        latitude,
+        longitude
       };
-      
-      // Add coordinates if available, or use default coordinates for Toronto if location provided but no coordinates
-      if (latitude !== null && longitude !== null) {
-        Object.assign(playdateData, {
-          latitude,
-          longitude
-        });
-      } else if (values.location) {
-        // Use default coordinates for Toronto if no specific coordinates provided
-        Object.assign(playdateData, {
-          latitude: 43.6532,
-          longitude: -79.3832
-        });
-        console.log("Using default Toronto coordinates for playdate");
-      }
       
       const { data, error } = await supabase
         .from('playdates')
@@ -71,7 +67,11 @@ export const usePlaydateSubmit = ({ userId, latitude, longitude }: UsePlaydateSu
       
       if (error) throw error;
       
-      console.log("Created playdate:", data);
+      console.log("Created playdate with coordinates:", { 
+        playdate: data,
+        latitude,
+        longitude
+      });
       
       toast({
         title: "Playdate created!",

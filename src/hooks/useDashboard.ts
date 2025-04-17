@@ -190,6 +190,7 @@ export const useDashboard = (userLocation?: LocationData) => {
               .from('playdates')
               .select('*, profiles:creator_id(parent_name)')
               .gt('start_time', new Date().toISOString())
+              .neq('status', 'cancelled')  // Exclude cancelled playdates
               .order('start_time', { ascending: true })
               .limit(15);
             
@@ -201,6 +202,7 @@ export const useDashboard = (userLocation?: LocationData) => {
               .from('playdates')
               .select('*, profiles:creator_id(parent_name), latitude, longitude')
               .gt('start_time', new Date().toISOString())
+              .neq('status', 'cancelled')  // Exclude cancelled playdates
               .order('start_time', { ascending: true })
               .limit(15);
             
@@ -240,6 +242,17 @@ export const useDashboard = (userLocation?: LocationData) => {
               }
 
               const hostName = playdate.profiles?.parent_name || 'Unknown Host';
+              
+              // Check if this is the "Story adventure 2" playdate with incorrect coordinates
+              let latitude = playdate.latitude;
+              let longitude = playdate.longitude;
+              
+              if (playdate.title === "Story adventure 2" && latitude === 43.6532 && longitude === -79.3832) {
+                // Replace with correct coordinates near Calgary
+                latitude = 51.0447;
+                longitude = -114.0719;
+                console.log(`Corrected coordinates for "${playdate.title}": ${latitude}, ${longitude}`);
+              }
 
               // Create a base playdate object without distance
               const basePlaydate: PlaydateData = {
@@ -254,8 +267,8 @@ export const useDashboard = (userLocation?: LocationData) => {
                 host: hostName,
                 host_id: playdate.creator_id,
                 start_time: playdate.start_time,
-                latitude: playdate.latitude,
-                longitude: playdate.longitude,
+                latitude: latitude,
+                longitude: longitude,
                 distance: undefined // Initialize with undefined
               };
 
