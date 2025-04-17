@@ -26,14 +26,32 @@ export function getDistanceInKm(lat1: number, lon1: number, lat2: number, lon2: 
     return Infinity;
   }
   
+  // Convert from degrees to radians
+  const latRad1 = deg2rad(lat1Num);
+  const lonRad1 = deg2rad(lon1Num);
+  const latRad2 = deg2rad(lat2Num);
+  const lonRad2 = deg2rad(lon2Num);
+  
+  // Haversine formula
   const R = 6371; // Radius of the earth in km
-  const dLat = deg2rad(lat2Num - lat1Num);
-  const dLon = deg2rad(lon2Num - lon1Num);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(lat1Num)) * Math.cos(deg2rad(lat2Num)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const dLat = latRad2 - latRad1;
+  const dLon = lonRad2 - lonRad1;
+  
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(latRad1) * Math.cos(latRad2) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   const distance = R * c; // Distance in km
+  
+  // Add debug logging
+  console.log('Distance calculation:', {
+    point1: `${lat1Num}, ${lon1Num}`,
+    point2: `${lat2Num}, ${lon2Num}`,
+    distance: distance.toFixed(2) + 'km'
+  });
+  
   return distance;
 }
 
