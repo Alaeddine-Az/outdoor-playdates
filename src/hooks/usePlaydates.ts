@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -56,21 +55,12 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
         setLoading(true);
         console.log('Fetching playdates with user location:', userLocation);
 
-        // Check if latitude/longitude columns are available
-        const { data: testData, error: testError } = await supabase
-          .from('playdates')
-          .select('latitude, longitude')
-          .limit(1);
-
-        const hasLocationColumns = !(testError && testError.message.includes("column 'latitude' does not exist"));
-        console.log('Database has location columns:', hasLocationColumns);
-
         // Fetch upcoming playdates - exclude cancelled playdates
         let upcomingPlaydatesQuery = supabase.from('playdates').select('*');
 
         const { data: upcomingPlaydates, error: upcomingError } = await upcomingPlaydatesQuery
           .gt('start_time', new Date().toISOString())
-          .neq('status', 'cancelled')  // Exclude cancelled playdates
+          .neq('status', 'cancelled')
           .order('start_time', { ascending: true });
 
         if (upcomingError) throw upcomingError;
@@ -161,17 +151,6 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
           }
 
           const hostName = creatorProfile?.parent_name || 'Unknown Host';
-          
-          // Check if this is the "Story adventure 2" playdate with incorrect coordinates
-          let latitude = p.latitude;
-          let longitude = p.longitude;
-          
-          if (p.title === "Story adventure 2" && latitude === 43.6532 && longitude === -79.3832) {
-            // Replace with correct coordinates near Calgary
-            latitude = 51.0447;
-            longitude = -114.0719;
-            console.log(`Corrected coordinates for "${p.title}": ${latitude}, ${longitude}`);
-          }
 
           return {
             id: p.id,
@@ -180,13 +159,13 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
             time: `${format(new Date(p.start_time), 'h:mm a')} - ${format(new Date(p.end_time), 'h:mm a')}`,
             location: p.location,
             families: participantCounts[p.id] || 0,
-            status: p.status || status,  // Use the database status if available
+            status: p.status || status,
             host: hostName,
             host_id: p.creator_id,
             start_time: p.start_time,
             end_time: p.end_time,
-            latitude: latitude,
-            longitude: longitude
+            latitude: p.latitude,
+            longitude: p.longitude
           };
         };
 
@@ -200,7 +179,7 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
         let pastPlaydatesWithDistances = [...formattedPast];
         let myPlaydatesWithDistances = [...formattedMyPlaydates];
         
-        if (userLocation?.latitude && userLocation?.longitude && hasLocationColumns) {
+        if (userLocation?.latitude && userLocation?.longitude) {
           console.log('Adding distance to playdates using location:', userLocation);
           
           // Add distance to all upcoming playdates with valid coordinates

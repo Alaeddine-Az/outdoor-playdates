@@ -24,23 +24,23 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   const [manualMode, setManualMode] = useState<boolean>(false);
   const { latitude, longitude } = useUserLocation();
   
-  // Improved logging for debugging
   useEffect(() => {
     console.log('LocationInput - API Key available:', apiKey ? 'yes' : 'no', 'length:', apiKey?.length || 0);
     if (apiKey) {
       console.log('API Key in LocationInput starts with:', apiKey.substring(0, 5) + '...');
     }
-    
-    if (latitude && longitude) {
-      console.log('User location available for biasing:', { latitude, longitude });
-    }
-  }, [apiKey, latitude, longitude]);
+  }, [apiKey]);
   
   const handlePlaceSelected = (place: google.maps.places.PlaceResult) => {
     if (place.geometry?.location) {
       const lat = place.geometry.location.lat();
       const lng = place.geometry.location.lng();
       onCoordinatesChange(lat, lng);
+      console.log('Selected place coordinates:', { lat, lng });
+      
+      // Use formatted address if available
+      const formattedAddress = place.formatted_address || value;
+      onChange(formattedAddress);
       
       toast({
         title: "Location selected",
@@ -67,10 +67,6 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   // Handle manual mode toggle
   const toggleManualMode = () => {
     setManualMode(!manualMode);
-    if (!manualMode) {
-      // If switching to manual mode, set default coordinates for Toronto
-      onCoordinatesChange(43.6532, -79.3832); // Toronto coordinates
-    }
   };
 
   if (manualMode || !hasApiKey) {
