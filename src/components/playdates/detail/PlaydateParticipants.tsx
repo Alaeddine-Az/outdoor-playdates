@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, User, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChildProfile } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { RemoveParticipantDialog } from './RemoveParticipantDialog';
 
 interface PlaydateParticipantsProps {
   participantDetails: {
@@ -23,7 +24,7 @@ interface PlaydateParticipantsProps {
   isRemoving?: string[];
 }
 
-export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({ 
+export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
   participantDetails, 
   playdateId,
   isCompleted,
@@ -43,12 +44,40 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
       : '?';
   };
 
-  const handleRemoveChild = async (participantId: string, childId: string, childName: string) => {
-    if (!user || !participantId || isCompleted || isCanceled) return;
-    
-    if (confirm(`Are you sure you want to remove ${childName} from this playdate?`)) {
-      await onParticipantRemoved(participantId, childId);
+  // Dialog state for removal
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [pendingRemove, setPendingRemove] = useState<{
+    participantId: string;
+    childId: string;
+    childName: string;
+  } | null>(null);
+
+  const handleRemoveChildClick = (
+    participantId: string,
+    childId: string,
+    childName: string
+  ) => {
+    setPendingRemove({ participantId, childId, childName });
+    setDialogOpen(true);
+  };
+
+  const handleDialogCancel = () => {
+    setDialogOpen(false);
+    setPendingRemove(null);
+  };
+
+  const handleDialogConfirm = async () => {
+    if (
+      pendingRemove &&
+      pendingRemove.participantId &&
+      pendingRemove.childId &&
+      !isCompleted &&
+      !isCanceled
+    ) {
+      await onParticipantRemoved(pendingRemove.participantId, pendingRemove.childId);
     }
+    setDialogOpen(false);
+    setPendingRemove(null);
   };
 
   return (
@@ -97,24 +126,40 @@ export const PlaydateParticipants: React.FC<PlaydateParticipantsProps> = ({
                   </p>
                 </div>
                 {canRemove && (
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => handleRemoveChild(participantId, child.id, child.name)}
-                    disabled={isCurrentlyRemoving}
-                  >
-                    {isCurrentlyRemoving ? (
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-red-500 border-t-transparent"></span>
-                    ) : (
-                      <X className="h-4 w-4" />
-                    )}
-                    <span className="sr-only">Remove</span>
-                  </Button>
+                  <>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleRemoveChildClick(participantId!, child.id, child.name)}
+                      disabled={isCurrentlyRemoving}
+                    >
+                      {isCurrentlyRemoving ? (
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-red-500 border-t-transparent"></span>
+                      ) : (
+                        <X className="h-4 w-4" />
+                      )}
+                      <span className="sr-only">Remove</span>
+                    </Button>
+                  </>
                 )}
               </div>
             );
           })
+        )}
+        {/* Show dialog if needed */}
+        {pendingRemove && (
+          <RemoveParticipantDialog
+            open={dialogOpen}
+            childName={pendingRemove.childName}
+            onCancel={handleDialogCancel}
+            onConfirm={handleDialogConfirm}
+            loading={
+              pendingRemove.participantId
+                ? isRemoving.includes(pendingRemove.participantId)
+                : false
+            }
+          />
         )}
       </CardContent>
     </Card>
