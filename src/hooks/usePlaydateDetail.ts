@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -35,6 +35,7 @@ export const usePlaydateDetail = (id: string | undefined) => {
   }>({});
   const [userChildren, setUserChildren] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const form = useForm({
     defaultValues: {
@@ -48,10 +49,12 @@ export const usePlaydateDetail = (id: string | undefined) => {
     }
   });
 
-  const loadPlaydateData = async () => {
+  const loadPlaydateData = useCallback(async () => {
     try {
       if (!id) return;
       setIsLoading(true);
+
+      console.log("🔄 Loading playdate data for ID:", id);
 
       const { data: playdateData, error: playdateError } = await supabase
         .from('playdates')
@@ -72,6 +75,9 @@ export const usePlaydateDetail = (id: string | undefined) => {
         .from('playdate_participants')
         .select('*')
         .eq('playdate_id', id);
+
+      console.log("📋 Raw participants data:", rawParticipants);
+      
       if (!rawParticipants) {
         setParticipants([]);
         setParticipantDetails({});
@@ -84,6 +90,9 @@ export const usePlaydateDetail = (id: string | undefined) => {
 
         const allChildIds = normalized.flatMap(p => p.child_ids).filter(Boolean);
         const uniqueChildIds = [...new Set(allChildIds)];
+
+        console.log("🧒 All child IDs:", allChildIds);
+        console.log("🧒 Unique child IDs:", uniqueChildIds);
 
         if (uniqueChildIds.length > 0) {
           const { data: allChildren } = await supabase
@@ -125,6 +134,7 @@ export const usePlaydateDetail = (id: string | undefined) => {
             }
           }
 
+          console.log("🏗️ Built participant details:", detailsObj);
           setParticipantDetails(detailsObj);
         } else {
           setParticipantDetails({});
@@ -153,16 +163,31 @@ export const usePlaydateDetail = (id: string | undefined) => {
           maxParticipants: playdateData.max_participants?.toString() || ''
         });
       }
+
+      console.log("✅ Playdate data loaded successfully");
     } catch (err) {
       console.error('Failed to load playdate data:', err);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id, user, form]);
 
+  // Trigger initial load
   useEffect(() => {
     loadPlaydateData();
-  }, [id, user]);
+  }, [loadPlaydateData, id, user, refreshTrigger]);
+
+  // Function to force a refresh by incrementing the trigger
+  const forceRefresh = useCallback(() => {
+    console.log("🔃 Forcing playdate data refresh");
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
+
+  // Enhanced loadPlaydateData that also triggers a refresh
+  const refreshData = useCallback(async () => {
+    await loadPlaydateData();
+    forceRefresh();
+  }, [loadPlaydateData, forceRefresh]);
 
   const isCreator = user && playdate?.creator_id === user.id;
   const isCanceled = playdate?.status === 'canceled';
@@ -180,6 +205,6 @@ export const usePlaydateDetail = (id: string | undefined) => {
     isLoading,
     form,
     setPlaydate,
-    loadPlaydateData
+    loadPlaydateData: refreshData
   };
 };
