@@ -41,9 +41,6 @@ const PlaydateDetail = () => {
     handleRemoveParticipant
   } = usePlaydateActions(id, loadPlaydateData);
 
-  // Local participantDetails state
-  const [localParticipantDetails, setLocalParticipantDetails] = useState(participantDetails);
-
   // Get list of already participating child IDs for the current user
   const [participatingChildIds, setParticipatingChildIds] = useState<string[]>([]);
 
@@ -58,11 +55,6 @@ const PlaydateDetail = () => {
     setParticipatingChildIds(childIds);
   }, [participantDetails, userChildren]);
 
-  // Sync when the hook value changes
-  useEffect(() => {
-    setLocalParticipantDetails(participantDetails);
-  }, [participantDetails]);
-
   const handleUpdatePlaydateSubmit = (values: any) => {
     handleUpdatePlaydate(values, playdate);
     setIsEditDialogOpen(false);
@@ -72,18 +64,6 @@ const PlaydateDetail = () => {
   const handleParticipantRemoved = async (participantId: string, childIdToRemove: string) => {
     // Call the hook function to remove from database
     await handleRemoveParticipant(participantId, childIdToRemove);
-    
-    // Update local state immediately for a responsive UI
-    setLocalParticipantDetails(prev => {
-      const updated = { ...prev };
-      for (const key in updated) {
-        if (updated[key].participantId === participantId && updated[key].child.id === childIdToRemove) {
-          delete updated[key];
-          break;
-        }
-      }
-      return updated;
-    });
   };
 
   const handleJoin = async (selectedChildIds: string[]) => {
@@ -130,7 +110,7 @@ const PlaydateDetail = () => {
       <div className="grid md:grid-cols-3 gap-6 mt-6">
         <div className="md:col-span-2 space-y-6">
           <PlaydateParticipants 
-            participantDetails={localParticipantDetails} 
+            participantDetails={participantDetails} 
             playdateId={id || ''}
             isCompleted={isCompleted}
             isCanceled={isCanceled}

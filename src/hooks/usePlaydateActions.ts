@@ -147,7 +147,7 @@ export const usePlaydateActions = (
       // Fetch the current participant row
       const { data: row, error: fetchError } = await supabase
         .from('playdate_participants')
-        .select('child_ids, parent_id, playdate_id')
+        .select('child_ids, parent_id, playdate_id, child_id')
         .eq('id', participantId)
         .single();
 
@@ -169,6 +169,7 @@ export const usePlaydateActions = (
         throw new Error("You can only remove your own children from the playdate.");
       }
 
+      // Get the current child IDs array or initialize it if not present
       const currentChildIds = row.child_ids || [];
 
       if (!currentChildIds.includes(childIdToRemove)) {
@@ -188,12 +189,17 @@ export const usePlaydateActions = (
 
         console.log("✅ Deleted participant row because no more children remained.");
       } else {
+        // Determine the new primary child_id if needed
+        const newPrimaryChildId = childIdToRemove === row.child_id 
+          ? updatedChildIds[0] 
+          : row.child_id;
+
         // Update the row with remaining children
         const { error: updateError } = await supabase
           .from('playdate_participants')
           .update({ 
             child_ids: updatedChildIds,
-            child_id: updatedChildIds[0] // Update primary child ID to the first remaining child
+            child_id: newPrimaryChildId
           })
           .eq('id', participantId);
 
@@ -202,6 +208,7 @@ export const usePlaydateActions = (
         console.log("✅ Updated participant row with fewer children:", updatedChildIds);
       }
 
+      // Important: Wait for refreshData to complete to ensure UI is in sync with DB
       await refreshData();
 
       toast({
