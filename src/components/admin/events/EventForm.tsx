@@ -26,7 +26,8 @@ const eventSchema = z.object({
   end_time: z.string().min(1, 'End time is required'),
   location: z.string().min(1, 'Location is required'),
   city: z.string().min(1, 'City is required'),
-  address: z.string().optional(),
+  address: z.string().min(1, 'Address is required'),
+  max_families: z.number().optional(),
 });
 
 interface EventFormProps {
@@ -48,6 +49,7 @@ const EventForm = ({ event, onClose, onSuccess }: EventFormProps) => {
       location: event.location,
       city: event.city,
       address: event.address || '',
+      max_families: event.max_families || undefined,
     } : {
       title: '',
       description: '',
@@ -56,6 +58,7 @@ const EventForm = ({ event, onClose, onSuccess }: EventFormProps) => {
       location: '',
       city: '',
       address: '',
+      max_families: undefined,
     },
   });
 
@@ -71,10 +74,15 @@ const EventForm = ({ event, onClose, onSuccess }: EventFormProps) => {
       }
 
       const eventData = {
-        ...values,
+        title: values.title,
+        description: values.description,
         start_time: new Date(values.start_time).toISOString(),
         end_time: new Date(values.end_time).toISOString(),
-        host_id: user.id
+        location: values.location,
+        city: values.city,
+        address: values.address,
+        host_id: user.id,
+        max_families: values.max_families || null
       };
 
       if (event) {
@@ -211,9 +219,31 @@ const EventForm = ({ event, onClose, onSuccess }: EventFormProps) => {
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address (optional)</FormLabel>
+                  <FormLabel>Address</FormLabel>
                   <FormControl>
                     <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="max_families"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Maximum Families (optional)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      {...field} 
+                      value={field.value || ''} 
+                      onChange={(e) => {
+                        const value = e.target.value ? parseInt(e.target.value) : undefined;
+                        field.onChange(value);
+                      }} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

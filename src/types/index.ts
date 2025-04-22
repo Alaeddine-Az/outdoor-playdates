@@ -50,7 +50,7 @@ export interface Event {
   end_time: string;
   location: string;
   city: string;
-  address?: string;
+  address: string;
   host_id?: string;
   max_families?: number;
   created_at: string;
