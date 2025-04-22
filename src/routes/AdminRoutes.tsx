@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,6 +6,7 @@ import AdminDashboard from '@/pages/AdminDashboard';
 import AdminUsers from '@/pages/admin/AdminUsers';
 import AdminSignups from '@/pages/admin/AdminSignups';
 import AdminLogs from '@/pages/admin/AdminLogs';
+import AdminEvents from '@/pages/admin/AdminEvents';
 import CreateAdmin from '@/pages/admin/CreateAdmin';
 
 const AdminRoutes = () => {
@@ -37,6 +37,7 @@ const AdminRoutes = () => {
         <Route path="/users" element={<AdminUsers />} />
         <Route path="/signups" element={<AdminSignups />} />
         <Route path="/logs" element={<AdminLogs />} />
+        <Route path="/events" element={<AdminEvents />} />
         <Route path="/create-admin" element={<CreateAdmin />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>

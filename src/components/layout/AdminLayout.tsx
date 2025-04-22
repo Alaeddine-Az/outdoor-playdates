@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -8,6 +7,7 @@ import {
   FileBarChart2,
   LogOut,
   UserPlus,
+  Calendar
 } from 'lucide-react';
 import { SidebarLink } from '@/components/SidebarLink';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,7 +31,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   return (
     <div className="flex min-h-screen w-full">
-      {/* Admin Sidebar */}
       <div className="hidden border-r bg-muted/40 md:block w-64">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4">
@@ -41,6 +40,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
               <SidebarLink to="/admin" label="Dashboard" icon={LayoutDashboard} />
               <SidebarLink to="/admin/users" label="Manage Users" icon={Users} />
+              <SidebarLink to="/admin/events" label="Manage Events" icon={Calendar} />
               <SidebarLink to="/admin/signups" label="Early Signups" icon={ClipboardList} />
               <SidebarLink to="/admin/logs" label="System Logs" icon={FileBarChart2} />
               <SidebarLink to="/admin/create-admin" label="Create Admin" icon={UserPlus} />
@@ -56,7 +56,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex flex-1 flex-col px-6 pt-6">
         {children}
       </div>

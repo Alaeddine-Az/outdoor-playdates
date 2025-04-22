@@ -1,4 +1,3 @@
-
 export interface ParentProfile {
   id: string;
   parent_name: string;
@@ -45,14 +44,9 @@ export interface Message {
 export interface Event {
   id: string;
   title: string;
-  description?: string;
+  start_time: string;
   location: string;
   city: string;
-  address: string;
-  start_time: string;
-  end_time: string;
-  host_id: string;
-  max_families?: number;
   created_at: string;
   updated_at: string;
 }
