@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Link } from 'react-router-dom';
 
 // Define sample playdate data
 const samplePlaydates = [{
@@ -77,6 +78,7 @@ const samplePlaydates = [{
   },
   children: "Charlotte (6) and Benjamin (8)"
 }];
+
 const Hero = () => {
   const [playdateIndex, setPlaydateIndex] = useState(0);
   const [playdate, setPlaydate] = useState(samplePlaydates[0]);
@@ -92,6 +94,7 @@ const Hero = () => {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
+
   const {
     ref,
     isIntersecting
@@ -111,15 +114,14 @@ const Hero = () => {
       behavior: 'smooth'
     });
   };
+
   return <section ref={ref as React.RefObject<HTMLDivElement>} className="relative min-h-screen flex items-center px-6 pt-16 pb-20 overflow-hidden">
-      {/* Background Elements - Updated with more playful, vibrant gradients */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-pink-50 via-blue-50 to-white my-0 py-0"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-secondary/15 filter blur-3xl animate-pulse"></div>
         <div className="absolute top-[20%] left-[-5%] w-[40%] h-[40%] rounded-full bg-primary/15 filter blur-3xl animate-pulse"></div>
         <div className="absolute top-[60%] right-[20%] w-[25%] h-[25%] rounded-full bg-accent/15 filter blur-3xl animate-pulse"></div>
         
-        {/* Decorative floating shapes for playful aesthetic */}
         <div className="absolute top-[15%] right-[15%] w-12 h-12 bg-yellow-200 rounded-full opacity-20 animate-bounce"></div>
         <div className="absolute bottom-[25%] left-[10%] w-6 h-6 bg-green-300 rounded-full opacity-30 animate-ping" style={{
         animationDuration: '3s'
@@ -153,12 +155,13 @@ const Hero = () => {
               <Button size="lg" className="button-glow bg-gradient-to-r from-primary to-secondary hover:opacity-90 shadow-md text-white rounded-xl transform transition-all duration-300 hover:scale-105" onClick={scrollToOnboarding}>
                 Get Invited - It's Free! <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button size="lg" variant="outline" className="rounded-xl hover:bg-white hover:text-primary border-2 border-primary/30 shadow-sm transition-all duration-300 hover:scale-105 hover:border-primary" onClick={scrollToFeatures}>
-                Learn More
-              </Button>
+              <Link to="/auth">
+                <Button size="lg" variant="outline" className="rounded-xl hover:bg-white hover:text-primary border-2 border-primary/30 shadow-sm transition-all duration-300 hover:scale-105 hover:border-primary">
+                  Sign In
+                </Button>
+              </Link>
             </div>
             
-            {/* Feature bubbles */}
             <div className="flex flex-wrap mt-10 gap-2">
               {['Fun Adventures', 'Safe Environment', 'Make Friends', 'Great Memories'].map((feature, i) => <div key={i} className="flex items-center bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm shadow-sm">
                   <Check className="h-3.5 w-3.5 mr-1.5 text-green-500" />
@@ -201,7 +204,6 @@ const Hero = () => {
               </div>
             </div>
             
-            {/* Decorative elements */}
             <div className="absolute top-[-5%] right-[-5%] h-40 w-40 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full filter blur-xl animate-pulse"></div>
             <div className="absolute bottom-[-5%] left-[-5%] h-24 w-24 bg-gradient-to-br from-secondary/10 to-accent/10 rounded-full filter blur-xl animate-pulse"></div>
           </div>
@@ -215,4 +217,5 @@ const Hero = () => {
       </div>
     </section>;
 };
+
 export default Hero;
