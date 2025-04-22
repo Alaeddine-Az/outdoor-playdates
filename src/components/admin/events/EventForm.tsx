@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -17,12 +17,16 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Event } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 const eventSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  start_time: z.string().min(1, 'Date and time are required'),
+  description: z.string().optional(),
+  start_time: z.string().min(1, 'Start time is required'),
+  end_time: z.string().min(1, 'End time is required'),
   location: z.string().min(1, 'Location is required'),
   city: z.string().min(1, 'City is required'),
+  address: z.string().optional(),
 });
 
 interface EventFormProps {
@@ -32,30 +36,51 @@ interface EventFormProps {
 }
 
 const EventForm = ({ event, onClose, onSuccess }: EventFormProps) => {
+  const { user } = useAuth();
+  
   const form = useForm<z.infer<typeof eventSchema>>({
     resolver: zodResolver(eventSchema),
     defaultValues: event ? {
       title: event.title,
+      description: event.description || '',
       start_time: new Date(event.start_time).toISOString().slice(0, 16),
+      end_time: new Date(event.end_time).toISOString().slice(0, 16),
       location: event.location,
       city: event.city,
+      address: event.address || '',
     } : {
       title: '',
+      description: '',
       start_time: '',
+      end_time: '',
       location: '',
       city: '',
+      address: '',
     },
   });
 
   const onSubmit = async (values: z.infer<typeof eventSchema>) => {
     try {
+      if (!user) {
+        toast({
+          title: "Authentication error",
+          description: "You must be logged in to perform this action.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const eventData = {
+        ...values,
+        start_time: new Date(values.start_time).toISOString(),
+        end_time: new Date(values.end_time).toISOString(),
+        host_id: user.id
+      };
+
       if (event) {
         const { error } = await supabase
           .from('events')
-          .update({
-            ...values,
-            start_time: new Date(values.start_time).toISOString(),
-          })
+          .update(eventData)
           .eq('id', event.id);
 
         if (error) throw error;
@@ -67,10 +92,7 @@ const EventForm = ({ event, onClose, onSuccess }: EventFormProps) => {
       } else {
         const { error } = await supabase
           .from('events')
-          .insert({
-            ...values,
-            start_time: new Date(values.start_time).toISOString(),
-          });
+          .insert(eventData);
 
         if (error) throw error;
 
@@ -114,17 +136,47 @@ const EventForm = ({ event, onClose, onSuccess }: EventFormProps) => {
 
             <FormField
               control={form.control}
-              name="start_time"
+              name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Date and Time</FormLabel>
+                  <FormLabel>Description (optional)</FormLabel>
                   <FormControl>
-                    <Input type="datetime-local" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="start_time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Date and Time</FormLabel>
+                    <FormControl>
+                      <Input type="datetime-local" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="end_time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Date and Time</FormLabel>
+                    <FormControl>
+                      <Input type="datetime-local" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
@@ -146,6 +198,20 @@ const EventForm = ({ event, onClose, onSuccess }: EventFormProps) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>City</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Address (optional)</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
