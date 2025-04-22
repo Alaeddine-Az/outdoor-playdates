@@ -29,6 +29,7 @@ export function useFetchEvents() {
               try {
                 const startTime = parseISO(event.start_time);
                 return {
+                  id: event.id, // Include the event id for navigation
                   title: event.title,
                   date: format(startTime, 'MMM d'),
                   location: event.city || event.location,
@@ -41,7 +42,7 @@ export function useFetchEvents() {
             .filter(Boolean)
             .sort((a, b) => compareAsc(new Date(a.rawDate), new Date(b.rawDate)))
             .slice(0, 6)
-            .map(({title, date, location}) => ({title, date, location}));
+            .map(({id, title, date, location}) => ({ id, title, date, location })); // id included
         }
 
         if (upcomingEvents.length < 6) {

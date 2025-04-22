@@ -4,14 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, MapPin, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { DashboardEvent } from '@/types';
+import { useNavigate } from 'react-router-dom';
 
 interface EventCardProps {
+  id?: string;
   title: string;
   date: string;
   location: string;
 }
 
-const EventCard = ({ title, date, location }: EventCardProps) => {
+const EventCard = ({ id, title, date, location }: EventCardProps) => {
+  const navigate = useNavigate();
+
   const getEventIcon = (title: string) => {
     const lowerTitle = title.toLowerCase();
     
@@ -41,11 +45,23 @@ const EventCard = ({ title, date, location }: EventCardProps) => {
       );
     }
   };
-  
+
+  // Only attach click handler if id is present (DB events)
+  const handleClick = () => {
+    if (id) {
+      navigate(`/event/${id}`);
+    }
+  };
+
   return (
     <motion.div 
-      className="p-4 rounded-xl border border-play-beige bg-white hover:border-play-lime/50 hover:bg-play-lime/5 transition-all duration-300 group shadow-sm hover:shadow-md"
-      whileHover={{ y: -4 }}
+      className={`p-4 rounded-xl border border-play-beige bg-white hover:border-play-lime/50 hover:bg-play-lime/5 transition-all duration-300 group shadow-sm hover:shadow-md ${id ? 'cursor-pointer' : ''}`}
+      whileHover={id ? { y: -4 } : undefined}
+      onClick={id ? handleClick : undefined}
+      tabIndex={id ? 0 : -1}
+      onKeyDown={id ? (e) => { if (e.key === 'Enter') handleClick(); } : undefined}
+      role={id ? 'button' : undefined}
+      aria-label={id ? `View event details for ${title}` : undefined}
     >
       <div className="flex justify-between">
         <h4 className="font-medium text-base flex items-center">

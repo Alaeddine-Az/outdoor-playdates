@@ -1,4 +1,3 @@
-
 export interface ParentProfile {
   id: string;
   parent_name: string;
@@ -90,6 +89,7 @@ export interface Playdate {
 }
 
 export interface DashboardEvent {
+  id?: string;     // Make id optional: present for DB events, absent for static fallback events
   title: string;
   date: string;
   location: string;
