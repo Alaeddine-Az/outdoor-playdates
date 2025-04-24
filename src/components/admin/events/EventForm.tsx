@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -121,9 +120,9 @@ const EventForm = ({ event, onClose, onSuccess }: EventFormProps) => {
   };
 
   return (
-    <Card>
+    <Card className="w-full max-w-full">
       <CardHeader>
-        <CardTitle>{event ? 'Edit Event' : 'Create Event'}</CardTitle>
+        <CardTitle className="text-xl">{event ? 'Edit Event' : 'Create Event'}</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -250,11 +249,11 @@ const EventForm = ({ event, onClose, onSuccess }: EventFormProps) => {
               )}
             />
 
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={onClose}>
+            <div className="flex flex-wrap gap-2 justify-end">
+              <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button type="submit" className="w-full sm:w-auto">
                 {event ? 'Update' : 'Create'}
               </Button>
             </div>

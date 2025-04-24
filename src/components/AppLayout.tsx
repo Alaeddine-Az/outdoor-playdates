@@ -26,19 +26,16 @@ export default function AppLayout({ children }: AppLayoutProps) {
   };
 
   const handleGoBack = () => {
-    // Check if there's history to go back to
     if (window.history.length > 2) {
-      navigate(-1); // Go back in history
+      navigate(-1);
     } else {
-      // Fallback to dashboard if no history
       navigate('/dashboard');
     }
   };
 
   return (
-    <div className="flex min-h-screen w-full">
-      {/* Sidebar */}
-      <div className="hidden border-r bg-muted/40 md:block w-64">
+    <div className="flex min-h-screen w-full overflow-hidden">
+      <div className="hidden border-r bg-muted/40 md:block w-64 flex-shrink-0">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center px-4 text-lg font-semibold">
             GoPlayNow
@@ -69,9 +66,10 @@ export default function AppLayout({ children }: AppLayoutProps) {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col px-6 pt-6">
-        {children || <Outlet />}
+      <div className="flex-1 flex flex-col w-full max-w-full overflow-x-hidden">
+        <div className="flex-1 px-4 sm:px-6 w-full max-w-full">
+          {children || <Outlet />}
+        </div>
       </div>
     </div>
   );

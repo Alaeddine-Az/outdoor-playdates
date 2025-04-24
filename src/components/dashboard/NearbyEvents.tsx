@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, MapPin, ExternalLink } from 'lucide-react';
@@ -46,7 +45,6 @@ const EventCard = ({ id, title, date, location }: EventCardProps) => {
     }
   };
 
-  // Only attach click handler if id is present (DB events)
   const handleClick = () => {
     if (id) {
       navigate(`/event/${id}`);
@@ -55,7 +53,7 @@ const EventCard = ({ id, title, date, location }: EventCardProps) => {
 
   return (
     <motion.div 
-      className={`p-4 rounded-xl border border-play-beige bg-white hover:border-play-lime/50 hover:bg-play-lime/5 transition-all duration-300 group shadow-sm hover:shadow-md ${id ? 'cursor-pointer' : ''}`}
+      className={`p-3 sm:p-4 rounded-xl border border-play-beige bg-white hover:border-play-lime/50 hover:bg-play-lime/5 transition-all duration-300 group shadow-sm hover:shadow-md ${id ? 'cursor-pointer' : ''}`}
       whileHover={id ? { y: -4 } : undefined}
       onClick={id ? handleClick : undefined}
       tabIndex={id ? 0 : -1}
@@ -63,25 +61,25 @@ const EventCard = ({ id, title, date, location }: EventCardProps) => {
       role={id ? 'button' : undefined}
       aria-label={id ? `View event details for ${title}` : undefined}
     >
-      <div className="flex justify-between">
-        <h4 className="font-medium text-base flex items-center">
+      <div className="flex justify-between items-start">
+        <h4 className="font-medium text-sm sm:text-base flex items-center">
           {getEventIcon(title)}
-          {title}
+          <span className="line-clamp-2">{title}</span>
         </h4>
-        <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+        <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2" />
       </div>
-      <div className="flex flex-wrap items-center text-xs text-muted-foreground mt-2 gap-3">
+      <div className="flex flex-wrap items-center text-xs text-muted-foreground mt-2 gap-2 sm:gap-3">
         <div className="flex items-center">
           <div className="w-5 h-5 rounded-full bg-play-beige flex items-center justify-center mr-1.5">
             <Calendar className="h-3 w-3" /> 
           </div>
-          <span>{date}</span>
+          <span className="truncate">{date}</span>
         </div>
         <div className="flex items-center">
           <div className="w-5 h-5 rounded-full bg-play-beige flex items-center justify-center mr-1.5">
             <MapPin className="h-3 w-3" /> 
           </div>
-          <span>{location}</span>
+          <span className="truncate">{location}</span>
         </div>
       </div>
     </motion.div>
@@ -112,15 +110,15 @@ const NearbyEvents = ({ events }: NearbyEventsProps) => {
     <Card className="rounded-3xl border-none shadow-md overflow-hidden">
       <CardHeader className="border-b border-muted/30 bg-gradient-to-r from-play-lime/30 to-green-100 pb-3">
         <CardTitle className="text-lg font-semibold flex items-center">
-          <div className="w-10 h-10 rounded-full bg-play-lime flex items-center justify-center mr-3">
-            <Calendar className="h-5 w-5 text-green-700" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-play-lime flex items-center justify-center mr-2 sm:mr-3">
+            <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-green-700" />
           </div>
           Nearby Events
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-4 bg-white">
+      <CardContent className="p-3 sm:p-4 bg-white">
         <motion.div 
-          className="space-y-3"
+          className="space-y-2 sm:space-y-3"
           variants={container}
           initial="hidden"
           animate="show"

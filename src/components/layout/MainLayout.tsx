@@ -11,7 +11,6 @@ interface MainLayoutProps {
 const MainLayout = ({ children }: MainLayoutProps) => {
   const { user, loading } = useAuth();
 
-  // Show simple loading spinner while authentication state is being determined
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -21,12 +20,11 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Header is always rendered and always sticky */}
+    <div className="min-h-screen flex flex-col overflow-x-hidden w-full">
       <div className="sticky top-0 z-50">
         <Header />
       </div>
-      <main className="flex-1">
+      <main className="flex-1 w-full max-w-full">
         {children || <Outlet />}
       </main>
     </div>
