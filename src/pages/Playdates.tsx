@@ -46,16 +46,14 @@ const Playdates = () => {
       console.log("Playdates data loaded:", {
         all: allPlaydates?.length || 0,
         my: myPlaydates?.length || 0,
-        past: pastPlaydates?.length || 0,
-        nearby: nearbyPlaydates?.length || 0
+        past: pastPlaydates?.length || 0
       });
     }
   }, [
     loading,
     allPlaydates?.length,
     myPlaydates?.length,
-    pastPlaydates?.length,
-    nearbyPlaydates?.length
+    pastPlaydates?.length
   ]);
   
   if (!user) {
@@ -70,7 +68,6 @@ const Playdates = () => {
 
   const hasLocation = !location.loading && location.latitude !== null && location.longitude !== null;
   const showLocationError = !location.loading && location.error;
-  const hasNearbyPlaydates = nearbyPlaydates && nearbyPlaydates.length > 0;
 
   return (
     <div className="animate-fade-in">
@@ -104,34 +101,6 @@ const Playdates = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 fade-up-stagger">
         <div className="md:col-span-2 space-y-6">
-          {hasLocation && (
-            <>
-              {hasNearbyPlaydates ? (
-                <PlaydateList
-                  title="Playdates Near You"
-                  playdates={nearbyPlaydates}
-                  loading={loading}
-                  error={error}
-                  emptyTitle="No nearby playdates"
-                  emptyMessage="There are no playdates within 10km of your current location."
-                  showCreateButton={true}
-                  icon={<Navigation className="h-5 w-5 text-blue-500" />}
-                />
-              ) : (
-                <PlaydateList
-                  title="Playdates Near You"
-                  playdates={[]}
-                  loading={loading}
-                  error={error}
-                  emptyTitle="No playdates nearby"
-                  emptyMessage="There are no playdates within 10km of your location. Create one to get started!"
-                  showCreateButton={true}
-                  icon={<Navigation className="h-5 w-5 text-blue-500" />}
-                />
-              )}
-            </>
-          )}
-          
           {showLocationError && (
             <div className="bg-white rounded-xl shadow-soft border border-muted p-6 mb-6">
               <h3 className="text-lg font-medium mb-2 flex items-center gap-2">

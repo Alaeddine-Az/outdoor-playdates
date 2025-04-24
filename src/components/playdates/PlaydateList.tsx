@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -57,11 +58,6 @@ const PlaydateList = ({
     const filteredPlaydates = playdates.filter(p => p.status !== 'cancelled');
     
     return [...filteredPlaydates].sort((a, b) => {
-      if (a?.distance !== undefined && b?.distance !== undefined) {
-        return a.distance - b.distance;
-      }
-      if (a?.distance !== undefined) return -1;
-      if (b?.distance !== undefined) return 1;
       if (a?.start_time && b?.start_time) {
         return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
       }
@@ -126,7 +122,6 @@ const PlaydateList = ({
               host={playdate.host}
               host_id={playdate.host_id}
               status={getPlaydateStatus(playdate)}
-              distance={playdate.distance}
               onClick={() => navigate(`/playdate/${playdate.id}`)}
             />
           ))}

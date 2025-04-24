@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
-import { getDistanceInKm } from '@/utils/locationUtils';
 
 export interface PlaydateData {
   id: string;
@@ -18,7 +17,6 @@ export interface PlaydateData {
   start_time?: string;
   latitude?: number;
   longitude?: number;
-  distance?: number;
 }
 
 interface LocationData {
@@ -117,7 +115,6 @@ export function useFetchPlaydates(userLocation?: LocationData) {
               start_time: playdate.start_time,
               latitude: latitude,
               longitude: longitude,
-              distance: undefined,
             };
           } catch (err) {
             return {
@@ -134,30 +131,11 @@ export function useFetchPlaydates(userLocation?: LocationData) {
               start_time: undefined,
               latitude: undefined,
               longitude: undefined,
-              distance: undefined,
             } as PlaydateData;
           }
         });
 
-        let playdatesWithDistances = [...formattedPlaydates];
-        if (userLocation?.latitude && userLocation?.longitude) {
-          playdatesWithDistances = formattedPlaydates.map(playdate => {
-            if (
-              playdate.latitude !== undefined && playdate.longitude !== undefined &&
-              playdate.latitude !== null && playdate.longitude !== null
-            ) {
-              const distance = getDistanceInKm(
-                userLocation.latitude,
-                userLocation.longitude,
-                playdate.latitude,
-                playdate.longitude
-              );
-              return { ...playdate, distance };
-            }
-            return { ...playdate, distance: undefined };
-          });
-        }
-        const sortedPlaydates = playdatesWithDistances
+        const sortedPlaydates = formattedPlaydates
           .sort((a, b) => {
             if (a.start_time && b.start_time) {
               return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
@@ -168,21 +146,8 @@ export function useFetchPlaydates(userLocation?: LocationData) {
 
         if (!cancelled) {
           setUpcomingPlaydates(sortedPlaydates);
-          if (userLocation?.latitude && userLocation?.longitude) {
-            const playdatesWithLocation = playdatesWithDistances.filter(
-              p =>
-                p.latitude !== undefined &&
-                p.longitude !== undefined &&
-                p.latitude !== null &&
-                p.longitude !== null
-            );
-            const playdatesWithinDistance = playdatesWithLocation
-              .filter((p) => p.distance !== undefined && p.distance <= 10)
-              .sort((a, b) => (a.distance || 999) - (b.distance || 999));
-            setNearbyPlaydates(playdatesWithinDistance);
-          } else {
-            setNearbyPlaydates([]);
-          }
+          // We're no longer filtering nearby playdates by distance
+          setNearbyPlaydates([]);
         }
       } catch (err: any) {
         if (!cancelled) {

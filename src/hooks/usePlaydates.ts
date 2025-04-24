@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -117,19 +118,6 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
           participantCounts[p.playdate_id] = (participantCounts[p.playdate_id] || 0) + 1;
         });
 
-        // Fetch coordinates for Toronto, Ontario for geolocation debugging
-        let torontoCoordinates = { latitude: 43.6532, longitude: -79.3832 };
-
-        // Geocode playdate locations if needed
-        const playdatesNeedingCoordinates = allPlaydatesData.filter(
-          p => (!p.latitude || !p.longitude) && p.location
-        );
-
-        if (playdatesNeedingCoordinates.length > 0) {
-          console.log(`Found ${playdatesNeedingCoordinates.length} playdates needing coordinates`);
-          // This would be where you'd implement geocoding
-        }
-
         const formatPlaydate = (p, status): Playdate => {
           let creatorProfile = creatorProfileMap[p.creator_id];
 
@@ -173,87 +161,20 @@ export const usePlaydates = (options: UsePlaydatesOptions = {}) => {
         // Filter out my playdates that are cancelled
         const formattedMyPlaydates = formattedUpcoming.filter(p => p.host_id === user.id);
 
-        let playdatesWithDistances = [...formattedUpcoming];
-        let pastPlaydatesWithDistances = [...formattedPast];
-        let myPlaydatesWithDistances = [...formattedMyPlaydates];
+        // Since we're no longer calculating distances, we just set our state variables directly
+        setAllPlaydates(formattedUpcoming);
+        setMyPlaydates(formattedMyPlaydates);
+        setPastPlaydates(formattedPast);
         
-        if (userLocation?.latitude && userLocation?.longitude) {
-          console.log('Adding distance to playdates using location:', userLocation);
-          
-          // Add distance to all upcoming playdates with valid coordinates
-          playdatesWithDistances = formattedUpcoming.map(playdate => {
-            if (playdate.latitude !== undefined && playdate.longitude !== undefined && 
-                playdate.latitude !== null && playdate.longitude !== null) {
-              const distance = getDistanceInKm(
-                userLocation.latitude,
-                userLocation.longitude,
-                playdate.latitude,
-                playdate.longitude
-              );
-              return { ...playdate, distance };
-            }
-            return playdate;
-          });
-          
-          // Add distance to all past playdates with valid coordinates
-          pastPlaydatesWithDistances = formattedPast.map(playdate => {
-            if (playdate.latitude !== undefined && playdate.longitude !== undefined && 
-                playdate.latitude !== null && playdate.longitude !== null) {
-              const distance = getDistanceInKm(
-                userLocation.latitude,
-                userLocation.longitude,
-                playdate.latitude,
-                playdate.longitude
-              );
-              return { ...playdate, distance };
-            }
-            return playdate;
-          });
-          
-          // Add distance to all my playdates with valid coordinates
-          myPlaydatesWithDistances = formattedMyPlaydates.map(playdate => {
-            if (playdate.latitude !== undefined && playdate.longitude !== undefined && 
-                playdate.latitude !== null && playdate.longitude !== null) {
-              const distance = getDistanceInKm(
-                userLocation.latitude,
-                userLocation.longitude,
-                playdate.latitude,
-                playdate.longitude
-              );
-              return { ...playdate, distance };
-            }
-            return playdate;
-          });
-          
-          // Find nearby playdates (within maxDistance)
-          const playdatesWithCoords = playdatesWithDistances.filter(
-            p => p.latitude !== undefined && p.longitude !== undefined && 
-            p.latitude !== null && p.longitude !== null
-          );
-          
-          console.log(`Found ${playdatesWithCoords.length} playdates with coordinates`);
-          
-          if (playdatesWithCoords.length > 0) {
-            const nearby = getNearbyPlaydates(
-              userLocation.latitude,
-              userLocation.longitude,
-              playdatesWithCoords,
-              maxDistance
-            );
-            console.log(`Found ${nearby.length} nearby playdates`);
-            setNearbyPlaydates(nearby);
-          } else {
-            console.log("No playdates found with valid coordinates");
-            setNearbyPlaydates([]);
-          }
-        } else {
-          console.log('User location not available or database missing location columns');
-          setNearbyPlaydates([]);
-        }
+        // For nearby playdates, we now simply set an empty array since distance filtering is removed
+        // In a real application, you'd need to implement proper filtering based on coordinates
+        setNearbyPlaydates([]);
 
-        setAllPlaydates(playdatesWithDistances);
-        setMyPlaydates(myPlaydatesWithDistances);
-        setPastPlaydates(pastPlaydatesWithDistances);
+        console.log("Playdates loaded:", {
+          all: formattedUpcoming.length,
+          my: formattedMyPlaydates.length,
+          past: formattedPast.length
+        });
       } catch (err) {
         console.error('Error fetching playdates:', err);
         setError(err);

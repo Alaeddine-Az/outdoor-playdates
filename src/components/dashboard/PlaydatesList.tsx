@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CalendarDays, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -15,7 +16,6 @@ interface Playdate {
   host?: string;
   host_id?: string;
   start_time?: string;
-  distance?: number;
 }
 
 interface PlaydatesListProps {
@@ -38,11 +38,6 @@ const PlaydatesList = ({
   icon = <CalendarDays className="text-orange-500 w-5 h-5" />
 }: PlaydatesListProps) => {
   const sortedPlaydates = [...playdates].sort((a, b) => {
-    if (a.distance !== undefined && b.distance !== undefined) {
-      return a.distance - b.distance;
-    }
-    if (a.distance !== undefined) return -1;
-    if (b.distance !== undefined) return 1;
     if (a.start_time && b.start_time) {
       return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
     }

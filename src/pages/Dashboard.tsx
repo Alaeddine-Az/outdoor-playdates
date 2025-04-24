@@ -55,11 +55,10 @@ const Dashboard = () => {
         profileLoaded: !!profile,
         childrenCount: children?.length || 0,
         upcomingCount: upcomingPlaydates?.length || 0,
-        nearbyCount: nearbyPlaydates?.length || 0,
         hasError: !!error
       });
     }
-  }, [loading, profile, children?.length, upcomingPlaydates?.length, nearbyPlaydates?.length, error]);
+  }, [loading, profile, children?.length, upcomingPlaydates?.length, error]);
 
   useEffect(() => {
     if (error) {
@@ -90,7 +89,6 @@ const Dashboard = () => {
 
   const interests = profile?.interests || ['Arts & Crafts', 'Nature', 'STEM'];
   const hasLocation = !location.loading && location.latitude !== null && location.longitude !== null;
-  const hasNearbyPlaydates = nearbyPlaydates && nearbyPlaydates.length > 0;
 
   return (
     <div className="animate-fade-in px-4 py-6 max-w-6xl mx-auto">
@@ -155,18 +153,6 @@ const Dashboard = () => {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            {hasLocation && hasNearbyPlaydates && (
-              <PlaydatesList
-                title="Playdates Near You"
-                playdates={nearbyPlaydates}
-                showNewButton={true}
-                viewAllLink="/playdates"
-                limit={3}
-                className="bg-gradient-to-br from-[#FDF7E4] to-[#FAEBBD]"
-                icon={<Navigation className="text-blue-500 w-5 h-5" />}
-              />
-            )}
-            
             {/* Show location error message if needed */}
             {!hasLocation && !location.loading && (
               <div className="bg-white rounded-xl shadow-soft border border-muted p-6 mb-6">
