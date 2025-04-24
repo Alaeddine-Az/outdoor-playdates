@@ -20,10 +20,19 @@ import { useConnections } from '@/hooks/useConnections';
 
 const ParentProfile = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const { user } = useAuth();
   const profileId = id && id !== 'me' ? id : user?.id;
   const { profile, children, loading, error, isCurrentUser } = useProfile(profileId);
+
+  const handleBack = () => {
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate('/dashboard');
+    }
+  };
 
   if (loading) {
     return (
@@ -53,7 +62,7 @@ const ParentProfile = () => {
     <div className="p-6 max-w-5xl mx-auto animate-fade-in">
       <div className="flex justify-between items-start mb-6">
         <button 
-          onClick={() => navigate(-1)} 
+          onClick={handleBack}
           className="text-muted-foreground hover:text-foreground transition-colors"
         >
           ← Back

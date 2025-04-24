@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Save } from 'lucide-react';
 import ChildBasicInfoForm from '@/components/child/ChildBasicInfoForm';
@@ -9,6 +9,7 @@ import { toast } from '@/components/ui/use-toast';
 
 const EditChild = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams<{ id: string }>();
   const { 
     child, 
@@ -22,6 +23,14 @@ const EditChild = () => {
     handleSave, 
     isNewChild 
   } = useChildProfile(id);
+
+  const handleBack = () => {
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate('/parent-profile');
+    }
+  };
 
   if (loading) {
     return (
@@ -37,10 +46,10 @@ const EditChild = () => {
     <div className="p-6 max-w-3xl mx-auto animate-fade-in">
       <Button 
         variant="ghost" 
-        onClick={() => navigate('/parent-profile')}
+        onClick={handleBack}
         className="mb-4"
       >
-        <ArrowLeft className="h-4 w-4 mr-2" /> Back to Profile
+        <ArrowLeft className="h-4 w-4 mr-2" /> Back
       </Button>
       
       <h1 className="text-2xl font-bold mb-6">

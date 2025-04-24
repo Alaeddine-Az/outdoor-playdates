@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
@@ -43,12 +42,21 @@ export const PlaydateHeader: React.FC<PlaydateHeaderProps> = ({
   playdateId
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleBack = () => {
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate('/playdates');
+    }
+  };
 
   return (
     <>
-      <Button variant="ghost" onClick={() => navigate('/playdates')}>
+      <Button variant="ghost" onClick={handleBack}>
         <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to Playdates
+        Back
       </Button>
 
       <Card className="mt-6">
