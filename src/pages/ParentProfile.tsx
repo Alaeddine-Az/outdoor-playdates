@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   User,
@@ -9,7 +10,7 @@ import {
   UserPlus,
   Plus
 } from 'lucide-react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useProfile } from '@/hooks/useProfile';
