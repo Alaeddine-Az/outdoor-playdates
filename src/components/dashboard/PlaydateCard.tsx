@@ -15,7 +15,6 @@ interface PlaydateCardProps {
     status?: string;
     host?: string;
     host_id?: string;
-    distance?: number;
   };
 }
 
@@ -39,7 +38,6 @@ const PlaydateCard: React.FC<PlaydateCardProps> = ({ playdate }) => {
     status = 'upcoming', 
     host = 'Unknown Host',
     host_id,
-    // distance - removed from destructuring since not used in UI now
   } = playdate;
   const statusClass = statusColors[status as keyof typeof statusColors] || 'bg-muted text-muted-foreground';
 
@@ -53,8 +51,6 @@ const PlaydateCard: React.FC<PlaydateCardProps> = ({ playdate }) => {
       navigate(`/parent/${host_id}`);
     }
   };
-
-  // No distance display here anymore
 
   return (
     <div 
@@ -103,8 +99,6 @@ const PlaydateCard: React.FC<PlaydateCardProps> = ({ playdate }) => {
           <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
           <p className="line-clamp-1">{location}</p>
         </div>
-
-        {/* Distance info removed */}
 
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-primary flex-shrink-0" />

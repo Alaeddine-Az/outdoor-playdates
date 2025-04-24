@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
-import { getNearbyPlaydates, getDistanceInKm } from '@/utils/locationUtils';
 
 export interface Playdate {
   id: string;
@@ -19,7 +18,6 @@ export interface Playdate {
   end_time?: string;
   latitude?: number;
   longitude?: number;
-  distance?: number;
 }
 
 interface UsePlaydatesOptions {
