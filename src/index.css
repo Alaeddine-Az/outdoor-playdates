@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Base Theme Variables */
 @layer base {
   :root {
     --background: 45 70% 97%;
@@ -84,16 +85,22 @@
   }
 }
 
+/* Base Styles */
 @layer base {
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
+  html {
+    @apply scroll-smooth;
+  }
+
+  /* Typography */
   h1, h2, h3, h4, h5, h6 {
     @apply font-medium tracking-tight;
   }
@@ -117,9 +124,33 @@
   p {
     @apply leading-relaxed;
   }
+
+  /* Mobile Optimizations */
+  input, select, textarea, button {
+    @apply text-base; /* Prevents iOS zoom on focus */
+  }
+
+  /* Safe Area Padding */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  .pl-safe {
+    padding-left: env(safe-area-inset-left, 0);
+  }
+
+  .pr-safe {
+    padding-right: env(safe-area-inset-right, 0);
+  }
 }
 
+/* Component Styles */
 @layer components {
+  /* Card Styles */
   .glass-card {
     @apply bg-white bg-opacity-80 backdrop-blur-lg border border-white border-opacity-20 shadow-glass rounded-xl transition-all duration-300;
   }
@@ -128,6 +159,11 @@
     @apply border-opacity-40 shadow-soft transform-gpu translate-y-[-3px];
   }
 
+  .playful-card {
+    @apply rounded-3xl bg-white shadow-md border border-muted/30 transition-all duration-300 overflow-hidden hover:shadow-lg hover:border-primary/20;
+  }
+
+  /* Button Styles */
   .button-glow {
     @apply relative overflow-hidden;
   }
@@ -136,27 +172,27 @@
     @apply content-[''] absolute top-0 left-[-100%] w-full h-full bg-white bg-opacity-40 transform-gpu skew-x-[-45deg] transition-all duration-700 ease-out;
     animation: button-glow 3s infinite;
   }
-  
-  .playful-card {
-    @apply rounded-3xl bg-white shadow-md border border-muted/30 transition-all duration-300 overflow-hidden hover:shadow-lg hover:border-primary/20;
-  }
-  
-  .playful-icon-container {
-    @apply flex items-center justify-center w-12 h-12 rounded-xl transition-colors duration-300;
-  }
-  
+
   .playful-button {
     @apply flex items-center justify-center gap-2 font-medium rounded-full px-4 py-2 transition-all duration-300 transform hover:scale-105 shadow-sm;
   }
-  
+
+  /* Container Styles */
+  .playful-icon-container {
+    @apply flex items-center justify-center w-12 h-12 rounded-xl transition-colors duration-300;
+  }
+
+  /* Text Styles */
   .playful-gradient-text {
     @apply bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent;
   }
-  
+
+  /* Form Styles */
   .playful-input {
     @apply rounded-xl border-2 border-muted/50 focus:border-primary/30 focus:ring-primary/20 transition-all duration-300;
   }
 
+  /* Badge and Pill Styles */
   .playful-pill {
     @apply rounded-full px-4 py-2 text-sm font-medium;
   }
@@ -164,7 +200,8 @@
   .playful-badge {
     @apply rounded-full py-1.5 px-3 text-xs font-medium transition-all duration-300;
   }
-  
+
+  /* Decorative Styles */
   .wavy-border {
     @apply relative;
   }
@@ -173,105 +210,12 @@
     @apply content-[''] absolute left-0 bottom-0 w-full h-2 bg-accent/40;
     mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 20" xmlns="http://www.w3.org/2000/svg"><path d="M0,10 C30,20 70,0 100,10 L100,20 L0,20 Z" /></svg>');
   }
-  
+
+  /* Character Styles */
   .character-container {
     @apply relative inline-block animate-float cursor-pointer transition-transform duration-300 hover:scale-110;
   }
-  
-  @keyframes button-glow {
-    0% {
-      left: -100%;
-    }
-    20%, 100% {
-      left: 100%;
-    }
-  }
-  
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-20px);
-    }
-  }
 
-  .fade-up-stagger > * {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  
-  .fade-up-stagger > *:nth-child(1) {
-    animation: fade-up 0.6s 0.1s ease-out forwards;
-  }
-  
-  .fade-up-stagger > *:nth-child(2) {
-    animation: fade-up 0.6s 0.2s ease-out forwards;
-  }
-  
-  .fade-up-stagger > *:nth-child(3) {
-    animation: fade-up 0.6s 0.3s ease-out forwards;
-  }
-  
-  .fade-up-stagger > *:nth-child(4) {
-    animation: fade-up 0.6s 0.4s ease-out forwards;
-  }
-  
-  .fade-up-stagger > *:nth-child(5) {
-    animation: fade-up 0.6s 0.5s ease-out forwards;
-  }
-  
-  .fade-up-stagger > *:nth-child(6) {
-    animation: fade-up 0.6s 0.6s ease-out forwards;
-  }
-  
-  @keyframes fade-up {
-    0% {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  /* Playful bounce animation for elements */
-  .bounce-hover {
-    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  }
-  
-  .bounce-hover:hover {
-    transform: scale(1.05);
-  }
-  
-  /* Playful wiggle animation for interactive elements */
-  @keyframes wiggle {
-    0%, 100% { transform: rotate(0); }
-    25% { transform: rotate(5deg); }
-    75% { transform: rotate(-5deg); }
-  }
-  
-  .wiggle-hover:hover {
-    animation: wiggle 0.5s ease;
-  }
-
-  /* Custom bubble shape for chat and comment boxes */
-  .bubble-shape {
-    @apply rounded-2xl rounded-bl-none relative;
-  }
-  
-  .bubble-shape::after {
-    content: '';
-    @apply absolute -bottom-3 left-4 w-4 h-4 bg-inherit transform rotate-45;
-  }
-  
-  /* Playful tag styles */
-  .playful-tag {
-    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-play-beige text-play-orange shadow-sm transition-transform duration-300 hover:scale-105;
-  }
-
-  /* Bear character style */
   .bear-character {
     @apply inline-block relative;
     width: 80px;
@@ -351,91 +295,83 @@
   }
 }
 
-#root {
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 0;
-  text-align: center;
-}
-
-@media (min-width: 768px) {
-  #root {
-    padding: 1rem;
+/* Animation Keyframes */
+@keyframes button-glow {
+  0% {
+    left: -100%;
+  }
+  20%, 100% {
+    left: 100%;
   }
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
   }
-  to {
-    transform: rotate(360deg);
+  50% {
+    transform: translateY(-20px);
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(5deg); }
+  75% { transform: rotate(-5deg); }
+}
+
+@keyframes fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.card {
-  padding: 1em;
-}
-
-@media (min-width: 768px) {
-  .card {
-    padding: 2em;
+/* Animation Classes */
+@layer utilities {
+  .fade-up-stagger > * {
+    opacity: 0;
+    transform: translateY(20px);
   }
-}
+  
+  .fade-up-stagger > *:nth-child(1) { animation: fade-up 0.6s 0.1s ease-out forwards; }
+  .fade-up-stagger > *:nth-child(2) { animation: fade-up 0.6s 0.2s ease-out forwards; }
+  .fade-up-stagger > *:nth-child(3) { animation: fade-up 0.6s 0.3s ease-out forwards; }
+  .fade-up-stagger > *:nth-child(4) { animation: fade-up 0.6s 0.4s ease-out forwards; }
+  .fade-up-stagger > *:nth-child(5) { animation: fade-up 0.6s 0.5s ease-out forwards; }
+  .fade-up-stagger > *:nth-child(6) { animation: fade-up 0.6s 0.6s ease-out forwards; }
 
-.read-the-docs {
-  color: #888;
+  .bounce-hover {
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+  
+  .bounce-hover:hover {
+    transform: scale(1.05);
+  }
+  
+  .wiggle-hover:hover {
+    animation: wiggle 0.5s ease;
+  }
 }
 
 /* Mobile-specific styles */
-input, select, textarea, button {
-  font-size: 16px !important; /* Prevents iOS zoom on focus */
-}
-
-/* Add safe area padding for mobile devices */
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-
-.pt-safe {
-  padding-top: env(safe-area-inset-top, 0);
-}
-
-.pl-safe {
-  padding-left: env(safe-area-inset-left, 0);
-}
-
-.pr-safe {
-  padding-right: env(safe-area-inset-right, 0);
-}
-
-/* Improved touch targets for mobile */
 @media (max-width: 767px) {
   button, a, [role="button"] {
-    min-height: 44px;
+    @apply min-h-[44px]; /* Improved touch targets */
+  }
+
+  #root {
+    @apply p-0 max-w-full m-0 text-center;
   }
 }
 
-/* Smooth scrolling for the whole page */
-html {
-  scroll-behavior: smooth;
+/* Desktop-specific styles */
+@media (min-width: 768px) {
+  #root {
+    @apply p-4;
+  }
 }
