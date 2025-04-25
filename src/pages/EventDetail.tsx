@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { useUserChildren } from '@/hooks/playdate/useUserChildren';
 
 const EventDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +28,8 @@ const EventDetailPage = () => {
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [selectedChildren, setSelectedChildren] = useState<Record<string, boolean>>({});
   const [joining, setJoining] = useState(false);
+  
+  const { userChildren } = useUserChildren();
   
   const { 
     event, 
@@ -83,7 +86,7 @@ const EventDetailPage = () => {
   
   const handleJoinClick = () => {
     const initialSelection: Record<string, boolean> = {};
-    children.forEach(child => {
+    userChildren.forEach(child => {
       initialSelection[child.id] = true;
     });
     setSelectedChildren(initialSelection);
@@ -293,7 +296,7 @@ const EventDetailPage = () => {
               </DialogDescription>
             </DialogHeader>
             
-            {children.length === 0 ? (
+            {userChildren.length === 0 ? (
               <div className="py-4 text-center">
                 <p className="text-muted-foreground mb-2">
                   You need to add children to your profile first.
@@ -304,7 +307,7 @@ const EventDetailPage = () => {
               </div>
             ) : (
               <div className="py-4 space-y-4">
-                {children.map((child) => (
+                {userChildren.map((child) => (
                   <div key={child.id} className="flex items-start space-x-3">
                     <Checkbox
                       id={child.id}
@@ -341,7 +344,7 @@ const EventDetailPage = () => {
               </Button>
               <Button
                 onClick={handleJoinSubmit}
-                disabled={joining || children.length === 0 || Object.values(selectedChildren).every(selected => !selected)}
+                disabled={joining || userChildren.length === 0 || Object.values(selectedChildren).every(selected => !selected)}
                 className="button-glow bg-primary hover:bg-primary/90 text-white"
               >
                 {joining ? 'Joining...' : 'Join Event'}
