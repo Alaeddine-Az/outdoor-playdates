@@ -1,9 +1,7 @@
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import AppLayout from '@/components/AppLayout';
 import { useEventDetails } from '@/hooks/useEvents';
-import { useProfile } from '@/hooks/useProfile';
 import { format } from 'date-fns';
 import { 
   Calendar, 
@@ -42,8 +40,6 @@ const EventDetailPage = () => {
     joinEvent,
     leaveEvent
   } = useEventDetails(id || '');
-  
-  const { children } = useProfile();
   
   if (loading) {
     return (
@@ -86,10 +82,9 @@ const EventDetailPage = () => {
   const childrenCount = participantChildren.length;
   
   const handleJoinClick = () => {
-    // Reset selected children and open dialog
     const initialSelection: Record<string, boolean> = {};
     children.forEach(child => {
-      initialSelection[child.id] = true; // Default all to selected
+      initialSelection[child.id] = true;
     });
     setSelectedChildren(initialSelection);
     setJoinDialogOpen(true);
@@ -126,118 +121,117 @@ const EventDetailPage = () => {
           <ChevronLeft className="mr-2 h-4 w-4" /> Back to Events
         </Button>
         
-        <div className="bg-white rounded-xl shadow-soft border border-muted overflow-hidden mb-6">
-          <div className="p-6">
-            <h1 className="text-2xl md:text-3xl font-bold mb-4">{event.title}</h1>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="flex items-center text-muted-foreground">
-                  <Calendar className="h-5 w-5 mr-2 text-primary" />
-                  <span>{formattedDate}</span>
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2">
+            <div className="bg-white rounded-xl shadow-soft border border-muted overflow-hidden mb-6">
+              <div className="p-6">
+                <h1 className="text-2xl md:text-3xl font-bold mb-4">{event.title}</h1>
                 
-                <div className="flex items-center text-muted-foreground">
-                  <Clock className="h-5 w-5 mr-2 text-primary" />
-                  <span>{startTime} - {endTime}</span>
-                </div>
-                
-                <div className="flex items-center text-muted-foreground">
-                  <MapPin className="h-5 w-5 mr-2 text-primary" />
-                  <span>{event.location}, {event.city}</span>
-                </div>
-                
-                <div className="flex items-center text-muted-foreground">
-                  <Users className="h-5 w-5 mr-2 text-primary" />
-                  <span>
-                    {participantCount} {participantCount === 1 ? 'family' : 'families'} joined,&nbsp;
-                    {childrenCount} {childrenCount === 1 ? 'child' : 'children'}
-                  </span>
-                </div>
-              </div>
-              
-              <div className="flex flex-col items-start">
-                <div className="flex items-center gap-3 mb-4">
-                  <Avatar>
-                    <AvatarImage src={host.avatar_url} alt={host.parent_name} />
-                    <AvatarFallback className="bg-primary/10 text-primary">
-                      {host.parent_name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="text-sm text-muted-foreground">Hosted by</div>
-                    <Link 
-                      to={`/parent/${host.id}`}
-                      className="font-medium hover:text-primary transition-colors"
-                    >
-                      {host.parent_name}
-                    </Link>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center text-muted-foreground">
+                      <Calendar className="h-5 w-5 mr-2 text-primary" />
+                      <span>{formattedDate}</span>
+                    </div>
+                    
+                    <div className="flex items-center text-muted-foreground">
+                      <Clock className="h-5 w-5 mr-2 text-primary" />
+                      <span>{startTime} - {endTime}</span>
+                    </div>
+                    
+                    <div className="flex items-center text-muted-foreground">
+                      <MapPin className="h-5 w-5 mr-2 text-primary" />
+                      <span>{event.location}, {event.city}</span>
+                    </div>
+                    
+                    <div className="flex items-center text-muted-foreground">
+                      <Users className="h-5 w-5 mr-2 text-primary" />
+                      <span>
+                        {participantCount} {participantCount === 1 ? 'family' : 'families'} joined,&nbsp;
+                        {childrenCount} {childrenCount === 1 ? 'child' : 'children'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col items-start">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Avatar>
+                        <AvatarImage src={host.avatar_url} alt={host.parent_name} />
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          {host.parent_name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="text-sm text-muted-foreground">Hosted by</div>
+                        <Link 
+                          to={`/parent/${host.id}`}
+                          className="font-medium hover:text-primary transition-colors"
+                        >
+                          {host.parent_name}
+                        </Link>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-auto pt-4 flex gap-2 w-full">
+                      {isJoined ? (
+                        <>
+                          <Button 
+                            variant="outline" 
+                            className="flex-1"
+                            onClick={handleLeaveEvent}
+                          >
+                            Leave Event
+                          </Button>
+                          <Button 
+                            asChild
+                            className="flex-1 button-glow bg-primary hover:bg-primary/90 text-white"
+                          >
+                            <a href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${eventDate.toISOString().replace(/-|:|\.\d\d\d/g, "")}`} target="_blank" rel="noopener noreferrer">
+                              <Calendar className="h-4 w-4 mr-2" /> Add to Calendar
+                            </a>
+                          </Button>
+                        </>
+                      ) : (
+                        <Button 
+                          onClick={handleJoinClick}
+                          className="w-full button-glow bg-primary hover:bg-primary/90 text-white"
+                        >
+                          <Users className="h-4 w-4 mr-2" /> Join Event
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
-                
-                <div className="mt-auto pt-4 flex gap-2 w-full">
-                  {isJoined ? (
-                    <>
-                      <Button 
-                        variant="outline" 
-                        className="flex-1"
-                        onClick={handleLeaveEvent}
-                      >
-                        Leave Event
-                      </Button>
-                      <Button 
-                        asChild
-                        className="flex-1 button-glow bg-primary hover:bg-primary/90 text-white"
-                      >
-                        <a href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${eventDate.toISOString().replace(/-|:|\.\d\d\d/g, "")}`} target="_blank" rel="noopener noreferrer">
-                          <Calendar className="h-4 w-4 mr-2" /> Add to Calendar
-                        </a>
-                      </Button>
-                    </>
+              </div>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="bg-white rounded-xl shadow-soft border border-muted p-6">
+                <h2 className="text-xl font-semibold mb-4">About This Event</h2>
+                <div className="prose max-w-none">
+                  {event.description ? (
+                    <p>{event.description}</p>
                   ) : (
-                    <Button 
-                      onClick={handleJoinClick}
-                      className="w-full button-glow bg-primary hover:bg-primary/90 text-white"
-                    >
-                      <Users className="h-4 w-4 mr-2" /> Join Event
-                    </Button>
+                    <p className="text-muted-foreground">No description provided.</p>
                   )}
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-6">
-            {/* Event description */}
-            <div className="bg-white rounded-xl shadow-soft border border-muted p-6">
-              <h2 className="text-xl font-semibold mb-4">About This Event</h2>
-              <div className="prose max-w-none">
-                {event.description ? (
-                  <p>{event.description}</p>
-                ) : (
-                  <p className="text-muted-foreground">No description provided.</p>
-                )}
-              </div>
-            </div>
-            
-            {/* Event location */}
-            <div className="bg-white rounded-xl shadow-soft border border-muted p-6">
-              <h2 className="text-xl font-semibold mb-4">Location</h2>
-              <p className="mb-2">{event.location}</p>
-              <p className="text-muted-foreground mb-4">{event.address}</p>
               
-              <div className="h-[200px] bg-muted rounded-md flex items-center justify-center">
-                <Button variant="outline">
-                  <LinkIcon className="h-4 w-4 mr-2" /> Open in Maps
-                </Button>
+              <div className="bg-white rounded-xl shadow-soft border border-muted p-6">
+                <h2 className="text-xl font-semibold mb-4">Location</h2>
+                <p className="mb-2">{event.location}</p>
+                <p className="text-muted-foreground mb-4">{event.address}</p>
+                
+                <div className="h-[200px] bg-muted rounded-md flex items-center justify-center">
+                  <Button variant="outline">
+                    <LinkIcon className="h-4 w-4 mr-2" /> Open in Maps
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
           
           <div>
-            {/* Participants */}
             <div className="bg-white rounded-xl shadow-soft border border-muted p-6">
               <h2 className="text-xl font-semibold mb-4">Participants</h2>
               {participants.length === 0 ? (
@@ -290,7 +284,6 @@ const EventDetailPage = () => {
           </div>
         </div>
         
-        {/* Join Event Dialog */}
         <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
           <DialogContent>
             <DialogHeader>
