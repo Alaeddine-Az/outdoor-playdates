@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Link as LinkIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEventDetails } from '@/hooks/useEvents';
 import { useUserChildren } from '@/hooks/playdate/useUserChildren';
